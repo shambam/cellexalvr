@@ -22,6 +22,8 @@ if ( ! file.exists(outputFolder ) ){
 
 cellexalObj <- renew(cellexalObj)
 
+cellexalObj@outpath = outputFolder
+
 #exportUserGroups4vr(cellexalObj, outputFolder)
 
 server(name)

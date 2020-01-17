@@ -50,6 +50,7 @@ MonoBehaviour:
   referenceManager: {fileID: 797481884179529250}
   networkPrefab: {fileID: 114190743744166870, guid: 802de9a0247fe3f4aa4ce2c5509c2eef,
     type: 3}
+  SpatialGraphPrefab: {fileID: 0}
   graphName: {fileID: 114647396841719870, guid: 2ba89b1022cb7e14f9efe83d76c6788b,
     type: 3}
   lineprefab: {fileID: 1820579546230104, guid: f2a3da0f21dec6b4cb72d32489e20385, type: 3}

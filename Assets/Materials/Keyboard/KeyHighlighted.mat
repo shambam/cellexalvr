@@ -92,4 +92,4 @@ Material:
     - _LaserHitColor: {r: 0.29019606, g: 1, b: 0.8078432, a: 1}
     - _PulseColor: {r: 0.2901961, g: 1, b: 0.8078432, a: 1}
     - _PulseCoords: {r: -1, g: -1, b: -1, a: -1}
-    - _ScaleCorrection: {r: 0.14285715, g: 1, b: 1, a: 1}
+    - _ScaleCorrection: {r: 0.05882353, g: 1, b: 1, a: 1}

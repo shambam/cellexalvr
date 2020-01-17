@@ -844,7 +844,8 @@ namespace CellexalVR.AnalysisLogic
             }
             mesh.vertices = verts;
             mesh.triangles = tris;
-            MeshUtility.Optimize(mesh);
+            //MeshUtility.Optimize(mesh);
+
             CellexalLog.Log("Mesh vertices after optimization: " + mesh.vertexCount);
 
             mesh.RecalculateNormals();

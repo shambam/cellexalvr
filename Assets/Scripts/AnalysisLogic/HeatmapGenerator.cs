@@ -131,6 +131,28 @@ namespace CellexalVR.AnalysisLogic
             }
             heatmapList.Clear();
         }
+        [ConsoleCommand("heatmapGenerator", folder: "Output\\", aliases: new string[] { "loadheatmapfile", "lhf" })]
+        public void LoadHeatmap(string heatmapName)
+        {
+            statsMethod = CellexalConfig.Config.HeatmapAlgorithm;
+            heatmapName = "Output\\" + heatmapName;
+            CellexalLog.Log("Loading old heatmap from file " + heatmapName);
+            //CellexalEvents.CreatingHeatmap.Invoke();
+            //string heatmapName = "heatmap_" +            System.DateTime.Now.ToString("HH-mm-ss");
+            // the important parts in the GenerateHeatmapRoutine to            build the heatmap ? !
+            var heatmap = Instantiate(heatmapPrefab).GetComponent<Heatmap>();
+
+            heatmap.Init();
+            heatmap.transform.parent = transform;
+            heatmap.transform.localPosition = heatmapPosition;
+            heatmap.selectionNr = selectionNr;
+            heatmapList.Add(heatmap);
+            heatmap.directory = heatmapName;
+            BuildTexture(referenceManager.selectionManager.GetLastSelection(), heatmapName, heatmap);
+            heatmap.name = heatmapName; //"heatmap_" + heatmapsCreated;
+            heatmap.highlightQuad.GetComponent<Renderer>().material.color = HighlightMarkerColor;
+            heatmap.confirmQuad.GetComponent<Renderer>().material.color = ConfirmMarkerColor;
+        }
 
         [ConsoleCommand("heatmapGenerator", aliases: new string[] { "generateheatmap", "gh" })]
         public void CreateHeatmap()
@@ -148,12 +170,12 @@ namespace CellexalVR.AnalysisLogic
         /// <param name="name">If created via multiplayer. Name it the same as on other client.</param>
         public void CreateHeatmap(string name = "")
         {
-            if (selectionManager.groupCount < 2)
-            {
-                CellexalLog.Log("Could not create heatmap. Not enough groups selected to create a heatmap");
-                CellexalError.SpawnError("Could not create heatmap", "Not enough groups selected to create a heatmap");
-                return;
-            }
+            //if (selectionManager.groupCount < 2)
+            //{
+            //    CellexalLog.Log("Could not create heatmap. Not enough groups selected to create a heatmap");
+            //    CellexalError.SpawnError("Could not create heatmap", "Not enough groups selected to create a heatmap");
+            //    return;
+            //}
             // name the heatmap "heatmap_X". Where X is some number.
             string heatmapName = "";
             if (name.Equals(string.Empty))
@@ -215,7 +237,7 @@ namespace CellexalVR.AnalysisLogic
             // Show calculators and floor pulse
             //calculatorCluster.SetActive(true);
             referenceManager.floor.StartPulse();
-
+            
             // Check if more than one cell is selected
             while (selectionManager.RObjectUpdating)
             {
@@ -235,8 +257,14 @@ namespace CellexalVR.AnalysisLogic
                 yield break;
             }
             //string function = "make.cellexalvr.heatmap.list";
+           
             string objectPath = (CellexalUser.UserSpecificFolder + "\\cellexalObj.RData").UnFixFilePath();
             string groupingFilepath = (CellexalUser.UserSpecificFolder + "\\selection" + (selectionManager.fileCreationCtr - 1) + ".txt").UnFixFilePath();
+            string timeFile = (groupingFilepath + ".time").UnFixFilePath();
+            if (File.Exists(path: timeFile))
+            {
+                referenceManager.inputReader.RegisterOldGroup(timeFile);
+            }
             string topGenesNr = "250";
             string heatmapDirectory = (CellexalUser.UserSpecificFolder + @"\Heatmap").UnFixFilePath();
             string outputFilePath = (heatmapDirectory + @"\\" + heatmapName + ".txt");

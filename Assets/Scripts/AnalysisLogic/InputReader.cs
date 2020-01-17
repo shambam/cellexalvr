@@ -1305,6 +1305,16 @@ namespace CellexalVR.AnalysisLogic
             CellexalLog.Log("Successfully read " + groupingNames.Count + " files");
         }
 
+        [ConsoleCommand("inputReader", folder: "Output\\", aliases: new string[] { "readselectionfile", "rsf" })]
+        public void ReadPreviousSelection(string selectionFile)
+        {
+            selectionFile = "Output\\" + selectionFile;
+            CellexalLog.Log("Loading old selection from file " + selectionFile);
+
+            RegisterOldGroup(selectionFile);
+
+        }
+
 
         [ConsoleCommand("inputReader", aliases: new string[] { "selectfromprevious", "sfp" })]
         public void ReadAndSelectPreviousSelection(int index)
@@ -1323,8 +1333,13 @@ namespace CellexalVR.AnalysisLogic
                 CellexalEvents.CommandFinished.Invoke(false);
                 return;
             }
+            RegisterOldGroup(files[index]);
+        }
 
-            FileStream fileStream = new FileStream(files[index], FileMode.Open);
+        public void RegisterOldGroup(string file)
+        {
+
+            FileStream fileStream = new FileStream(file, FileMode.Open);
             StreamReader streamReader = new StreamReader(fileStream);
             var selectionManager = referenceManager.selectionManager;
             GraphManager graphManager = referenceManager.graphManager;
@@ -1343,7 +1358,7 @@ namespace CellexalVR.AnalysisLogic
                 }
                 catch (FormatException)
                 {
-                    CellexalLog.Log(string.Format("Bad color on line {0} in file {1}.", numPointsAdded + 1, files[index]));
+                    CellexalLog.Log(string.Format("Bad color on line {0} in file {1}.", numPointsAdded + 1, file));
                     streamReader.Close();
                     fileStream.Close();
                     CellexalEvents.CommandFinished.Invoke(false);
@@ -1356,7 +1371,59 @@ namespace CellexalVR.AnalysisLogic
             CellexalEvents.CommandFinished.Invoke(true);
             streamReader.Close();
             fileStream.Close();
+            selectionManager.DumpAnnotatedSelectionToTextFile();
         }
+        //[ConsoleCommand("inputReader", aliases: new string[] { "selectfromprevious", "sfp" })]
+        //public void ReadAndSelectPreviousSelection(int index)
+        //{
+        //    string dataFolder = CellexalUser.UserSpecificFolder;
+        //    string[] files = Directory.GetFiles(dataFolder, "selection*.txt");
+        //    if (files.Length == 0)
+        //    {
+        //        CellexalLog.Log("No previous selections found.");
+        //        CellexalEvents.CommandFinished.Invoke(false);
+        //        return;
+        //    }
+        //    else if (index < 0 || index >= files.Length)
+        //    {
+        //        CellexalLog.Log(string.Format("Index \'{0}\' is not within the range [0, {1}] when reading previous selection files.", index, files.Length - 1));
+        //        CellexalEvents.CommandFinished.Invoke(false);
+        //        return;
+        //    }
+
+        //    FileStream fileStream = new FileStream(files[index], FileMode.Open);
+        //    StreamReader streamReader = new StreamReader(fileStream);
+        //    var selectionManager = referenceManager.selectionManager;
+        //    GraphManager graphManager = referenceManager.graphManager;
+        //    int numPointsAdded = 0;
+        //    while (!streamReader.EndOfStream)
+        //    {
+        //        string line = streamReader.ReadLine();
+        //        string[] words = line.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+        //        int group = 0;
+        //        UnityEngine.Color groupColor;
+
+        //        try
+        //        {
+        //            group = int.Parse(words[3]);
+        //            ColorUtility.TryParseHtmlString(words[1], out groupColor);
+        //        }
+        //        catch (FormatException)
+        //        {
+        //            CellexalLog.Log(string.Format("Bad color on line {0} in file {1}.", numPointsAdded + 1, files[index]));
+        //            streamReader.Close();
+        //            fileStream.Close();
+        //            CellexalEvents.CommandFinished.Invoke(false);
+        //            return;
+        //        }
+        //        selectionManager.AddGraphpointToSelection(graphManager.FindGraphPoint(words[2], words[0]), group, false, groupColor);
+        //        numPointsAdded++;
+        //    }
+        //    CellexalLog.Log(string.Format("Added {0} points to selection", numPointsAdded));
+        //    CellexalEvents.CommandFinished.Invoke(true);
+        //    streamReader.Close();
+        //    fileStream.Close();
+        //}
 
         /// <summary>
         /// Sorts a list of gene expressions based on the mean expression level.

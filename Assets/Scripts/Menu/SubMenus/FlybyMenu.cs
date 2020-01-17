@@ -1,11 +1,8 @@
-﻿using System.Collections.Generic;
-using UnityEngine.Recorder;
-using UnityEngine;
-using UnityEngine.XR.WSA.WebCam;
-using System.Threading;
-using CellexalVR.General;
+﻿using CellexalVR.General;
+using System.Collections.Generic;
 using System.IO;
-using System.Collections;
+using System.Threading;
+using UnityEngine;
 
 namespace CellexalVR.Menu.SubMenus
 {
