@@ -315,6 +315,7 @@ namespace CellexalVR.AnalysisObjects
                     Destroy(panel.gameObject);
                 }
             }
+            selectionManager.LoadAnnotationTags();
             CellexalEvents.CommandFinished.Invoke(true);
         }
 

@@ -46,6 +46,7 @@ namespace CellexalVR.General
         private List<Graph.GraphPoint> selectedCells = new List<Graph.GraphPoint>();
         private List<Graph.GraphPoint> lastSelectedCells = new List<Graph.GraphPoint>();
         private List<Tuple<string, string>> annotatedPoints = new List<Tuple<string, string>>();
+        private Dictionary<string, string[]> cellTags = new Dictionary<string, string[]>();
         private bool selectionMade = false;
         private GameObject grabbedObject;
         private bool heatmapCreated = true;
@@ -720,28 +721,88 @@ namespace CellexalVR.General
         /// <summary>
         /// Adds the annotation to the currently selected group of cells.
         /// Also adds a line and text object above the cells with the annotation.
+        /// Touching these texts in VR will highlight the annotated cells.
         /// </summary>
         /// <param name="annotation">The text that will be shown above the cells and later written to file.</param>
+        /// <param name="index">The index of the currect selected group to tag.</param>
         public void AddAnnotation(string annotation, int index)
         {
             List<Graph.GraphPoint> pointsToAnnotate = GetCurrentSelectionGroup(index);
-            List<string> Cells;
+            string[] cellNames;
+
             foreach (Graph.GraphPoint gp in pointsToAnnotate)
             {
-                annotatedPoints.Add(new Tuple<string, string>(gp.Label, annotation));
-                Cells.Add(gp.Label);
+                annotatedPoints.Add( Tuple<string, string>( cellName, annotation) );
+                cellNames.Add(gp.Label);
+            }
+            RecolorSelectionPoints();
+            AnnotateCells ( cellsNames, annotation );
+            SaveAnnotationTag( annotation );
+        }
+
+        /// <summary>
+        /// Based on a list of cell names and an annotation string this function creates a name tag
+        /// attached to the first selected cell. This name tag highlights the attached cells when touched by an controller.
+        /// </summary>
+        /// <param name="annotation">The text that will be shown above the cells and later written to file.</param>
+        public void AnnotateCells( string[] cellsNames, string annotation ){
+
+            int id = 0;
+            List<Cell> cells;
+
+            cellTags.Add(annotation, cellsNames);
+
+            foreach( string cellName in cellNames ){
+                cells.Add( referenceManager.cellManager.GetCell( cellName ) );
             }
 
-            RecolorSelectionPoints();
-
-            foreach (Graph graph in graphManager.Graphs)
+            foreach (Graph graph in referenceManager.graphManager.originalGraphs)
             {
                 GameObject annotationText = Instantiate(annotationTextPrefab, graph.annotationsParent.transform);
-                Vector3 position = graph.FindGraphPoint(pointsToAnnotate[0].Label).Position;
+                Vector3 position = graph.FindGraphPoint(cells[0].Label).Position;
                 annotationText.transform.localPosition = position;
                 annotationText.GetComponentInChildren<TextMeshPro>().text = annotation;
-                annotationText.GetComponent<AnnotationTextPanel>().referenceManager = referenceManager;
-                annotationText.GetComponent<AnnotationTextPanel>().FilList(Cells, );
+                List<Graph.GraphPoint> pointsHere;
+                // get all graph points for this graph and add them to this AnnotationTextPanel
+                foreach ( Cell c in cells) {
+                    pointsHere.Add( c.GraphPoints[id] );
+                }
+                annotationText.GetComponent<AnnotationTextPanel>().FilList( pointsHere );
+                id = id+1;
+            }
+            if (cellTags.ContainsKey(annotation)){
+                cellTags.Remove(annotation );
+            }
+            cellTags.Add(annotation,  cellsNames);
+
+        }
+
+        /// <summary>
+        /// saves this annotation tag in a file 
+        /// CellexalUser.UserSpecificFolder + @"\TaggedCells\" + tag + '.txt'
+        /// replacing old annotation tag saves.
+        /// <param name="tag">The tag to save</param>
+        public void SaveAnnotationTag( string tag ) {
+            if (cellTags.ContainsKey(tag)){
+                string savedSelectionsPath = CellexalUser.UserSpecificFolder + @"\TaggedCells\";
+                if (!Directory.Exists(savedSelectionsPath))
+                {
+                    Directory.CreateDirectory(savedSelectionsPath);
+                }
+                filePath = savedSelectionsPath + tag + ".txt";
+                if ( File.Exists(filePath) ){
+                    File.Delete(filePath);
+                }
+                using (StreamWriter file = new StreamWriter(filePath, true))
+                {
+                    file.Write(tag);
+                    file.WriteLine();
+                    foreach (string cName in cellTags[tag])
+                    {
+                        file.Write(cName);
+                        file.WriteLine();
+                    }
+                }
             }
         }
 
@@ -796,6 +857,43 @@ namespace CellexalVR.General
             annotatedPoints.Clear();
         }
 
+        /// <summary>
+        /// Restore all saved AnnotationPanels
+        /// </summary>
+        /// <param name="filePath"></param>
+        public void LoadAnnotationTags( )
+        {   
+            string savedSelectionsPath = CellexalUser.UserSpecificFolder + @"\TaggedCells\";
+            if(Directory.Exists( savedSelectionsPath )
+            {
+                string [] fileEntries = Directory.GetFiles(savedSelectionsPath);
+                foreach(string fileName in fileEntries)
+                {
+                    LoadAnnotationTextsFromFile( fileName );
+                }
+            }
+        }
+
+        /// <summary>
+        /// Restore on annotation from a file
+        /// </summary>
+        /// <param name="file"></param>
+        public void LoadAnnotationTagFile(string file)
+        {   
+            // read the cells, populate annotatedPoints and run AnnotateCells( List<Cell> Cells )
+            string[] cellsNames;
+            string tag;
+            using (StreamReader streamreader = new StreamReader( file ) )
+            {
+                tag = streamreader.ReadLine();
+                while (streamreader.Peek() > 0)
+                {
+                    cellsNames.Add( streamreader.ReadLine() );
+                }
+            }
+            //RecolorSelectionPoints();
+            AnnotateCells ( cellsNames, tag );
+        }
         /// <summary>
         /// Gets a selection colors.
         /// </summary>
