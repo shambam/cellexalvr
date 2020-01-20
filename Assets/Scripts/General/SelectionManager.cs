@@ -163,7 +163,7 @@ namespace CellexalVR.General
                 Graph.GraphPoint gp = graphManager.FindGraphPoint(graph.GraphName, graphPoint.Label);
                 if (gp != null)
                 {
-                    gp.ColorSelectionColor(newGroup, true);
+                    gp.ColorSelectionColor( newGroup, true);
                 }
             }
             //graphPoint.Recolor(Colors[newGroup], newGroup);
@@ -725,9 +725,11 @@ namespace CellexalVR.General
         public void AddAnnotation(string annotation, int index)
         {
             List<Graph.GraphPoint> pointsToAnnotate = GetCurrentSelectionGroup(index);
+            List<string> Cells;
             foreach (Graph.GraphPoint gp in pointsToAnnotate)
             {
                 annotatedPoints.Add(new Tuple<string, string>(gp.Label, annotation));
+                Cells.Add(gp.Label);
             }
 
             RecolorSelectionPoints();
@@ -738,6 +740,8 @@ namespace CellexalVR.General
                 Vector3 position = graph.FindGraphPoint(pointsToAnnotate[0].Label).Position;
                 annotationText.transform.localPosition = position;
                 annotationText.GetComponentInChildren<TextMeshPro>().text = annotation;
+                annotationText.GetComponent<AnnotationTextPanel>().referenceManager = referenceManager;
+                annotationText.GetComponent<AnnotationTextPanel>().FilList(Cells, );
             }
         }
 
