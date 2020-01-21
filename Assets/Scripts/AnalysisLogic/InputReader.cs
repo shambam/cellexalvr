@@ -184,6 +184,7 @@ namespace CellexalVR.AnalysisLogic
             CellexalLog.Log("Reading " + mdsFiles.Length + " .mds files");
             StartCoroutine(ReadMDSFiles(fullPath, mdsFiles));
             graphGenerator.isCreating = true;
+            referenceManager.selectionManager.LoadAnnotationTags();
             //string[] spatialMds = Directory.GetFiles(fullPath, "*.spatialmds");
             //StartCoroutine(ReadSpatialMDSFiles(fullPath, spatialMds));
         }

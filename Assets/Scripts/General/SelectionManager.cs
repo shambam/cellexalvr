@@ -46,7 +46,7 @@ namespace CellexalVR.General
         private List<Graph.GraphPoint> selectedCells = new List<Graph.GraphPoint>();
         private List<Graph.GraphPoint> lastSelectedCells = new List<Graph.GraphPoint>();
         private List<Tuple<string, string>> annotatedPoints = new List<Tuple<string, string>>();
-        private Dictionary<string, string[]> cellTags = new Dictionary<string, string[]>();
+        private Dictionary<string, List<string>> cellTags = new Dictionary<string, List<string>>();
         private bool selectionMade = false;
         private GameObject grabbedObject;
         private bool heatmapCreated = true;
@@ -728,15 +728,15 @@ namespace CellexalVR.General
         public void AddAnnotation(string annotation, int index)
         {
             List<Graph.GraphPoint> pointsToAnnotate = GetCurrentSelectionGroup(index);
-            string[] cellNames;
+            List<string> cellNames = new List<string>();
 
             foreach (Graph.GraphPoint gp in pointsToAnnotate)
             {
-                annotatedPoints.Add( Tuple<string, string>( cellName, annotation) );
+              //  annotatedPoints.Add( new Tuple<string, string>( gp.Label, annotation) );
                 cellNames.Add(gp.Label);
             }
             RecolorSelectionPoints();
-            AnnotateCells ( cellsNames, annotation );
+            AnnotateCells ( cellNames, annotation );
             SaveAnnotationTag( annotation );
         }
 
@@ -745,12 +745,16 @@ namespace CellexalVR.General
         /// attached to the first selected cell. This name tag highlights the attached cells when touched by an controller.
         /// </summary>
         /// <param name="annotation">The text that will be shown above the cells and later written to file.</param>
-        public void AnnotateCells( string[] cellsNames, string annotation ){
+        public void AnnotateCells( List<string> cellNames, string annotation ){
 
             int id = 0;
-            List<Cell> cells;
+            List<Cell> cells = new List<Cell>();
 
-            cellTags.Add(annotation, cellsNames);
+            if (cellTags.ContainsKey(annotation))
+            {
+                cellTags.Remove(annotation);
+            }
+            cellTags.Add(annotation, cellNames);
 
             foreach( string cellName in cellNames ){
                 cells.Add( referenceManager.cellManager.GetCell( cellName ) );
@@ -762,7 +766,7 @@ namespace CellexalVR.General
                 Vector3 position = graph.FindGraphPoint(cells[0].Label).Position;
                 annotationText.transform.localPosition = position;
                 annotationText.GetComponentInChildren<TextMeshPro>().text = annotation;
-                List<Graph.GraphPoint> pointsHere;
+                List<Graph.GraphPoint> pointsHere = new List<Graph.GraphPoint>();
                 // get all graph points for this graph and add them to this AnnotationTextPanel
                 foreach ( Cell c in cells) {
                     pointsHere.Add( c.GraphPoints[id] );
@@ -770,10 +774,6 @@ namespace CellexalVR.General
                 annotationText.GetComponent<AnnotationTextPanel>().FilList( pointsHere );
                 id = id+1;
             }
-            if (cellTags.ContainsKey(annotation)){
-                cellTags.Remove(annotation );
-            }
-            cellTags.Add(annotation,  cellsNames);
 
         }
 
@@ -789,8 +789,9 @@ namespace CellexalVR.General
                 {
                     Directory.CreateDirectory(savedSelectionsPath);
                 }
-                filePath = savedSelectionsPath + tag + ".txt";
-                if ( File.Exists(filePath) ){
+                string filePath = savedSelectionsPath + tag + ".txt";
+                if ( File.Exists(filePath) )
+                {
                     File.Delete(filePath);
                 }
                 using (StreamWriter file = new StreamWriter(filePath, true))
@@ -864,12 +865,12 @@ namespace CellexalVR.General
         public void LoadAnnotationTags( )
         {   
             string savedSelectionsPath = CellexalUser.UserSpecificFolder + @"\TaggedCells\";
-            if(Directory.Exists( savedSelectionsPath )
+            if(Directory.Exists( savedSelectionsPath ))
             {
                 string [] fileEntries = Directory.GetFiles(savedSelectionsPath);
                 foreach(string fileName in fileEntries)
                 {
-                    LoadAnnotationTextsFromFile( fileName );
+                    LoadAnnotationTagFile( fileName );
                 }
             }
         }
@@ -881,7 +882,7 @@ namespace CellexalVR.General
         public void LoadAnnotationTagFile(string file)
         {   
             // read the cells, populate annotatedPoints and run AnnotateCells( List<Cell> Cells )
-            string[] cellsNames;
+            List<string> cellsNames = new List<string>();
             string tag;
             using (StreamReader streamreader = new StreamReader( file ) )
             {
