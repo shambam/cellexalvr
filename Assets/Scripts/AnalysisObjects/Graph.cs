@@ -1050,7 +1050,7 @@ namespace CellexalVR.AnalysisObjects
 
         public IEnumerator CreateGeneMesh(string geneName)
         {
-            string path = Directory.GetCurrentDirectory() + @"\Data\" + CellexalUser.DataSourceFolder + @"\" + "gene1vertex" + ".mesh";
+            string path = Directory.GetCurrentDirectory() + @"\Data\" + CellexalUser.DataSourceFolder + Path.PathSeparator + "gene1vertex" + ".mesh";
             List<List<Vector3>> meshes = new List<List<Vector3>>();
             List<Vector3> vertices = new List<Vector3>();
             CellexalLog.Log("Started reading " + path);
@@ -1150,8 +1150,8 @@ namespace CellexalVR.AnalysisObjects
         public IEnumerator CreateMeshFromAShape(string geneName)
         {
 
-            string path = Directory.GetCurrentDirectory() + @"\Data\" + CellexalUser.DataSourceFolder + @"\" + "gene1triang" + ".hull";
-            string vertPath = Directory.GetCurrentDirectory() + @"\Data\" + CellexalUser.DataSourceFolder + @"\" + geneName + ".mesh";
+            string path = Directory.GetCurrentDirectory() + @"\Data\" + CellexalUser.DataSourceFolder + Path.PathSeparator + "gene1triang" + ".hull";
+            string vertPath = Directory.GetCurrentDirectory() + @"\Data\" + CellexalUser.DataSourceFolder + Path.PathSeparator + geneName + ".mesh";
 
             FileStream fileStream = new FileStream(path, FileMode.Open);
             StreamReader streamReader = new StreamReader(fileStream);
@@ -1268,8 +1268,8 @@ namespace CellexalVR.AnalysisObjects
             // which way of the triangle is in and which is out, it's pretty much random what the result is.
             // The "solution" was to place a shader which does not cull the backside of the triangles, so 
             // both sides are always rendered.
-            //string path = Directory.GetCurrentDirectory() + @"\Data\" + CellexalUser.DataSourceFolder + @"\" + GraphName + ".mds";
-            string path = Directory.GetCurrentDirectory() + @"\Data\" + CellexalUser.DataSourceFolder + @"\" + GraphName + ".mds";
+            //string path = Directory.GetCurrentDirectory() + @"\Data\" + CellexalUser.DataSourceFolder + Path.PathSeparator + GraphName + ".mds";
+            string path = Directory.GetCurrentDirectory() + @"\Data\" + CellexalUser.DataSourceFolder + Path.PathSeparator + GraphName + ".mds";
             FileStream fileStream = new FileStream(path, FileMode.Open);
             StreamReader streamReader = new StreamReader(fileStream);
 

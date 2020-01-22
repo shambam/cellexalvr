@@ -99,7 +99,7 @@ namespace CellexalVR.General
                 Directory.CreateDirectory(userFolder);
             }
 
-            UserSpecificFolder = userFolder + @"\" + dataFolder;
+            UserSpecificFolder = userFolder + Path.PathSeparator + dataFolder;
             if (!Directory.Exists(UserSpecificFolder))
             {
                 CellexalLog.Log("Created directory " + UserSpecificFolder);

@@ -366,7 +366,7 @@ namespace CellexalVR.DesktopUI
             {
                 // suggest file or folder
                 string currentText = words[words.Length - 1];
-                string folder = Directory.GetCurrentDirectory() + @"\" + folders[command] + @"\";
+                string folder = Directory.GetCurrentDirectory() + Path.PathSeparator + folders[command] + Path.PathSeparator;
                 string[] foundFolders = Directory.GetDirectories(folder, currentText + "*", SearchOption.TopDirectoryOnly);
                 string[] foundFiles = Directory.GetFiles(folder, currentText + "*", SearchOption.TopDirectoryOnly);
                 // put everything in one list
