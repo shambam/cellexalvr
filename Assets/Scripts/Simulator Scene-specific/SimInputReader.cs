@@ -56,7 +56,7 @@
 //
 //
 //
-//         string[] txtList = Directory.GetFiles(Directory.GetCurrentDirectory() + "\\Assets\\Data\\runtimeGroups", "*.txt");
+//         string[] txtList = Directory.GetFiles(Directory.GetCurrentDirectory() + Path.PathSeparator + "Assets\\Data\\runtimeGroups", "*.txt");
 //         foreach (string f in txtList)
 //         {
 //             //File.Delete(f);
