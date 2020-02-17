@@ -87,7 +87,7 @@ namespace CellexalVR.SceneObjects
                 waitTime += Time.deltaTime;
                 yield return null;
             }
-            if (!File.Exists(CellexalUser.UserSpecificFolder + Path.PathSeparator + "mainServer.input.lock"))
+            if (!File.Exists(CellexalUser.UserSpecificFolder + Path.DirectorySeparatorChar + "mainServer.input.lock"))
             {
                 StopPulse();
                 StartWave();

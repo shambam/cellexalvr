@@ -29,14 +29,14 @@ namespace CellexalVR.General
             var now = DateTime.Now;
             var time = now.ToString("yyyy-MM-dd-HH-mm-ss");
 
-            logDirectory = Directory.GetCurrentDirectory() + Path.PathSeparator + "Output" + Path.PathSeparator  + CellexalUser.Username;
+            logDirectory = Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "Output" + Path.DirectorySeparatorChar  + CellexalUser.Username;
             if (!Directory.Exists(logDirectory))
             {
                 logThisLater.Add("\tCreated directory " + FixFilePath(logDirectory));
                 Directory.CreateDirectory(logDirectory);
             }
 
-            LogFilePath = logDirectory + Path.PathSeparator + "cellexal-log-" + time + ".txt";
+            LogFilePath = logDirectory + Path.DirectorySeparatorChar + "cellexal-log-" + time + ".txt";
             // this will most likely always happen
             if (!File.Exists(LogFilePath))
             {
@@ -162,7 +162,7 @@ namespace CellexalVR.General
             CellexalEvents.UsernameChanged.AddListener(CellexalLog.UsernameChanged);
             //CellexalEvents.GraphsLoaded.AddListener(CellexalLog.InitNewLog);
 
-            string outputDirectory = Directory.GetCurrentDirectory() + Path.PathSeparator + "Output";
+            string outputDirectory = Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "Output";
 
             CellexalLog.consoleManager = referenceManager.consoleManager;
             if (!Directory.Exists(outputDirectory))

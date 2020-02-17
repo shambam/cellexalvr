@@ -994,13 +994,13 @@ namespace CellexalVR.AnalysisObjects
                 CellexalLog.Log("Created directory " + directoryPath);
             }
 
-            directoryPath += Path.PathSeparator + "Networks";
+            directoryPath += Path.DirectorySeparatorChar + "Networks";
             if (!Directory.Exists(directoryPath))
             {
                 Directory.CreateDirectory(directoryPath);
                 CellexalLog.Log("Created directory " + directoryPath);
             }
-            string filePath = directoryPath + Path.PathSeparator + name + "_" + DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".txt";
+            string filePath = directoryPath + Path.DirectorySeparatorChar + name + "_" + DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".txt";
             var stream = File.Create(filePath);
             var streamWriter = new StreamWriter(stream);
 
@@ -1118,14 +1118,14 @@ namespace CellexalVR.AnalysisObjects
                 CellexalLog.Log("Created directory " + networkImageDirectory);
             }
 
-            networkImageDirectory += Path.PathSeparator + "Networks";
+            networkImageDirectory += Path.DirectorySeparatorChar + "Networks";
             if (!Directory.Exists(networkImageDirectory))
             {
                 Directory.CreateDirectory(networkImageDirectory);
                 CellexalLog.Log("Created directory " + networkImageDirectory);
             }
 
-            string networkImageFilePath = networkImageDirectory + Path.PathSeparator + name + "_" + DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".png";
+            string networkImageFilePath = networkImageDirectory + Path.DirectorySeparatorChar + name + "_" + DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".png";
             bitmap.Save(networkImageFilePath, ImageFormat.Png);
             CellexalLog.Log("Saved " + name + " as an image at " + networkImageFilePath);
             StartCoroutine(referenceManager.reportManager.LogNetwork(networkImageFilePath, this));

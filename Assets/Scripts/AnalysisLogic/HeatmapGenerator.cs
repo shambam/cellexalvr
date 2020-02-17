@@ -131,11 +131,11 @@ namespace CellexalVR.AnalysisLogic
             }
             heatmapList.Clear();
         }
-        [ConsoleCommand("heatmapGenerator", folder: "Output" + Path.PathSeparator , aliases: new string[] { "loadheatmapfile", "lhf" })]
+        [ConsoleCommand("heatmapGenerator", folder: "Output" , aliases: new string[] { "loadheatmapfile", "lhf" })]
         public void LoadHeatmap(string heatmapName)
         {
             statsMethod = CellexalConfig.Config.HeatmapAlgorithm;
-            heatmapName = "Output" + Path.PathSeparator  + heatmapName;
+            heatmapName = "Output" + Path.DirectorySeparatorChar  + heatmapName;
             CellexalLog.Log("Loading old heatmap from file " + heatmapName);
             //CellexalEvents.CreatingHeatmap.Invoke();
             //string heatmapName = "heatmap_" +            System.DateTime.Now.ToString("HH-mm-ss");
@@ -247,7 +247,7 @@ namespace CellexalVR.AnalysisLogic
             if (selection.Count < 1)
             {
                 CellexalLog.Log("can not create heatmap with less than 1 graphpoints, aborting");
-                if (!(referenceManager.networkGenerator.GeneratingNetworks && File.Exists(CellexalUser.UserSpecificFolder + Path.PathSeparator + "mainServer.input.R")))
+                if (!(referenceManager.networkGenerator.GeneratingNetworks && File.Exists(CellexalUser.UserSpecificFolder + Path.DirectorySeparatorChar + "mainServer.input.R")))
                 {
                     referenceManager.floor.StopPulse();
                 }
@@ -258,8 +258,8 @@ namespace CellexalVR.AnalysisLogic
             }
             //string function = "make.cellexalvr.heatmap.list";
            
-            string objectPath = (CellexalUser.UserSpecificFolder + Path.PathSeparator + "cellexalObj.RData").UnFixFilePath();
-            string groupingFilepath = (CellexalUser.UserSpecificFolder + Path.PathSeparator + "selection" + (selectionManager.fileCreationCtr - 1) + ".txt").UnFixFilePath();
+            string objectPath = (CellexalUser.UserSpecificFolder + Path.DirectorySeparatorChar + "cellexalObj.RData").UnFixFilePath();
+            string groupingFilepath = (CellexalUser.UserSpecificFolder + Path.DirectorySeparatorChar + "selection" + (selectionManager.fileCreationCtr - 1) + ".txt").UnFixFilePath();
             string timeFile = (groupingFilepath + ".time").UnFixFilePath();
             if (File.Exists(path: timeFile))
             {
@@ -267,7 +267,7 @@ namespace CellexalVR.AnalysisLogic
             }
             string topGenesNr = "250";
             string heatmapDirectory = (CellexalUser.UserSpecificFolder + @"\Heatmap").UnFixFilePath();
-            string outputFilePath = (heatmapDirectory + @Path.PathSeparator + heatmapName + ".txt");
+            string outputFilePath = (heatmapDirectory + @Path.DirectorySeparatorChar + heatmapName + ".txt");
             string statsMethod = CellexalConfig.Config.HeatmapAlgorithm;
             //string args = "cellexalObj" + ", \"" + groupingFilepath + "\", " + topGenesNr + ", \"" + outputFilePath + "\", \"" + statsMethod + "\"";
             string args = CellexalUser.UserSpecificFolder + " " + groupingFilepath + " " + topGenesNr + " " + outputFilePath + " " + statsMethod;
@@ -281,14 +281,14 @@ namespace CellexalVR.AnalysisLogic
                 CellexalLog.Log("Creating directory " + heatmapDirectory.FixFilePath());
                 Directory.CreateDirectory(heatmapDirectory);
             }
-            bool rServerReady = File.Exists(CellexalUser.UserSpecificFolder + Path.PathSeparator + "mainServer.pid") &&
-                    !File.Exists(CellexalUser.UserSpecificFolder + Path.PathSeparator + "mainServer.input.R") &&
-                    !File.Exists(CellexalUser.UserSpecificFolder + Path.PathSeparator + "mainServer.input.lock");
+            bool rServerReady = File.Exists(CellexalUser.UserSpecificFolder + Path.DirectorySeparatorChar + "mainServer.pid") &&
+                    !File.Exists(CellexalUser.UserSpecificFolder + Path.DirectorySeparatorChar + "mainServer.input.R") &&
+                    !File.Exists(CellexalUser.UserSpecificFolder + Path.DirectorySeparatorChar + "mainServer.input.lock");
             while (!rServerReady || !RScriptRunner.serverIdle)
             {
-                rServerReady = File.Exists(CellexalUser.UserSpecificFolder + Path.PathSeparator + "mainServer.pid") &&
-                                !File.Exists(CellexalUser.UserSpecificFolder + Path.PathSeparator + "mainServer.input.R") &&
-                                !File.Exists(CellexalUser.UserSpecificFolder + Path.PathSeparator + "mainServer.input.lock");
+                rServerReady = File.Exists(CellexalUser.UserSpecificFolder + Path.DirectorySeparatorChar + "mainServer.pid") &&
+                                !File.Exists(CellexalUser.UserSpecificFolder + Path.DirectorySeparatorChar + "mainServer.input.R") &&
+                                !File.Exists(CellexalUser.UserSpecificFolder + Path.DirectorySeparatorChar + "mainServer.input.lock");
                 yield return null;
             }
             //t = new Thread(() => RScriptRunner.RunScript(script));
@@ -298,7 +298,7 @@ namespace CellexalVR.AnalysisLogic
             var stopwatch = new System.Diagnostics.Stopwatch();
             stopwatch.Start();
 
-            while (t.IsAlive || File.Exists(CellexalUser.UserSpecificFolder + Path.PathSeparator + "mainServer.input.R"))
+            while (t.IsAlive || File.Exists(CellexalUser.UserSpecificFolder + Path.DirectorySeparatorChar + "mainServer.input.R"))
             {
                 yield return null;
             }
@@ -388,7 +388,7 @@ namespace CellexalVR.AnalysisLogic
                 {
                     CellexalLog.Log("Failed to create heatmap. R script did not return gene list file " + filepath);
                     CellexalError.SpawnError("Failed to create heatmap", "R script did not return gene list file " + filepath);
-                    if (!(referenceManager.networkGenerator.GeneratingNetworks && File.Exists(CellexalUser.UserSpecificFolder + Path.PathSeparator + "mainServer.input.R")))
+                    if (!(referenceManager.networkGenerator.GeneratingNetworks && File.Exists(CellexalUser.UserSpecificFolder + Path.DirectorySeparatorChar + "mainServer.input.R")))
                     {
                         referenceManager.floor.StopPulse();
                     }
@@ -555,7 +555,7 @@ namespace CellexalVR.AnalysisLogic
             {
                 Directory.CreateDirectory(heatmapDirectory);
             }
-            string heatmapFilePath = heatmapDirectory + Path.PathSeparator + "heatmap_temp.png";
+            string heatmapFilePath = heatmapDirectory + Path.DirectorySeparatorChar + "heatmap_temp.png";
 
 
             CellexalLog.Log("Reading " + result.Count + " results from database");
@@ -597,7 +597,7 @@ namespace CellexalVR.AnalysisLogic
 
             CellexalEvents.HeatmapCreated.Invoke();
             CellexalEvents.ScriptFinished.Invoke();
-            //if (!(referenceManager.networkGenerator.GeneratingNetworks && File.Exists(CellexalUser.UserSpecificFolder + Path.PathSeparator + "mainServer.input.R")))
+            //if (!(referenceManager.networkGenerator.GeneratingNetworks && File.Exists(CellexalUser.UserSpecificFolder + Path.DirectorySeparatorChar + "mainServer.input.R")))
             //{
             //    referenceManager.floor.StopPulse();
             //}

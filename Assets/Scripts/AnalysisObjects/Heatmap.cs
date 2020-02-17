@@ -586,14 +586,14 @@ namespace CellexalVR.AnalysisObjects
                 CellexalLog.Log("Created directory " + heatmapImageDirectory);
             }
 
-            heatmapImageDirectory += Path.PathSeparator + "Heatmap";
+            heatmapImageDirectory += Path.DirectorySeparatorChar + "Heatmap";
             if (!Directory.Exists(heatmapImageDirectory))
             {
                 Directory.CreateDirectory(heatmapImageDirectory);
                 CellexalLog.Log("Created directory " + heatmapImageDirectory);
             }
 
-            string heatmapImageFilePath = heatmapImageDirectory + Path.PathSeparator + name + "_" + DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".png";
+            string heatmapImageFilePath = heatmapImageDirectory + Path.DirectorySeparatorChar + name + "_" + DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".png";
             while (File.Exists(heatmapImageFilePath))
             {
                 // append "_d" until the filenames no longer collide.
@@ -611,7 +611,7 @@ namespace CellexalVR.AnalysisObjects
         /// </summary>
         public void DumpGenesToTextFile(string[] genes, string name)
         {
-            string filePath = (CellexalUser.UserSpecificFolder + Path.PathSeparator + "Heatmap" + Path.PathSeparator  + name + ".txt").FixFilePath();
+            string filePath = (CellexalUser.UserSpecificFolder + Path.DirectorySeparatorChar + "Heatmap" + Path.DirectorySeparatorChar  + name + ".txt").FixFilePath();
             using (StreamWriter file = new StreamWriter(filePath))
             {
                 foreach (string gene in genes)

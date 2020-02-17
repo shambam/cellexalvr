@@ -66,7 +66,7 @@ namespace CellexalVR.Spatial
         /// <returns></returns>
         public IEnumerator CreateMesh()
         {
-            string path = Directory.GetCurrentDirectory() + @"\Data\" + CellexalUser.DataSourceFolder + Path.PathSeparator + "slice.mds";
+            string path = Directory.GetCurrentDirectory() + @"\Data\" + CellexalUser.DataSourceFolder + Path.DirectorySeparatorChar + "slice.mds";
             ChunkManager chunkManager = GameObject.Instantiate(chunkManagerPrefab).GetComponent<ChunkManager>();
             yield return null;
             int i = 0;
@@ -115,8 +115,8 @@ namespace CellexalVR.Spatial
         public IEnumerator CreateMeshFromAShape(string geneName)
         {
 
-            //string path = Directory.GetCurrentDirectory() + @"\Data\" + CellexalUser.DataSourceFolder + Path.PathSeparator + "gene1triang" + ".hull";
-            string vertPath = Directory.GetCurrentDirectory() + @"\Data\" + CellexalUser.DataSourceFolder + Path.PathSeparator + geneName + ".mesh";
+            //string path = Directory.GetCurrentDirectory() + @"\Data\" + CellexalUser.DataSourceFolder + Path.DirectorySeparatorChar + "gene1triang" + ".hull";
+            string vertPath = Directory.GetCurrentDirectory() + @"\Data\" + CellexalUser.DataSourceFolder + Path.DirectorySeparatorChar + geneName + ".mesh";
             ChunkManager chunkManager = GameObject.Instantiate(chunkManagerPrefab).GetComponent<ChunkManager>();
             chunkManager.gameObject.name = geneName;
             yield return null;
