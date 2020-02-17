@@ -412,7 +412,9 @@ namespace CellexalVR.AnalysisObjects
             public int index;
             public Vector2Int textureCoord;
             public Graph parent;
-            private int group;
+
+            private int colorSource = 1; //1: ColorSelectionColor; 2: ColorGeneExpression
+            private int group = -1;
             public int Group
             {
                 get { return group; }
@@ -461,14 +463,30 @@ namespace CellexalVR.AnalysisObjects
                 textureCoord = newPos;
             }
 
+            public void ReColour ( int i, bool outline)
+            {
+                if (colorSource ==1)
+                {
+                    ColorSelectionColor(i, outline);
+                }
+                else
+                {
+                    ColorGeneExpression(i, outline);
+                }
+
+            }
+
             public void ColorGeneExpression(int i, bool outline)
             {
                 parent.ColorGraphPointGeneExpression(this, i, outline);
+                colorSource = 2;
+                Group = i;
             }
 
             public void ColorSelectionColor(int i, bool outline)
             {
                 parent.ColorGraphPointSelectionColor(this, i, outline);
+                colorSource = 1;
                 Group = i;
             }
 

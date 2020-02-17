@@ -12,7 +12,7 @@ namespace CellexalVR.Interaction
 
         List<Graph.GraphPoint> graphPoints = new List<Graph.GraphPoint>();
         int myColor = 1;
-        int otherColor;
+        int[] otherColor;
 
         private void Start()
         {
@@ -31,12 +31,14 @@ namespace CellexalVR.Interaction
             if (other.gameObject.name.Equals("ControllerCollider(Clone)"))
             {
                 //print("nr of cells: " + graphPoints.Count);
+                //this.otherColor = new int[graphPoints.Count];
+                //int i = 0;
                 foreach (Graph.GraphPoint gp in graphPoints)
                 {
-                    //otherColor = gp.Group;
-                    
+                    //print("SET id " + i + " color " + gp.Group);
+                    //this.otherColor[i++] = gp.Group;
                     gp.HighlightGraphPoint(true);
-                    //gp.ColorSelectionColor( i: myColor, outline: false);
+                    //gp.ColorSelectionColor( i: this.myColor, outline: false);
                 }
 
             }
@@ -45,14 +47,14 @@ namespace CellexalVR.Interaction
         private void OnTriggerExit(Collider other)
         {
             //print("trigger exited " + other.gameObject.name);
-            if (other.gameObject.name.Equals("ControllerCollider(Clone)"))
+            //int i = 0;
+            foreach (Graph.GraphPoint gp in graphPoints)
             {
-                foreach (Graph.GraphPoint gp in graphPoints)
-                {
-                    gp.HighlightGraphPoint(false);
-                    //gp.ColorSelectionColor( i: otherColor, outline: false);
-                }
+                //print("RESET id " + i + " color " + this.otherColor[i]);
+                gp.HighlightGraphPoint(false);
+                //gp.ReColour( i: this.otherColor[i++], outline: false);
             }
+            
         }
 
     }

@@ -26,4 +26,4 @@ cellexalObj@outpath = outputFolder
 
 #exportUserGroups4vr(cellexalObj, outputFolder)
 
-server(name)
+server(name, debug=TRUE)
