@@ -113,9 +113,9 @@ namespace CellexalVR.Extensions
         /// <returns>The unfixed string.</returns>
         public static string UnFixFilePath(this string s)
         {
-            string directorySeparatorChar = "\\\\";
+            string directorySeparatorChar = Path.PathSeparator + "" + Path.PathSeparator ;
             s = s.Replace("/", directorySeparatorChar);
-            s = s.Replace("\\", directorySeparatorChar);
+            s = s.Replace(Path.PathSeparator, directorySeparatorChar);
             return s;
         }
 

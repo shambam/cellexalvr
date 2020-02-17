@@ -26,7 +26,7 @@ namespace CellexalVR.Interaction
             // special
             new string[] {  "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
                             "Shift", "!", "#", "%", "&", "/", "(", ")", "=", "@",
-                            "ABC\nabc", "\\", "-", "_", ".", ":", ",", ";", "Back", "Clear",
+                            "ABC\nabc", Path.PathSeparator, "-", "_", ".", ":", ",", ";", "Back", "Clear",
                             "Enter" }
         };
 

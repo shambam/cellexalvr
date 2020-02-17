@@ -74,7 +74,7 @@ namespace CellexalVR.AnalysisLogic
                                             string second_marker, string third_marker)
         {
             // print(new System.Diagnostics.StackTrace());
-            this.filePath = CellexalUser.UserSpecificFolder + "\\" + first_marker + "_" + second_marker + "_" + third_marker + ".txt";
+            this.filePath = CellexalUser.UserSpecificFolder + Path.PathSeparator + first_marker + "_" + second_marker + "_" + third_marker + ".txt";
             HashSet<string> previousLines = new HashSet<string>();
             using (StreamWriter file = new StreamWriter(filePath))
             {

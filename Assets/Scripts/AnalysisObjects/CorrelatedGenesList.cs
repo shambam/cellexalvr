@@ -121,14 +121,14 @@ namespace CellexalVR.AnalysisObjects
             string rScriptFilePath = (Application.streamingAssetsPath + @"\R\get_correlated_genes.R").FixFilePath();
 
             // First wait until other processes are finished before trying to start this one.
-            bool rServerReady = File.Exists(CellexalUser.UserSpecificFolder + "\\mainServer.pid") &&
-                    !File.Exists(CellexalUser.UserSpecificFolder + "\\mainServer.input.R") &&
-                    !File.Exists(CellexalUser.UserSpecificFolder + "\\mainServer.input.lock");
+            bool rServerReady = File.Exists(CellexalUser.UserSpecificFolder + Path.PathSeparator + "mainServer.pid") &&
+                    !File.Exists(CellexalUser.UserSpecificFolder + Path.PathSeparator + "mainServer.input.R") &&
+                    !File.Exists(CellexalUser.UserSpecificFolder + Path.PathSeparator + "mainServer.input.lock");
             while (!rServerReady || !RScriptRunner.serverIdle)
             {
-                rServerReady = File.Exists(CellexalUser.UserSpecificFolder + "\\mainServer.pid") &&
-                                !File.Exists(CellexalUser.UserSpecificFolder + "\\mainServer.input.R") &&
-                                !File.Exists(CellexalUser.UserSpecificFolder + "\\mainServer.input.lock");
+                rServerReady = File.Exists(CellexalUser.UserSpecificFolder + Path.PathSeparator + "mainServer.pid") &&
+                                !File.Exists(CellexalUser.UserSpecificFolder + Path.PathSeparator + "mainServer.input.R") &&
+                                !File.Exists(CellexalUser.UserSpecificFolder + Path.PathSeparator + "mainServer.input.lock");
                 yield return null;
             }
             CellexalLog.Log("Calculating correlated genes with R script " + rScriptFilePath + " and arguments: " + args);
@@ -138,7 +138,7 @@ namespace CellexalVR.AnalysisObjects
             Thread t = new Thread(() => RScriptRunner.RunRScript(rScriptFilePath, args));
             t.Start();
             // Wait for this process to finish.
-            while (t.IsAlive || File.Exists(CellexalUser.UserSpecificFolder + "\\mainServer.input.R"))
+            while (t.IsAlive || File.Exists(CellexalUser.UserSpecificFolder + Path.PathSeparator + "mainServer.input.R"))
             {
                 yield return null;
             }

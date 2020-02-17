@@ -942,7 +942,7 @@ namespace CellexalVR.AnalysisObjects
             if (g.hasVelocityInfo)
             {
                 referenceManager.velocitySubMenu.CreateButton(Directory.GetCurrentDirectory() +
-                    @"\Data\" + CellexalUser.DataSourceFolder + @"\" + g.GraphName + ".mds", name);
+                    @"\Data\" + CellexalUser.DataSourceFolder + Path.PathSeparator + g.GraphName + ".mds", name);
                 subGraph.hasVelocityInfo = true;
             }
         }

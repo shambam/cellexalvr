@@ -1,0 +1,72 @@
+[0227/161838:INFO:user_input_monitor_win.cc(168)] RegisterRawInputDevices() failed for RIDEV_REMOVE: The parameter is incorrect. (0x57)
+[0227/161842:ERROR:audio_output_device.cc(369)] IO loop going away before the audio device has been stopped
+[0227/161842:ERROR:audio_input_device.cc(269)] IO loop going away before the input device has been stopped
+[0227/163741.322:ERROR:audio_output_device.cc(425)] IO loop going away before the audio device has been stopped
+[0227/163756.015:INFO:user_input_monitor_win.cc(171)] RegisterRawInputDevices() failed for RIDEV_REMOVE: The parameter is incorrect. (0x57)
+[0227/163812.534:INFO:user_input_monitor_win.cc(171)] RegisterRawInputDevices() failed for RIDEV_REMOVE: The parameter is incorrect. (0x57)
+[0227/163816.970:ERROR:audio_output_device.cc(425)] IO loop going away before the audio device has been stopped
+[0227/165104.252:ERROR:audio_output_device.cc(425)] IO loop going away before the audio device has been stopped
+[0227/165741.013:ERROR:audio_output_device.cc(425)] IO loop going away before the audio device has been stopped
+[0227/170132.406:ERROR:audio_output_device.cc(425)] IO loop going away before the audio device has been stopped
+[0227/170431.307:ERROR:audio_output_device.cc(425)] IO loop going away before the audio device has been stopped
+[0227/170436.887:ERROR:audio_output_device.cc(425)] IO loop going away before the audio device has been stopped
+[0227/170438.201:INFO:user_input_monitor_win.cc(171)] RegisterRawInputDevices() failed for RIDEV_REMOVE: The parameter is incorrect. (0x57)
+[0227/170449.972:INFO:user_input_monitor_win.cc(171)] RegisterRawInputDevices() failed for RIDEV_REMOVE: The parameter is incorrect. (0x57)
+[0227/170452.622:ERROR:audio_output_device.cc(425)] IO loop going away before the audio device has been stopped
+[0227/170453.974:INFO:user_input_monitor_win.cc(171)] RegisterRawInputDevices() failed for RIDEV_REMOVE: The parameter is incorrect. (0x57)
+[0227/170505.326:ERROR:audio_output_device.cc(425)] IO loop going away before the audio device has been stopped
+[0227/170506.672:INFO:user_input_monitor_win.cc(171)] RegisterRawInputDevices() failed for RIDEV_REMOVE: The parameter is incorrect. (0x57)
+[1108/144415.848:WARNING:spdy_session.cc(2224)] Received HEADERS for invalid stream 7
+[1108/152241.106:WARNING:spdy_session.cc(2224)] Received HEADERS for invalid stream 5
+[1108/152241.111:WARNING:spdy_session.cc(2224)] Received HEADERS for invalid stream 7
+[1109/103304.872:ERROR:latency_info.cc(163)] RenderWidgetHostImpl::OnSwapCompositorFrame, LatencyInfo vector size 115 is too big.
+[1109/113828.661:ERROR:audio_output_device.cc(425)] IO loop going away before the audio device has been stopped
+[1109/114058.103:ERROR:audio_output_device.cc(425)] IO loop going away before the audio device has been stopped
+[1112/095511.154:WARNING:spdy_session.cc(2224)] Received HEADERS for invalid stream 7
+[1112/112327.682:ERROR:browser_host_impl.cc(1548)] Invalid URL passed to CefBrowserHostImpl::LoadURL: 
+[1112/112355.011:ERROR:browser_host_impl.cc(1548)] Invalid URL passed to CefBrowserHostImpl::LoadURL: 
+[1112/112455.501:ERROR:browser_host_impl.cc(1548)] Invalid URL passed to CefBrowserHostImpl::LoadURL: 
+[1112/112552.767:ERROR:render_media_log.cc(25)] MediaEvent: PIPELINE_ERROR demuxer: could not open
+[1112/112919.156:ERROR:browser_host_impl.cc(1548)] Invalid URL passed to CefBrowserHostImpl::LoadURL: 
+[1112/122435.152:ERROR:render_media_log.cc(25)] MediaEvent: PIPELINE_ERROR demuxer: could not open
+[1112/122521.191:ERROR:render_media_log.cc(25)] MediaEvent: PIPELINE_ERROR demuxer: could not open
+[1112/125811.911:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[1112/125811.912:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0306/141824.387:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0306/141824.387:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0306/141824.530:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0306/141837.996:WARNING:spdy_session.cc(2224)] Received HEADERS for invalid stream 121
+[0306/141847.707:WARNING:audio_output_dispatcher_impl.cc(138)] Active proxy streams during shutdown: 1
+[0306/141847.779:WARNING:audio_sync_reader.cc(166)] AudioSyncReader::Read timed out, audio glitch count=1
+[0402/160725.631:WARNING:spdy_session.cc(2224)] Received HEADERS for invalid stream 89
+[0703/091853.190:ERROR:render_media_log.cc(25)] MediaEvent: PIPELINE_ERROR demuxer: could not open
+[0703/091853.191:ERROR:render_media_log.cc(25)] MediaEvent: PIPELINE_ERROR demuxer: could not open
+[0703/091853.193:ERROR:render_media_log.cc(25)] MediaEvent: PIPELINE_ERROR demuxer: could not open
+[0703/091853.193:ERROR:render_media_log.cc(25)] MediaEvent: PIPELINE_ERROR demuxer: could not open
+[0703/091853.195:ERROR:render_media_log.cc(25)] MediaEvent: PIPELINE_ERROR demuxer: could not open
+[0703/091853.197:ERROR:render_media_log.cc(25)] MediaEvent: PIPELINE_ERROR demuxer: could not open
+[0703/091941.506:ERROR:render_media_log.cc(25)] MediaEvent: PIPELINE_ERROR demuxer: could not open
+[0703/091941.507:ERROR:render_media_log.cc(25)] MediaEvent: PIPELINE_ERROR demuxer: could not open
+[0703/091941.507:ERROR:render_media_log.cc(25)] MediaEvent: PIPELINE_ERROR demuxer: could not open
+[0703/091941.508:ERROR:render_media_log.cc(25)] MediaEvent: PIPELINE_ERROR demuxer: could not open
+[0703/091941.511:ERROR:render_media_log.cc(25)] MediaEvent: PIPELINE_ERROR demuxer: could not open
+[0703/091941.511:ERROR:render_media_log.cc(25)] MediaEvent: PIPELINE_ERROR demuxer: could not open
+[0703/093739.444:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0703/093739.444:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0703/094618.653:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0703/094618.654:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0703/094618.810:WARNING:quota_manager.cc(1833)] Create directory failed for path
+[0703/153703.188:ERROR:render_media_log.cc(25)] MediaEvent: PIPELINE_ERROR demuxer: could not open
+[0703/153703.190:ERROR:render_media_log.cc(25)] MediaEvent: PIPELINE_ERROR demuxer: could not open
+[0703/153703.190:ERROR:render_media_log.cc(25)] MediaEvent: PIPELINE_ERROR demuxer: could not open
+[0703/153703.191:ERROR:render_media_log.cc(25)] MediaEvent: PIPELINE_ERROR demuxer: could not open
+[0703/153703.193:ERROR:render_media_log.cc(25)] MediaEvent: PIPELINE_ERROR demuxer: could not open
+[0703/153703.194:ERROR:render_media_log.cc(25)] MediaEvent: PIPELINE_ERROR demuxer: could not open
+[0704/111244.126:ERROR:render_media_log.cc(25)] MediaEvent: PIPELINE_ERROR demuxer: could not open
+[0704/111244.127:ERROR:render_media_log.cc(25)] MediaEvent: PIPELINE_ERROR demuxer: could not open
+[0704/111244.129:ERROR:render_media_log.cc(25)] MediaEvent: PIPELINE_ERROR demuxer: could not open
+[0704/111244.129:ERROR:render_media_log.cc(25)] MediaEvent: PIPELINE_ERROR demuxer: could not open
+[0704/111244.132:ERROR:render_media_log.cc(25)] MediaEvent: PIPELINE_ERROR demuxer: could not open
+[0704/111244.133:ERROR:render_media_log.cc(25)] MediaEvent: PIPELINE_ERROR demuxer: could not open
+[0716/155818.047:ERROR:browser_host_impl.cc(1548)] Invalid URL passed to CefBrowserHostImpl::LoadURL: 
+[0716/155825.788:ERROR:ssl_client_socket_impl.cc(1101)] handshake failed; returned -1, SSL error code 1, net_error -101

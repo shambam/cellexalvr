@@ -78,7 +78,7 @@ namespace CellexalVR.Menu.SubMenus
                     {
                         string fileName = "frame_" + fileId.ToString("D6") + ".jpg";
 
-                        FileStream fileStream = File.Create(outputPath + @"\" + fileName);
+                        FileStream fileStream = File.Create(outputPath + Path.PathSeparator + fileName);
                         fileStream.Write(frameData, 0, frameData.Length);
                         fileStream.Flush();
                         fileStream.Close();

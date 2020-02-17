@@ -1091,7 +1091,7 @@ namespace CellexalVR.Multiuser
         {
             CellexalLog.Log("Recieved message to read velocity file - " + shorterFilePath);
             var veloButton = referenceManager.velocitySubMenu.FindButton(shorterFilePath, subGraphName);
-            string filePath = Directory.GetCurrentDirectory() + "\\Data\\" + CellexalUser.DataSourceFolder + "\\" + shorterFilePath + ".mds";
+            string filePath = Directory.GetCurrentDirectory() + Path.PathSeparator + "Data" + Path.PathSeparator  + CellexalUser.DataSourceFolder + Path.PathSeparator + shorterFilePath + ".mds";
             Graph graph = referenceManager.graphManager.FindGraph(subGraphName);
             //if (subGraphName != string.Empty)
             //{

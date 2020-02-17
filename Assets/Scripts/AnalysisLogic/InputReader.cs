@@ -137,24 +137,24 @@ namespace CellexalVR.AnalysisLogic
             // multiple_exp }
             currentPath = path;
             string workingDirectory = Directory.GetCurrentDirectory();
-            string fullPath = workingDirectory + "\\Data\\" + path;
+            string fullPath = workingDirectory + Path.PathSeparator + "Data" + Path.PathSeparator  + path;
             CellexalLog.Log("Started reading the data folder at " + CellexalLog.FixFilePath(fullPath));
             CellexalUser.DataSourceFolder = currentPath;
             //LoadPreviousGroupings();
-            database.InitDatabase(fullPath + "\\database.sqlite");
-            if (Directory.Exists(workingDirectory + "\\Output"))
+            database.InitDatabase(fullPath + Path.PathSeparator + "database.sqlite");
+            if (Directory.Exists(workingDirectory + Path.PathSeparator + "Output"))
             {
-                if (File.Exists(workingDirectory + "\\Output\\r_log.txt"))
+                if (File.Exists(workingDirectory + Path.PathSeparator + "Output\\r_log.txt"))
                 {
                     CellexalLog.Log("Deleting old r log file");
-                    File.Delete(workingDirectory + "\\Output\\r_log.txt");
+                    File.Delete(workingDirectory + Path.PathSeparator + "Output\\r_log.txt");
                 }
             }
             selectionManager.DataDir = fullPath;
             if (!debug)
             {
                 // clear the network folder
-                string networkDirectory = (CellexalUser.UserSpecificFolder + "\\Resources\\Networks").FixFilePath();
+                string networkDirectory = (CellexalUser.UserSpecificFolder + Path.PathSeparator + "Resources\\Networks").FixFilePath();
                 if (!Directory.Exists(networkDirectory))
                 {
                     CellexalLog.Log("Creating directory " + CellexalLog.FixFilePath(networkDirectory));
@@ -453,7 +453,7 @@ namespace CellexalVR.AnalysisLogic
             int maximumItemsPerFrame = CellexalConfig.Config.GraphLoadingCellsPerFrameStartCount;
             int itemsThisFrame = 0;
             int totalNbrOfCells = 0;
-            //string fullPath = Directory.GetCurrentDirectory() + "\\Data\\" + data + "\\tsne.mds";
+            //string fullPath = Directory.GetCurrentDirectory() + Path.PathSeparator + "Data" + Path.PathSeparator  + data + Path.PathSeparator + "tsne.mds";
             float prevCoord = float.NaN;
             while (graphGenerator.isCreating)
             {
@@ -702,7 +702,7 @@ namespace CellexalVR.AnalysisLogic
             Process currentProcess = Process.GetCurrentProcess();
             int pid = currentProcess.Id;
             string rScriptFilePath = Application.streamingAssetsPath + @"\R\start_server.R";
-            string serverName = CellexalUser.UserSpecificFolder + "\\" + serverType + "Server";
+            string serverName = CellexalUser.UserSpecificFolder + Path.PathSeparator + serverType + "Server";
             string dataSourceFolder = Directory.GetCurrentDirectory() + @"\Data\" + CellexalUser.DataSourceFolder;
             string args = serverName + " " + dataSourceFolder + " " + CellexalUser.UserSpecificFolder + " " + pid;
 
@@ -738,10 +738,10 @@ namespace CellexalVR.AnalysisLogic
         /// </summary>
         public void QuitServer()
         {
-            File.Delete(CellexalUser.UserSpecificFolder + "\\mainServer.pid");
-            File.Delete(CellexalUser.UserSpecificFolder + "\\mainServer.input.lock");
-            File.Delete(CellexalUser.UserSpecificFolder + "\\mainServer.input.R");
-            //File.Delete(CellexalUser.UserSpecificFolder + "\\geneServer.pid");
+            File.Delete(CellexalUser.UserSpecificFolder + Path.PathSeparator + "mainServer.pid");
+            File.Delete(CellexalUser.UserSpecificFolder + Path.PathSeparator + "mainServer.input.lock");
+            File.Delete(CellexalUser.UserSpecificFolder + Path.PathSeparator + "mainServer.input.R");
+            //File.Delete(CellexalUser.UserSpecificFolder + Path.PathSeparator + "geneServer.pid");
             CellexalLog.Log("Stopped Server");
         }
 
@@ -810,7 +810,7 @@ namespace CellexalVR.AnalysisLogic
             System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
             stopwatch.Start();
 
-            string fullpath = path + "\\index.facs";
+            string fullpath = path + Path.PathSeparator + "index.facs";
 
             if (!File.Exists(fullpath))
             {
@@ -1211,7 +1211,7 @@ namespace CellexalVR.AnalysisLogic
         public void LoadPreviousGroupings()
         {
             string dataFolder = CellexalUser.UserSpecificFolder;
-            string groupingsInfoFile = dataFolder + "\\groupings_info.txt";
+            string groupingsInfoFile = dataFolder + Path.PathSeparator + "groupings_info.txt";
             CellexalLog.Log("Started reading the previous groupings files");
             //print(groupingsInfoFile);
             if (!File.Exists(groupingsInfoFile))
@@ -1306,10 +1306,10 @@ namespace CellexalVR.AnalysisLogic
             CellexalLog.Log("Successfully read " + groupingNames.Count + " files");
         }
 
-        [ConsoleCommand("inputReader", folder: "Output\\", aliases: new string[] { "readselectionfile", "rsf" })]
+        [ConsoleCommand("inputReader", folder: "Output" + Path.PathSeparator , aliases: new string[] { "readselectionfile", "rsf" })]
         public void ReadPreviousSelection(string selectionFile)
         {
-            selectionFile = "Output\\" + selectionFile;
+            selectionFile = "Output" + Path.PathSeparator  + selectionFile;
             CellexalLog.Log("Loading old selection from file " + selectionFile);
 
             RegisterOldGroup(selectionFile);

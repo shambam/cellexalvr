@@ -238,9 +238,9 @@ namespace CellexalVR.AnalysisLogic
         //string args = CellexalUser.UserSpecificFolder.UnFixFilePath() + " " + geneName;
         ////string func = "write.table(cellexalObj@data[\"" + geneName + "\", cellexalObj@data[\"" +
         ////    geneName + "\",] > 0], file=\"" + CellexalUser.UserSpecificFolder.UnFixFilePath() +
-        ////    "\\\\gene_expr.txt\", append=FALSE, row.names=TRUE, col.names=FALSE, sep=\" \", quote=FALSE)";
+        ////    Path.PathSeparator + "\\gene_expr.txt\", append=FALSE, row.names=TRUE, col.names=FALSE, sep=\" \", quote=FALSE)";
         ////string result = string.Empty;
-        //while (selectionManager.RObjectUpdating || File.Exists(CellexalUser.UserSpecificFolder + "\\geneServer.input.R"))
+        //while (selectionManager.RObjectUpdating || File.Exists(CellexalUser.UserSpecificFolder + Path.PathSeparator + "geneServer.input.R"))
         //{
         //    yield return null;
         //}
@@ -250,7 +250,7 @@ namespace CellexalVR.AnalysisLogic
         //CellexalLog.Log("Running R function " + rScriptFilePath + " with the arguments: " + args);
         //var stopwatch = new System.Diagnostics.Stopwatch();
         //stopwatch.Start();
-        //while (t.IsAlive || File.Exists(CellexalUser.UserSpecificFolder + "\\geneServer.input.R"))
+        //while (t.IsAlive || File.Exists(CellexalUser.UserSpecificFolder + Path.PathSeparator + "geneServer.input.R"))
         //{
         //    yield return null;
         //}
@@ -397,8 +397,8 @@ namespace CellexalVR.AnalysisLogic
                     values[i + 10] = results[results.Length - (i + 1)].Second;
                 }
             }
-            CellexalLog.Log("Overwriting file: " + CellexalUser.UserSpecificFolder + "\\gene_expr_diff.txt with new results");
-            StreamWriter stream = new StreamWriter(CellexalUser.UserSpecificFolder + "\\gene_expr_diff.txt", false);
+            CellexalLog.Log("Overwriting file: " + CellexalUser.UserSpecificFolder + Path.PathSeparator + "gene_expr_diff.txt with new results");
+            StreamWriter stream = new StreamWriter(CellexalUser.UserSpecificFolder + Path.PathSeparator + "gene_expr_diff.txt", false);
             foreach (Pair<string, float> p in results)
             {
                 stream.Write(p.First + "\t\t " + p.Second + "\n");
