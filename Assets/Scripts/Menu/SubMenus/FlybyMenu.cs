@@ -31,7 +31,7 @@ namespace CellexalVR.Menu.SubMenus
         public void RenderFlyby()
         {
             CellexalLog.Log("Started creating flyby");
-            string outputPath = CellexalUser.UserSpecificFolder + @"\Flyby\";
+            string outputPath = CellexalUser.UserSpecificFolder +  @"/Flyby\";
             if (Directory.Exists(outputPath))
             {
                 Directory.CreateDirectory(outputPath);
@@ -40,11 +40,11 @@ namespace CellexalVR.Menu.SubMenus
 
             int dirEnd = 0;
 
-            while (Directory.Exists(outputPath + @"\Flyby" + dirEnd))
+            while (Directory.Exists(outputPath +  @"/Flyby" + dirEnd))
             {
                 dirEnd++;
             }
-            outputPath = outputPath + @"\Flyby" + dirEnd;
+            outputPath = outputPath +  @"/Flyby" + dirEnd;
             Directory.CreateDirectory(outputPath);
             CellexalLog.Log("Created directory " + outputPath);
 
@@ -78,7 +78,7 @@ namespace CellexalVR.Menu.SubMenus
                     {
                         string fileName = "frame_" + fileId.ToString("D6") + ".jpg";
 
-                        FileStream fileStream = File.Create(outputPath + Path.DirectorySeparatorChar + fileName);
+                        FileStream fileStream = File.Create(outputPath + "/" + fileName);
                         fileStream.Write(frameData, 0, frameData.Length);
                         fileStream.Flush();
                         fileStream.Close();

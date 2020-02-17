@@ -540,19 +540,19 @@ namespace CellexalVR.General
             // wait one frame to let ConfirmSelection finish.
             yield return null;
             //string function = "userGrouping";
-            string latestSelection = (CellexalUser.UserSpecificFolder + Path.DirectorySeparatorChar + "selection"
+            string latestSelection = (CellexalUser.UserSpecificFolder + "/" + "selection"
                                         + (fileCreationCtr - 1) + ".txt").UnFixFilePath();
             string args = CellexalUser.UserSpecificFolder.UnFixFilePath() + " " + latestSelection;
-            string rScriptFilePath = (Application.streamingAssetsPath + @"\R\update_grouping.R").FixFilePath();
+            string rScriptFilePath = (Application.streamingAssetsPath + @"/R/update_grouping.R").FixFilePath();
             // Wait for server to start up and not be busy
-            bool rServerReady = File.Exists(CellexalUser.UserSpecificFolder + Path.DirectorySeparatorChar + "mainServer.pid") &&
-                    !File.Exists(CellexalUser.UserSpecificFolder + Path.DirectorySeparatorChar + "mainServer.input.R") &&
-                    !File.Exists(CellexalUser.UserSpecificFolder + Path.DirectorySeparatorChar + "mainServer.input.lock");
+            bool rServerReady = File.Exists(CellexalUser.UserSpecificFolder + "/" + "mainServer.pid") &&
+                    !File.Exists(CellexalUser.UserSpecificFolder + "/" + "mainServer.input.R") &&
+                    !File.Exists(CellexalUser.UserSpecificFolder + "/" + "mainServer.input.lock");
             while (!rServerReady || !RScriptRunner.serverIdle)
             {
-                rServerReady = File.Exists(CellexalUser.UserSpecificFolder + Path.DirectorySeparatorChar + "mainServer.pid") &&
-                    !File.Exists(CellexalUser.UserSpecificFolder + Path.DirectorySeparatorChar + "mainServer.input.R") &&
-                    !File.Exists(CellexalUser.UserSpecificFolder + Path.DirectorySeparatorChar + "mainServer.input.lock");
+                rServerReady = File.Exists(CellexalUser.UserSpecificFolder + "/" + "mainServer.pid") &&
+                    !File.Exists(CellexalUser.UserSpecificFolder + "/" + "mainServer.input.R") &&
+                    !File.Exists(CellexalUser.UserSpecificFolder + "/" + "mainServer.input.lock");
                 yield return null;
             }
             Thread t = new Thread(() => RScriptRunner.RunRScript(rScriptFilePath, args));
@@ -560,7 +560,7 @@ namespace CellexalVR.General
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
             t.Start();
-            while (t.IsAlive || File.Exists(CellexalUser.UserSpecificFolder + Path.DirectorySeparatorChar + "mainServer.input.R"))
+            while (t.IsAlive || File.Exists(CellexalUser.UserSpecificFolder + "/" + "mainServer.input.R"))
             {
                 yield return null;
             }
@@ -667,7 +667,7 @@ namespace CellexalVR.General
         {
             if (filePath != "")
             {
-                string savedSelectionsPath = CellexalUser.UserSpecificFolder + @"\SavedSelections\";
+                string savedSelectionsPath = CellexalUser.UserSpecificFolder +  @"/SavedSelections\";
                 if (!Directory.Exists(savedSelectionsPath))
                 {
                     Directory.CreateDirectory(savedSelectionsPath);
@@ -676,7 +676,7 @@ namespace CellexalVR.General
             }
             else
             {
-                filePath = CellexalUser.UserSpecificFolder + Path.DirectorySeparatorChar + "selection" + (fileCreationCtr++) + ".txt";
+                filePath = CellexalUser.UserSpecificFolder + "/" + "selection" + (fileCreationCtr++) + ".txt";
                 using (StreamWriter file = new StreamWriter(filePath))
                 {
                     CellexalLog.Log("Dumping selection data to " + CellexalLog.FixFilePath(filePath));
@@ -779,12 +779,12 @@ namespace CellexalVR.General
 
         /// <summary>
         /// saves this annotation tag in a file 
-        /// CellexalUser.UserSpecificFolder + @"\TaggedCells\" + tag + '.txt'
+        /// CellexalUser.UserSpecificFolder +  @"/TaggedCells\" + tag + '.txt'
         /// replacing old annotation tag saves.
         /// <param name="tag">The tag to save</param>
         public void SaveAnnotationTag( string tag ) {
             if (cellTags.ContainsKey(tag)){
-                string savedSelectionsPath = CellexalUser.UserSpecificFolder + @"\TaggedCells\";
+                string savedSelectionsPath = CellexalUser.UserSpecificFolder +  @"/TaggedCells\";
                 if (!Directory.Exists(savedSelectionsPath))
                 {
                     Directory.CreateDirectory(savedSelectionsPath);
@@ -818,7 +818,7 @@ namespace CellexalVR.General
         {
             if (filePath != "")
             {
-                string savedSelectionsPath = CellexalUser.UserSpecificFolder + @"\SavedSelections\";
+                string savedSelectionsPath = CellexalUser.UserSpecificFolder +  @"/SavedSelections\";
                 if (!Directory.Exists(savedSelectionsPath))
                 {
                     Directory.CreateDirectory(savedSelectionsPath);
@@ -827,17 +827,17 @@ namespace CellexalVR.General
             }
             else
             {
-                string annotationDirectory = CellexalUser.UserSpecificFolder + @"\AnnotatedSelections";
+                string annotationDirectory = CellexalUser.UserSpecificFolder +  @"/AnnotatedSelections";
                 if (!Directory.Exists(annotationDirectory))
                 {
                     CellexalLog.Log("Creating directory " + annotationDirectory.FixFilePath());
                     Directory.CreateDirectory(annotationDirectory);
                 }
-                filePath = annotationDirectory + Path.DirectorySeparatorChar + "annotated_selection" + annotationCtr + ".txt";
+                filePath = annotationDirectory + "/" +"annotated_selection" + annotationCtr + ".txt";
                 if (File.Exists(filePath))
                 {
                     annotationCtr++;
-                    filePath = annotationDirectory + Path.DirectorySeparatorChar + "annotated_selection" + annotationCtr + ".txt";
+                    filePath = annotationDirectory + "/" +"annotated_selection" + annotationCtr + ".txt";
                 }
                 using (StreamWriter file = new StreamWriter(filePath, true))
                 {
@@ -864,7 +864,7 @@ namespace CellexalVR.General
         /// <param name="filePath"></param>
         public void LoadAnnotationTags( )
         {   
-            string savedSelectionsPath = CellexalUser.UserSpecificFolder + @"\TaggedCells\";
+            string savedSelectionsPath = CellexalUser.UserSpecificFolder +  @"/TaggedCells\";
             if(Directory.Exists( savedSelectionsPath ))
             {
                 string [] fileEntries = Directory.GetFiles(savedSelectionsPath);

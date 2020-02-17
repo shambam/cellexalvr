@@ -79,8 +79,8 @@ namespace CellexalVR.Extensions
         /// <returns>The fixed string.</returns>
         public static string FixFilePath(this string s)
         {
-            char directorySeparatorChar = Path.DirectorySeparatorChar;
-            s = s.Replace('/', directorySeparatorChar);
+            char directorySeparatorChar = '/';
+            /// s = s.Replace('/', directorySeparatorChar);
             s = s.Replace('\\', directorySeparatorChar);
             return s;
         }
@@ -113,8 +113,8 @@ namespace CellexalVR.Extensions
         /// <returns>The unfixed string.</returns>
         public static string UnFixFilePath(this string s)
         {
-            string directorySeparatorChar = Path.DirectorySeparatorChar + "" + Path.DirectorySeparatorChar ;
-            s = s.Replace("/", directorySeparatorChar);
+            string directorySeparatorChar = "/" ;
+            ///s = s.Replace("/", directorySeparatorChar);
             s = s.Replace("\\", directorySeparatorChar);
             return s;
         }

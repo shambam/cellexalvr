@@ -17,26 +17,26 @@ public class BrowserPostBuild
         {
             case BuildTarget.StandaloneWindows64:
             {
-                    if (!Directory.Exists(Path.GetDirectoryName(path) + @"\PluginServer"))
-                        Directory.CreateDirectory(Path.GetDirectoryName(path) + @"\PluginServer");
+                    if (!Directory.Exists(Path.GetDirectoryName(path) +  @"/PluginServer"))
+                        Directory.CreateDirectory(Path.GetDirectoryName(path) +  @"/PluginServer");
                     
-                string[] files=Directory.GetFiles(Application.dataPath+ @"\SimpleWebBrowser\PluginServer\x64");
+                string[] files=Directory.GetFiles(Application.dataPath+  @"/SimpleWebBrowser\PluginServer\x64");
                 foreach (var file in files)
                 {
                     if (!file.Contains("meta"))
                     {
-                            if(!File.Exists(Path.GetDirectoryName(path) + @"\PluginServer\" + Path.GetFileName(file)))
-                        FileUtil.CopyFileOrDirectory(file, Path.GetDirectoryName(path) + @"\PluginServer\"+Path.GetFileName(file));
+                            if(!File.Exists(Path.GetDirectoryName(path) +  @"/PluginServer\" + Path.GetFileName(file)))
+                        FileUtil.CopyFileOrDirectory(file, Path.GetDirectoryName(path) +  @"/PluginServer\"+Path.GetFileName(file));
                     }
                 }
-                    Directory.CreateDirectory(Path.GetDirectoryName(path) + @"\PluginServer\locales");
-                    files = Directory.GetFiles(Application.dataPath + @"\SimpleWebBrowser\PluginServer\x64\locales");
+                    Directory.CreateDirectory(Path.GetDirectoryName(path) +  @"/PluginServer\locales");
+                    files = Directory.GetFiles(Application.dataPath +  @"/SimpleWebBrowser\PluginServer\x64\locales");
                     foreach (var file in files)
                     {
                         if (!file.Contains("meta"))
                         {
-                            if (!File.Exists(Path.GetDirectoryName(path) + @"\PluginServer\locales\" + Path.GetFileName(file)))
-                                FileUtil.CopyFileOrDirectory(file, Path.GetDirectoryName(path) + @"\PluginServer\locales\" + Path.GetFileName(file));
+                            if (!File.Exists(Path.GetDirectoryName(path) +  @"/PluginServer\locales\" + Path.GetFileName(file)))
+                                FileUtil.CopyFileOrDirectory(file, Path.GetDirectoryName(path) +  @"/PluginServer\locales\" + Path.GetFileName(file));
                         }
                     }
 
@@ -44,26 +44,26 @@ public class BrowserPostBuild
             }
             case BuildTarget.StandaloneWindows:
             {
-                    if (!Directory.Exists(Path.GetDirectoryName(path) + @"\PluginServer"))
-                        Directory.CreateDirectory(Path.GetDirectoryName(path) + @"\PluginServer");
+                    if (!Directory.Exists(Path.GetDirectoryName(path) +  @"/PluginServer"))
+                        Directory.CreateDirectory(Path.GetDirectoryName(path) +  @"/PluginServer");
 
-                    string[] files = Directory.GetFiles(Application.dataPath + @"\SimpleWebBrowser\PluginServer\x86");
+                    string[] files = Directory.GetFiles(Application.dataPath +  @"/SimpleWebBrowser\PluginServer\x86");
                     foreach (var file in files)
                     {
                         if (!file.Contains("meta"))
                         {
-                            if (!File.Exists(Path.GetDirectoryName(path) + @"\PluginServer\" + Path.GetFileName(file)))
-                                FileUtil.CopyFileOrDirectory(file, Path.GetDirectoryName(path) + @"\PluginServer\" + Path.GetFileName(file));
+                            if (!File.Exists(Path.GetDirectoryName(path) +  @"/PluginServer\" + Path.GetFileName(file)))
+                                FileUtil.CopyFileOrDirectory(file, Path.GetDirectoryName(path) +  @"/PluginServer\" + Path.GetFileName(file));
                         }
                     }
-                    Directory.CreateDirectory(Path.GetDirectoryName(path) + @"\PluginServer\locales");
-                    files = Directory.GetFiles(Application.dataPath + @"\SimpleWebBrowser\PluginServer\x86\locales");
+                    Directory.CreateDirectory(Path.GetDirectoryName(path) +  @"/PluginServer\locales");
+                    files = Directory.GetFiles(Application.dataPath +  @"/SimpleWebBrowser\PluginServer\x86\locales");
                     foreach (var file in files)
                     {
                         if (!file.Contains("meta"))
                         {
-                            if (!File.Exists(Path.GetDirectoryName(path) + @"\PluginServer\locales\" + Path.GetFileName(file)))
-                                FileUtil.CopyFileOrDirectory(file, Path.GetDirectoryName(path) + @"\PluginServer\locales\" + Path.GetFileName(file));
+                            if (!File.Exists(Path.GetDirectoryName(path) +  @"/PluginServer\locales\" + Path.GetFileName(file)))
+                                FileUtil.CopyFileOrDirectory(file, Path.GetDirectoryName(path) +  @"/PluginServer\locales\" + Path.GetFileName(file));
                         }
                     }
                     break;

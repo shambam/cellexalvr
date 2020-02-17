@@ -29,7 +29,7 @@ namespace CellexalVR.AnalysisLogic
         /// <summary>
         /// Runs an R script from a file using Rscript.exe.
         /// Example:
-        ///   RScriptRunner.RunFromCmd(curDirectory + @"\ImageClustering.r", curDirectory.Replace('\\','/'));
+        ///   RScriptRunner.RunFromCmd(curDirectory +  @"/ImageClustering.r", curDirectory.Replace('\\','/'));
         /// Getting args passed from C# using R:
         ///   args = commandArgs(trailingOnly = TRUE)
         ///   print(args[1]);
@@ -64,7 +64,7 @@ namespace CellexalVR.AnalysisLogic
                     if (!String.IsNullOrEmpty(e.Data))
                     {
                         using (StreamWriter stderrorWriter =
-                                new StreamWriter(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "Output\\r_log.txt", true))
+                                new StreamWriter(Directory.GetCurrentDirectory() + "/" + "Output/r_log.txt", true))
                         {
                             stderrorWriter.WriteLine("\n STDERROR: " + e.Data);
                         }
@@ -78,7 +78,7 @@ namespace CellexalVR.AnalysisLogic
                         if (writeOut)
                         {
                             using (StreamWriter stdoutWriter =
-                                    new StreamWriter(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "Output\\r_log.txt", true))
+                                    new StreamWriter(Directory.GetCurrentDirectory() + "/" + "Output/r_log.txt", true))
                             {
                                 stdoutWriter.WriteLine("\n STDOUT: " + e.Data);
                             }
@@ -123,9 +123,9 @@ namespace CellexalVR.AnalysisLogic
 
         static void GeneProcHandler(object sender, DataReceivedEventArgs e)
         {
-            //new StreamWriter(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "Output\\gene_log.txt", true))
+            //new StreamWriter(Directory.GetCurrentDirectory() + "/" + "Output\\gene_log.txt", true))
             using (StreamWriter geneWriter =
-                new StreamWriter(CellexalUser.UserSpecificFolder + @"\gene_expr.txt", false))
+                new StreamWriter(CellexalUser.UserSpecificFolder + @"/gene_expr.txt", false))
             {
 
                 geneWriter.WriteLine(e.Data);
@@ -166,7 +166,7 @@ namespace CellexalVR.AnalysisLogic
             //    else
             //    {
             //        using (StreamWriter geneWriter =
-            //            new StreamWriter(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "Output\\gene_log.txt", true))
+            //            new StreamWriter(Directory.GetCurrentDirectory() + "/" + "Output\\gene_log.txt", true))
             //        {
 
             //            geneWriter.WriteLine(e.Data);
@@ -184,7 +184,7 @@ namespace CellexalVR.AnalysisLogic
         /// <param name="isFile">If the s argument instead is a filePath the function copies that entire file to input.R</param>
         public static void RunScript(string s)
         {
-            string inputFilePath = CellexalUser.UserSpecificFolder + Path.DirectorySeparatorChar + "server";
+            string inputFilePath = CellexalUser.UserSpecificFolder + "/" + "server";
             File.WriteAllText(inputFilePath + ".input.R", s);
             //if (!File.Exists(inputFilePath + ".input.lock"))
             //{
@@ -205,7 +205,7 @@ namespace CellexalVR.AnalysisLogic
         {
             serverIdle = false;
             string result = null;
-            string inputFilePath = CellexalUser.UserSpecificFolder + Path.DirectorySeparatorChar + "mainServer";
+            string inputFilePath = CellexalUser.UserSpecificFolder + "/" + "mainServer";
             if (!File.Exists(inputFilePath + ".input.lock"))
             {
                 try

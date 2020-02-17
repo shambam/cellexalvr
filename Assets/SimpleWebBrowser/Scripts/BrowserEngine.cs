@@ -112,10 +112,10 @@ namespace SimpleWebBrowser
             //Also change the path in deployment script.
 
 #if UNITY_EDITOR_64
-            string PluginServerPath = Application.dataPath + @"\SimpleWebBrowser\PluginServer\x64";
+            string PluginServerPath = Application.dataPath +  @"/SimpleWebBrowser\PluginServer\x64";
 #else
 #if UNITY_EDITOR_32
-        string PluginServerPath = Application.dataPath + @"\SimpleWebBrowser\PluginServer\x86";
+        string PluginServerPath = Application.dataPath +  @"/SimpleWebBrowser\PluginServer\x86";
 #else
 
 
@@ -129,7 +129,7 @@ namespace SimpleWebBrowser
         AssemblyPath = Directory.GetParent(AssemblyPath).FullName; //<project>_Data
         AssemblyPath = Directory.GetParent(AssemblyPath).FullName;//required
 
-        string PluginServerPath=AssemblyPath+@"\PluginServer";
+        string PluginServerPath=AssemblyPath+ @"/PluginServer";
 #endif
 #endif
 
@@ -167,7 +167,7 @@ namespace SimpleWebBrowser
                         StartInfo = new ProcessStartInfo()
                         {
                             WorkingDirectory = PluginServerPath,
-                            FileName = PluginServerPath + @"\SharedPluginServer.exe",
+                            FileName = PluginServerPath +  @"/SharedPluginServer.exe",
                             Arguments = args
 
                         }
@@ -181,7 +181,7 @@ namespace SimpleWebBrowser
                 catch (Exception ex)
                 {
                     //log the file
-                    Debug.Log("FAILED TO START SERVER FROM:" + PluginServerPath + @"\SharedPluginServer.exe");
+                    Debug.Log("FAILED TO START SERVER FROM:" + PluginServerPath +  @"/SharedPluginServer.exe");
                     throw;
                 }
 

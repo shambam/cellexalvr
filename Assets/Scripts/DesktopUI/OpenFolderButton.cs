@@ -15,7 +15,7 @@ namespace CellexalVR.DesktopUI
         public void OpenFolder()
         {
             string currentDir = Directory.GetCurrentDirectory();
-            string fullPath = currentDir + Path.DirectorySeparatorChar + path;
+            string fullPath = currentDir + "/" + path;
             if (path == "$LOG")
             {
                 CellexalLog.LogBacklog();

@@ -81,7 +81,7 @@ namespace CellexalVR.Filters
         {
             loadingFilter = true;
             currentFilterPath = path;
-            //path = Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "Data" + Path.DirectorySeparatorChar  + CellexalUser.DataSourceFolder + Path.DirectorySeparatorChar + path;
+            //path = Directory.GetCurrentDirectory() + "/" + "Data" + "/" + CellexalUser.DataSourceFolder + "/" + path;
             Filter newFilter = new Filter();
             newFilter.Expression = BooleanExpression.ParseFile(path);
             //referenceManager.selectionManager.CurrentFilter = currentFilter;
@@ -105,12 +105,12 @@ namespace CellexalVR.Filters
             currentFilter.Expression.GetAttributes(ref itemsInFilter);
             string fileName = string.Join("_", itemsInFilter);
 
-            while (File.Exists(CellexalUser.UserSpecificFolder + Path.DirectorySeparatorChar + fileName))
+            while (File.Exists(CellexalUser.UserSpecificFolder + "/" + fileName))
             {
                 fileName += "_2";
             }
 
-            string filterPath = CellexalUser.UserSpecificFolder + Path.DirectorySeparatorChar + fileName + ".fil";
+            string filterPath = CellexalUser.UserSpecificFolder + "/" + fileName + ".fil";
             FileStream fileStream = new FileStream(filterPath, FileMode.Create, FileAccess.Write, FileShare.None);
 
             using (StreamWriter streamWriter = new StreamWriter(fileStream))

@@ -130,9 +130,9 @@ namespace CellexalVR.General
 
         private void Start()
         {
-            configDir = Directory.GetCurrentDirectory() + @"\Config";
-            configPath = configDir + @"\config.xml";
-            sampleConfigPath = Application.streamingAssetsPath + @"\sample_config.xml";
+            configDir = Directory.GetCurrentDirectory() +  @"/Config";
+            configPath = configDir +  @"/config.xml";
+            sampleConfigPath = Application.streamingAssetsPath +  @"/sample_config.xml";
             if (CellexalLog.consoleManager == null)
             {
                 CellexalLog.consoleManager = referenceManager.consoleManager;
@@ -260,7 +260,7 @@ namespace CellexalVR.General
 
             referenceManager.multiuserMessageSender.SendMessageSynchConfig(data);
 
-            string sharedConfigPath = configDir + @"\sharedConfig.xml";
+            string sharedConfigPath = configDir +  @"/sharedConfig.xml";
             //if (!File.Exists(sharedConfigPath))
             //{
             //    File.Create(sharedConfigPath);
@@ -337,7 +337,7 @@ namespace CellexalVR.General
             CellexalConfig.Config.VelocityParticlesLowColor = config.VelocityParticlesLowColor;
             CellexalConfig.Config.VelocityParticlesHighColor = config.VelocityParticlesHighColor;
 
-            string sharedConfigPath = configDir + @"\sharedConfig.xml";
+            string sharedConfigPath = configDir +  @"/sharedConfig.xml";
             configPath = sharedConfigPath;
             SaveConfigFile();
             ReadConfigFile();
