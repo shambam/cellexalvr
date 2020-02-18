@@ -453,7 +453,7 @@ namespace CellexalVR.AnalysisLogic
             int maximumItemsPerFrame = CellexalConfig.Config.GraphLoadingCellsPerFrameStartCount;
             int itemsThisFrame = 0;
             int totalNbrOfCells = 0;
-            //string fullPath = Directory.GetCurrentDirectory() + "/" + "Data" + Path.DirectorySeparatorChar  + data "/" "tsne.mds";
+            //string fullPath = Directory.GetCurrentDirectory() + "/" + "Data" + "/" + data "/" "tsne.mds";
             float prevCoord = float.NaN;
             while (graphGenerator.isCreating)
             {

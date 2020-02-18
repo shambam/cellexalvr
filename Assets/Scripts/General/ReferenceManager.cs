@@ -102,6 +102,7 @@ namespace CellexalVR.General
         public ConfigManager configManager;
         //public GameObject helperCylinder;
         public InputReader inputReader;
+        public GOIreader goiReader;
         public SQLite database;
         public LogManager logManager;
         public MultiuserMessageSender multiuserMessageSender;
