@@ -66,9 +66,11 @@ MonoBehaviour:
   chunkManagerPrefab: {fileID: 4866979709267056668, guid: 42bb42301be5d3c48a3924c4f686c7f4,
     type: 3}
   graphManager: {fileID: 0}
+  infoParent: {fileID: 1389011759643290}
   graphNameText: {fileID: 114815460846482644}
   graphInfoText: {fileID: 114460485008951306}
   graphNrText: {fileID: 114566603823957088}
+  legendManager: {fileID: 0}
   axes: {fileID: 0}
   annotationsParent: {fileID: 1463522536816783246}
   axisNames: []
@@ -2341,9 +2343,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colorSquare: {fileID: 4109466661359386954}
-  attributeNameText: {fileID: 8533488614872964833}
+  groupName: {fileID: 0}
   numberOfCellsText: {fileID: 2339283121734427101}
-  percentOfActiveText: {fileID: 4720609527351128143}
+  percentOfSelectedText: {fileID: 0}
   percentOfAllText: {fileID: 7608257574666734895}
   numberOfCells: 0
 --- !u!1 &5301509705186628905
@@ -2396,6 +2398,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3202f71421c3ec46927356d203880a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  referenceManager: {fileID: 0}
   entryPrefab: {fileID: 5259322938831472050}
 --- !u!1 &6433478820048451786
 GameObject:
