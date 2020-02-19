@@ -30,7 +30,7 @@ namespace CellexalVR.AnalysisLogic
             CellexalLog.Log("The number of files heatmaps to be loaded:" + dirs.Length.ToString());
             foreach (string dir in dirs)
             {
-                referenceManager.heatmapGenerator.LoadHeatmap( "../"+dir);
+                referenceManager.heatmapGenerator.LoadHeatmap( "../" + dir);
             }
             
 
