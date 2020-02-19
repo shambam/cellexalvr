@@ -2128,3 +2128,9 @@
 2020-02-17 12:36:57,470 [1] INFO  SharedPluginServer.Program [(null)] - ===============START================
 2020-02-17 12:36:57,498 [1] INFO  SharedPluginServer.Program [(null)] - Starting plugin, settings:width:1024,height:768,url:http://www.google.com,memfile:139138c1-b329-492e-8d3a-a0b69f1ef85c,port:8778
 2020-02-17 13:17:47,219 [9] INFO  SharedPluginServer.App [(null)] - ==============SHUTTING DOWN==========
+2020-02-19 14:52:44,497 [1] INFO  SharedPluginServer.Program [(null)] - ===============START================
+2020-02-19 14:52:44,570 [1] INFO  SharedPluginServer.Program [(null)] - Starting plugin, settings:width:1024,height:768,url:http://www.google.com,memfile:5ea18535-ecc4-44d9-ba7e-90698fb287ea,port:8850
+2020-02-19 14:52:47,863 [1] ERROR SharedPluginServer.Program [(null)] - CefRuntime return 0
+2020-02-19 14:52:58,107 [1] INFO  SharedPluginServer.Program [(null)] - ===============START================
+2020-02-19 14:52:58,141 [1] INFO  SharedPluginServer.Program [(null)] - Starting plugin, settings:width:1280,height:720,url:http://test.webrtc.org,memfile:MainSharedMem,port:8885
+2020-02-19 15:21:06,288 [3] INFO  SharedPluginServer.App [(null)] - ==============SHUTTING DOWN==========

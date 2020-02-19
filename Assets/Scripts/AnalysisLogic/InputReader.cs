@@ -108,6 +108,8 @@ namespace CellexalVR.AnalysisLogic
 
             RScriptRunner.SetReferenceManager(referenceManager);
             CellexalEvents.UsernameChanged.AddListener(LoadPreviousGroupings);
+
+
         }
 
 
@@ -1337,14 +1339,26 @@ namespace CellexalVR.AnalysisLogic
             RegisterOldGroup(files[index]);
         }
 
+        
+
         public void RegisterOldGroup(string file)
         {
-
             FileStream fileStream = new FileStream(file, FileMode.Open);
             StreamReader streamReader = new StreamReader(fileStream);
             var selectionManager = referenceManager.selectionManager;
             GraphManager graphManager = referenceManager.graphManager;
             int numPointsAdded = 0;
+            int startAt = CellexalConfig.Config.SelectionToolColors.Length;
+
+            Dictionary<UnityEngine.Color, int> SelectionDictionary = new Dictionary<UnityEngine.Color, int>();
+            List<UnityEngine.Color> colorList = new List<UnityEngine.Color>();
+
+            for (int i = 0; i < CellexalConfig.Config.SelectionToolColors.Length; i++)
+            {
+                SelectionDictionary.Add(CellexalConfig.Config.SelectionToolColors[i], i);
+                colorList.Add(CellexalConfig.Config.SelectionToolColors[i]);
+            }
+
             while (!streamReader.EndOfStream)
             {
                 string line = streamReader.ReadLine();
@@ -1354,8 +1368,17 @@ namespace CellexalVR.AnalysisLogic
 
                 try
                 {
-                    group = int.Parse(words[3]);
                     ColorUtility.TryParseHtmlString(words[1], out groupColor);
+                    if (! SelectionDictionary.ContainsKey(groupColor))
+                    {
+                        SelectionDictionary.Add(groupColor, startAt );
+                        startAt++;
+                        colorList.Add(groupColor);
+                        CellexalConfig.Config.SelectionToolColors = colorList.ToArray();
+                        referenceManager.selectionToolCollider.UpdateColors();
+                        referenceManager.graphGenerator.CreateShaderColors();
+                    }
+                    group = SelectionDictionary[groupColor];
                 }
                 catch (FormatException)
                 {
