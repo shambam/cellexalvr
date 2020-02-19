@@ -703,6 +703,13 @@ namespace CellexalVR.AnalysisLogic
         {
             Process currentProcess = Process.GetCurrentProcess();
             int pid = currentProcess.Id;
+            CellexalLog.Log("Running sterer script - deleting all old selection files and putative left over's");
+            string[] dirs = Directory.GetFiles(CellexalUser.UserSpecificFolder , "selection*");
+            CellexalLog.Log("killing this many selection files: " + dirs.Length.ToString());
+            foreach (string dir in dirs)
+            {
+                File.Delete(dir);
+            }
             string rScriptFilePath = Application.streamingAssetsPath + @"/R/start_server.R";
             string serverName = CellexalUser.UserSpecificFolder + "/" + serverType + "Server";
             string dataSourceFolder = Directory.GetCurrentDirectory() + @"/Data/" + CellexalUser.DataSourceFolder;

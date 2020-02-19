@@ -2134,3 +2134,6 @@
 2020-02-19 14:52:58,107 [1] INFO  SharedPluginServer.Program [(null)] - ===============START================
 2020-02-19 14:52:58,141 [1] INFO  SharedPluginServer.Program [(null)] - Starting plugin, settings:width:1280,height:720,url:http://test.webrtc.org,memfile:MainSharedMem,port:8885
 2020-02-19 15:21:06,288 [3] INFO  SharedPluginServer.App [(null)] - ==============SHUTTING DOWN==========
+2020-02-19 16:43:12,776 [1] INFO  SharedPluginServer.Program [(null)] - ===============START================
+2020-02-19 16:43:12,807 [1] INFO  SharedPluginServer.Program [(null)] - Starting plugin, settings:width:1024,height:768,url:http://www.google.com,memfile:4db00ac4-ec04-49f0-884b-1099657daccf,port:8100
+2020-02-19 16:48:52,726 [9] INFO  SharedPluginServer.App [(null)] - ==============SHUTTING DOWN==========

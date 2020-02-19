@@ -260,11 +260,7 @@ namespace CellexalVR.AnalysisLogic
            
             string objectPath = (CellexalUser.UserSpecificFolder + "/" + "cellexalObj.RData").UnFixFilePath();
             string groupingFilepath = (CellexalUser.UserSpecificFolder + "/" + "selection" + (selectionManager.fileCreationCtr - 1) + ".txt").UnFixFilePath();
-            string timeFile = (groupingFilepath + ".time").UnFixFilePath();
-            if (File.Exists(path: timeFile))
-            {
-                referenceManager.inputReader.RegisterOldGroup(timeFile);
-            }
+            
             string topGenesNr = "250";
             string heatmapDirectory = (CellexalUser.UserSpecificFolder + @"/Heatmap").UnFixFilePath();
             string outputFilePath = (heatmapDirectory + "/" + heatmapName + ".txt");
@@ -275,6 +271,7 @@ namespace CellexalVR.AnalysisLogic
             string rScriptFilePath = (Application.streamingAssetsPath + @"/R/make_heatmap.R").FixFilePath();
 
             //string script = function + "(" + args + ")";
+
 
             if (!Directory.Exists(heatmapDirectory))
             {
@@ -307,6 +304,12 @@ namespace CellexalVR.AnalysisLogic
             CellexalLog.Log("Heatmap R script finished in " + stopwatch.Elapsed.ToString());
 
             GeneratingHeatmaps = false;
+
+            string timeFile = (groupingFilepath + ".time").UnFixFilePath();
+            if (File.Exists(path: timeFile))
+            {
+                referenceManager.inputReader.RegisterOldGroup(timeFile);
+            }
 
             var heatmap = Instantiate(heatmapPrefab).GetComponent<Heatmap>();
 
