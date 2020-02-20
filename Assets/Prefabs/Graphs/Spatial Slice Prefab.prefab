@@ -10,12 +10,11 @@ GameObject:
   m_Component:
   - component: {fileID: 4216483850737216}
   - component: {fileID: 114073428060975046}
-  - component: {fileID: 54762506670964714}
-  - component: {fileID: 114356468590826636}
-  - component: {fileID: 114212794373154340}
-  - component: {fileID: 114490444003295042}
+  - component: {fileID: 7832237612731343741}
+  - component: {fileID: -8027466906376193593}
+  - component: {fileID: 7338320939668804505}
   m_Layer: 8
-  m_Name: Graph Prefab
+  m_Name: Spatial Slice Prefab
   m_TagString: Graph
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -66,7 +65,7 @@ MonoBehaviour:
   chunkManagerPrefab: {fileID: 4866979709267056668, guid: 42bb42301be5d3c48a3924c4f686c7f4,
     type: 3}
   graphManager: {fileID: 0}
-  infoParent: {fileID: 1389011759643290}
+  infoParent: {fileID: 0}
   graphNameText: {fileID: 114815460846482644}
   graphInfoText: {fileID: 114460485008951306}
   graphNrText: {fileID: 114566603823957088}
@@ -91,23 +90,7 @@ MonoBehaviour:
   lineParent: {fileID: 4956736124800454237}
   hasVelocityInfo: 0
   graphPointsInactive: 0
---- !u!54 &54762506670964714
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1128814461414928}
-  serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 10
-  m_AngularDrag: 15
-  m_UseGravity: 0
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
---- !u!114 &114356468590826636
+--- !u!114 &7832237612731343741
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -116,18 +99,31 @@ MonoBehaviour:
   m_GameObject: {fileID: 1128814461414928}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8afa0b205791c9f4496bf2814aeac078, type: 3}
+  m_Script: {fileID: 11500000, guid: a3abaf4521bf2344ea21ed3020b98eb2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  precisionGrab: 1
-  rightSnapHandle: {fileID: 0}
-  leftSnapHandle: {fileID: 0}
-  throwVelocityWithAttachDistance: 0
-  throwMultiplier: 1
-  onGrabCollisionDelay: 0
-  destroyImmediatelyOnThrow: 1
-  breakForce: 1500
---- !u!114 &114212794373154340
+  disableWhenIdle: 1
+  allowedNearTouchControllers: 0
+  allowedTouchControllers: 0
+  ignoredColliders: []
+  isGrabbable: 0
+  holdButtonToGrab: 1
+  stayGrabbedOnTeleport: 1
+  validDrop: 1
+  grabOverrideButton: 0
+  allowedGrabControllers: 0
+  grabAttachMechanicScript: {fileID: 7338320939668804505}
+  secondaryGrabActionScript: {fileID: -8027466906376193593}
+  isUsable: 0
+  holdButtonToUse: 1
+  useOnlyIfGrabbed: 0
+  pointerActivatesUseAction: 0
+  useOverrideButton: 0
+  allowedUseControllers: 0
+  objectHighlighter: {fileID: 0}
+  touchHighlightColor: {r: 0, g: 0, b: 0, a: 0}
+  usingState: 0
+--- !u!114 &-8027466906376193593
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -148,7 +144,7 @@ MonoBehaviour:
   lockXAxis: 0
   lockYAxis: 0
   lockZAxis: 0
---- !u!114 &114490444003295042
+--- !u!114 &7338320939668804505
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -157,31 +153,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1128814461414928}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 05d0b8a967be67e428f5455baff8b660, type: 3}
+  m_Script: {fileID: 11500000, guid: 8afa0b205791c9f4496bf2814aeac078, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  disableWhenIdle: 1
-  allowedNearTouchControllers: 0
-  allowedTouchControllers: 0
-  ignoredColliders: []
-  isGrabbable: 1
-  holdButtonToGrab: 1
-  stayGrabbedOnTeleport: 1
-  validDrop: 1
-  grabOverrideButton: 0
-  allowedGrabControllers: 0
-  grabAttachMechanicScript: {fileID: 114356468590826636}
-  secondaryGrabActionScript: {fileID: 114212794373154340}
-  isUsable: 0
-  holdButtonToUse: 1
-  useOnlyIfGrabbed: 0
-  pointerActivatesUseAction: 0
-  useOverrideButton: 0
-  allowedUseControllers: 0
-  objectHighlighter: {fileID: 0}
-  touchHighlightColor: {r: 0, g: 0, b: 0, a: 0}
-  usingState: 0
-  referenceManager: {fileID: 0}
+  precisionGrab: 1
+  rightSnapHandle: {fileID: 0}
+  leftSnapHandle: {fileID: 0}
+  throwVelocityWithAttachDistance: 0
+  throwMultiplier: 1
+  onGrabCollisionDelay: 0
+  destroyImmediatelyOnThrow: 1
+  breakForce: 1500
 --- !u!1 &1141931572521968
 GameObject:
   m_ObjectHideFlags: 0

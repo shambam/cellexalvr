@@ -51,9 +51,13 @@ namespace CellexalVR.General
         public static UnityEvent QueryTopGenesStarted = new UnityEvent();
         public static UnityEvent QueryTopGenesFinished = new UnityEvent();
 
+        public static UnityEvent LegendAttached = new UnityEvent();
+        public static UnityEvent LegendDetached = new UnityEvent();
         public static UnityEvent MenuClosed = new UnityEvent();
         public static UnityEvent ModelChanged = new UnityEvent();
         public static UnityEvent ControllersInitiated = new UnityEvent();
+        public static UnityEvent CullingCubeSpawned = new UnityEvent();
+        public static UnityEvent CullingCubeRemoved = new UnityEvent();
 
         public static UnityEvent UsernameChanged = new UnityEvent();
         public static UnityEvent LogInitialized = new UnityEvent();

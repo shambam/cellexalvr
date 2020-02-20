@@ -18,6 +18,7 @@ namespace CellexalVR.AnalysisLogic
         public Dictionary<string, float> Facs { get; private set; }
         public Dictionary<string, string> FacsValue { get; private set; }
         public int ExpressionLevel { get; internal set; }
+        public float ExpressionValue { get; set; }
         public string Label { get; set; }
 
         private GraphManager graphManager;

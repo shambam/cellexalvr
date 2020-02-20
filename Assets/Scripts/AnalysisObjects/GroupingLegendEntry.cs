@@ -13,6 +13,8 @@ namespace CellexalVR.AnalysisObjects
         public TextMeshPro numberOfCellsText;
         public TextMeshPro percentOfSelectedText;
         public TextMeshPro percentOfAllText;
+        public GameObject topDivider;
+        public GameObject filterButton;
         [HideInInspector]
         public int numberOfCells;
 

@@ -1,4 +1,5 @@
-﻿using CellexalVR.General;
+﻿using CellexalVR.Filters;
+using CellexalVR.General;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -12,9 +13,11 @@ namespace CellexalVR.AnalysisObjects
     {
         public ReferenceManager referenceManager;
         public GameObject entryPrefab;
+        public GameObject extraColumn;
 
         private List<GroupingLegendEntry> entries = new List<GroupingLegendEntry>();
         private int activeCells = 0;
+        private bool attached;
 
         private Vector3 startPos = new Vector3(0f, 0.1968f, 0f);
         private Vector3 posInc = new Vector3(0f, -0.0416f, 0f);
@@ -25,6 +28,53 @@ namespace CellexalVR.AnalysisObjects
             {
                 referenceManager = GameObject.Find("InputReader").GetComponent<ReferenceManager>();
             }
+        }
+
+        private void Start()
+        {
+            CellexalEvents.LegendAttached.AddListener(ActivateExtraColumn);
+            CellexalEvents.LegendDetached.AddListener(DeActivateExtraColumn);
+            CellexalEvents.GraphsReset.AddListener(ClearLegend);
+            CellexalEvents.GraphsColoredByGene.AddListener(ClearLegend);
+            CellexalEvents.GraphsColoredByIndex.AddListener(ClearLegend);
+        }
+
+        private void ActivateExtraColumn()
+        {
+            extraColumn.SetActive(true);
+            GroupingLegendEntry groupingLegendEntry = entryPrefab.GetComponent<GroupingLegendEntry>();
+            AdjustEntry(groupingLegendEntry, true);
+
+            foreach (GroupingLegendEntry entry in entries)
+            {
+                AdjustEntry(entry, true);
+            }
+            attached = true;
+        }
+        private void DeActivateExtraColumn()
+        {
+            extraColumn.SetActive(false);
+            GroupingLegendEntry groupingLegendEntry = entryPrefab.GetComponent<GroupingLegendEntry>();
+            AdjustEntry(groupingLegendEntry, false);
+
+            foreach (GroupingLegendEntry entry in entries)
+            {
+                AdjustEntry(entry, false);
+            }
+            attached = false;
+        }
+
+        private void AdjustEntry(GroupingLegendEntry entry, bool toggle)
+        {
+            Vector3 scale = entry.topDivider.transform.localScale;
+            scale.x = toggle ? 0.064f : 0.057f;
+            entry.topDivider.transform.localScale = scale;
+            Vector3 pos = entry.topDivider.transform.localPosition;
+            pos.x = toggle ? 0.03f : 0f;
+            entry.topDivider.transform.localPosition = pos;
+            entry.filterButton.GetComponent<AttributeFilterButton>().toggle = false;
+            entry.filterButton.GetComponent<AttributeFilterButton>().ToggleOutline(false);
+            entry.filterButton.SetActive(toggle);
         }
 
         /// <summary>
@@ -41,12 +91,15 @@ namespace CellexalVR.AnalysisObjects
             newEntryGameObject.transform.localPosition = startPos + posInc * entries.Count;
             newEntryGameObject.transform.localRotation = Quaternion.identity;
             GroupingLegendEntry newEntry = newEntryGameObject.GetComponent<GroupingLegendEntry>();
+            newEntry.filterButton.SetActive(attached);
+            newEntry.filterButton.GetComponent<AttributeFilterButton>().group = groupName;
             activeCells += numberOfCells;
 
             string percentOfSelectedString = ((float)numberOfCells / activeCells).ToString("P");
             string percentOfAllString = ((float)numberOfCells / referenceManager.cellManager.GetNumberOfCells()).ToString("P");
             newEntry.SetPanelText(groupName, numberOfCells, percentOfSelectedString, percentOfAllString, color);
             UpdatePercentages();
+            newEntry.transform.localScale = Vector3.one;
             entries.Add(newEntry);
         }
 
@@ -66,6 +119,15 @@ namespace CellexalVR.AnalysisObjects
                 UpdatePercentages();
                 UpdatePositions();
             }
+        }
+
+        private void ClearLegend()
+        {
+            foreach (GroupingLegendEntry entry in entries)
+            {
+                Destroy(entry.gameObject);
+            }
+            entries.Clear();
         }
 
         /// <summary>
@@ -115,6 +177,10 @@ namespace CellexalVR.AnalysisObjects
             else
             {
                 AddGroup(groupName, numberOfCellsToAdd, color);
+                //if (attached)
+                //{
+                //    referenceManager.cullingFilterManager.AddSelectionGroupToFilter(groupName);
+                //}
             }
 
             activeCells += numberOfCellsToAdd;

@@ -197,9 +197,9 @@ namespace CellexalVR.Menu.Buttons
         }
 
         /// <summary>
-        /// To synchronise the outline in multi-user mode. So the outline doesnt get active if the other users menu or tab is active.
+        /// To synchronise the outline in multi-user mode. So the outline doesnt get active unless the other users menu or tab is active.
         /// </summary>
-        public void ToggleOutline(bool toggle)
+        public void ToggleOutline(bool toggle, bool legend = false)
         {
             var tab = transform.parent.GetComponent<Tab>();
             var menuNoTab = transform.parent.GetComponent<MenuWithoutTabs>();
@@ -207,7 +207,7 @@ namespace CellexalVR.Menu.Buttons
             {
                 activeOutline.SetActive(toggle);
             }
-            else if (menuNoTab != null)
+            else if (menuNoTab != null || legend)
             {
                 activeOutline.SetActive(toggle);
             }

@@ -148,9 +148,41 @@ namespace CellexalVR.AnalysisLogic
             return cells.Values.ToArray();
         }
 
+        /// <summary>
+        /// Returns cells that belongs to a certain attribute.
+        /// </summary>
+        /// <param name="attribute"></param>
+        /// <returns></returns>
+        public Cell[] GetCells(string attribute)
+        {
+            return cells.Values.Where(x => x.Attributes.ContainsKey(attribute.ToLower())).ToArray();
+        }
+
+        /// <summary>
+        /// Returns cell that belong to a certain selection group.
+        /// </summary>
+        /// <param name="group"></param>
+        /// <returns></returns>
+        public Cell[] GetCells(int group)
+        {
+            return cells.Values.Where(x => (x.GraphPoints[0].Group == group)).ToArray();
+        }
+
         public int GetNumberOfCells()
         {
             return cells.Count;
+        }
+
+
+        public void HighlightCells(Cell[] cellsToHighlight, bool highlight)
+        {
+            foreach (Cell cell in cellsToHighlight)
+            {
+                foreach (Graph.GraphPoint gp in cell.GraphPoints)
+                {
+                    gp.HighlightGraphPoint(highlight);
+                }
+            }
         }
 
         /// <summary>
@@ -486,7 +518,7 @@ namespace CellexalVR.AnalysisLogic
                 referenceManager.legendManager.attributeLegend.AddGroup(attributeType, numberOfCells, attributeColor);
                 foreach (Graph graph in referenceManager.graphManager.Graphs)
                 {
-                    referenceManager.velocityGenerator.DelaunayTriangulation(graph, pos[graph.GraphName], attributeColor, attributeType);
+                    //referenceManager.velocityGenerator.DelaunayTriangulation(graph, pos[graph.GraphName], attributeColor, attributeType);
                 }
 
             }
@@ -494,10 +526,14 @@ namespace CellexalVR.AnalysisLogic
             {
                 foreach (Graph graph in referenceManager.graphManager.Graphs)
                 {
-                    Destroy(convexHulls[graph.GraphName + "_" + attributeType]);
-                    convexHulls.Remove(graph.GraphName + "_" + attributeType);
+                    //Destroy(convexHulls[graph.GraphName + "_" + attributeType]);
+                    //convexHulls.Remove(graph.GraphName + "_" + attributeType);
                 }
                 referenceManager.legendManager.attributeLegend.RemoveGroup(attributeType);
+            }
+            if (referenceManager.legendManager.currentLegend != referenceManager.legendManager.desiredLegend)
+            {
+                referenceManager.legendManager.ActivateLegend(referenceManager.legendManager.desiredLegend);
             }
 
             CellexalEvents.CommandFinished.Invoke(true);

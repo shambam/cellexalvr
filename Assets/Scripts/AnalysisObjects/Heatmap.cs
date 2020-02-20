@@ -72,24 +72,24 @@ namespace CellexalVR.AnalysisObjects
         public int bitmapHeight = 4096;
         [HideInInspector]
         public int heatmapX = 250;
-        [HideInInspector]
-        public int heatmapY = 250;
-        [HideInInspector]
+        //[HideInInspector]
+        public int heatmapY = 330;
+        //[HideInInspector]
         public int heatmapWidth = 3596;
-        [HideInInspector]
+        //[HideInInspector]
         public int heatmapHeight = 3596;
-        [HideInInspector]
+        //[HideInInspector]
         public int geneListX = 3846;
-        [HideInInspector]
+        //[HideInInspector]
         public int geneListWidth = 250;
-        [HideInInspector]
+        //[HideInInspector]
         public int attributeBarY = 10;
-        [HideInInspector]
-        public int groupBarY = 120;
-        [HideInInspector]
-        public int groupBarHeight = 100;
-        [HideInInspector]
-        public int attributeBarHeight = 100;
+        //[HideInInspector]
+        public int groupBarY = 170;
+        //[HideInInspector]
+        public int groupBarHeight = 140;
+        //[HideInInspector]
+        public int attributeBarHeight = 140;
         [HideInInspector]
         public int noAttribute = -2; // different from -1 and other colour indices.
         [HideInInspector]

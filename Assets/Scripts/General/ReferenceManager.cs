@@ -143,6 +143,7 @@ namespace CellexalVR.General
         public KeyboardHandler filterOperatorKeyboard;
         public KeyboardHandler filterValueKeyboard;
         public AutoCompleteList filterNameKeyboardAutoCompleteList;
+        public CullingFilterManager cullingFilterManager;
 
         #endregion
 
@@ -224,6 +225,7 @@ namespace CellexalVR.General
             networkGenerator = generatorsParent.GetComponentInChildren<NetworkGenerator>();
             graphGenerator = generatorsParent.GetComponentInChildren<GraphGenerator>();
             legendManager = managersParent.GetComponentInChildren<LegendManager>();
+            cullingFilterManager = managersParent.GetComponentInChildren<CullingFilterManager>();
             inputFolderGenerator = generatorsParent.GetComponentInChildren<InputFolderGenerator>();
             loaderController = GameObject.Find("Tron_Loader").GetComponent<LoaderController>();
             GameObject inputreader = GameObject.Find("InputReader");

@@ -802,6 +802,7 @@ namespace CellexalVR.AnalysisLogic
             /// <param name="result">A reference to a list where the results should be put.</param>
             /// <param name="onlyPercent">True if only attributes that are not yet converted from percent to absolute values should be returned, false otherwise.</param>
             public abstract void GetAttributes(ref List<string> result);
+            public abstract void GetGroups(ref List<int> result);
 
             /// <summary>
             /// Saves the filtermanager that this filter is managed by, must be set before calling <see cref="Eval(Cell)"/>.
@@ -825,6 +826,7 @@ namespace CellexalVR.AnalysisLogic
             public bool percent;
 
             public FilterManager filterManager;
+            public CullingFilterManager cullingFilterManager;
 
             public GeneExpr() { }
 
@@ -839,9 +841,13 @@ namespace CellexalVR.AnalysisLogic
             public override bool Eval(Cell cell)
             {
                 Tuple<string, string> tuple = new Tuple<string, string>(gene, cell.Label);
-                if (filterManager.GeneExprs.ContainsKey(tuple))
+                if (filterManager != null && filterManager.GeneExprs.ContainsKey(tuple))
                 {
                     return compare(filterManager.GeneExprs[new Tuple<string, string>(gene, cell.Label)], value);
+                }
+                else if (cullingFilterManager != null && cullingFilterManager.GeneExprs.ContainsKey(tuple))
+                {
+                    return compare(cullingFilterManager.GeneExprs[new Tuple<string, string>(gene, cell.Label)], value);
                 }
                 else
                 {
@@ -887,6 +893,13 @@ namespace CellexalVR.AnalysisLogic
             {
                 this.filterManager = filterManager;
             }
+
+            public void SetCullingFilterManager(CullingFilterManager cullingFilterManager)
+            {
+                this.cullingFilterManager = cullingFilterManager;
+            }
+
+            public override void GetGroups(ref List<int> result) { }
         }
 
         public class FacsExpr : ComparerExpr
@@ -927,6 +940,7 @@ namespace CellexalVR.AnalysisLogic
             {
                 return "facs:" + facs + " " + OpToString(compare) + " " + value + (percent ? "%" : "");
             }
+            public override void GetGroups(ref List<int> result) { }
 
             public override void SwapPercentExpressions(Tuple<string, float, float>[] ranges)
             {
@@ -946,6 +960,49 @@ namespace CellexalVR.AnalysisLogic
 
             public override void SetFilterManager(FilterManager filterManager) { }
         }
+
+        public class SelectionGroupExpr : ComparerExpr
+        {
+            public int group;
+            public bool include;
+
+            public SelectionGroupExpr() { }
+
+            public SelectionGroupExpr(int group, bool include)
+            {
+                this.group = group;
+                this.include = include;
+            }
+
+            public override bool Eval(Cell cell)
+            {
+                return !(cell.GraphPoints[0].Group == group ^ include);
+            }
+
+            public override string ToString()
+            {
+                return "group:" + group + " " + include;
+            }
+
+            public override void GetGenes(ref List<string> result, bool onlyPercent = false) { }
+
+            public override void GetFacs(ref List<string> result, bool onlyPercent = false) { }
+
+            public override void SwapPercentExpressions(Tuple<string, float, float>[] ranges) { }
+
+            public override void SetFilterManager(FilterManager filterManager) { }
+
+            public override void GetAttributes(ref List<string> result) { }
+
+            public override void GetGroups(ref List<int> result)
+            {
+                if (!result.Contains(group))
+                {
+                    result.Add(group);
+                }
+            }
+        }
+
 
         public class AttributeExpr : ComparerExpr
         {
@@ -977,6 +1034,7 @@ namespace CellexalVR.AnalysisLogic
                     result.Add(attribute);
                 }
             }
+            public override void GetGroups(ref List<int> result) { }
 
             public override string ToString()
             {
@@ -1020,6 +1078,12 @@ namespace CellexalVR.AnalysisLogic
             {
                 subExpr1.GetAttributes(ref result);
                 subExpr2.GetAttributes(ref result);
+            }
+
+            public override void GetGroups(ref List<int> result)
+            {
+                subExpr1.GetGroups(ref result);
+                subExpr2.GetGroups(ref result);
             }
 
             public override string ToString()
@@ -1073,6 +1137,12 @@ namespace CellexalVR.AnalysisLogic
                 subExpr2.GetAttributes(ref result);
             }
 
+            public override void GetGroups(ref List<int> result)
+            {
+                subExpr1.GetGroups(ref result);
+                subExpr2.GetGroups(ref result);
+            }
+
             public override string ToString()
             {
                 return "(" + subExpr1.ToString() + " || " + subExpr2.ToString() + ")";
@@ -1090,6 +1160,7 @@ namespace CellexalVR.AnalysisLogic
                 subExpr2.SetFilterManager(filterManager);
             }
         }
+
 
         public class XorExpr : Expr
         {
@@ -1123,6 +1194,12 @@ namespace CellexalVR.AnalysisLogic
             {
                 subExpr1.GetAttributes(ref result);
                 subExpr2.GetAttributes(ref result);
+            }
+
+            public override void GetGroups(ref List<int> result)
+            {
+                subExpr1.GetGroups(ref result);
+                subExpr2.GetGroups(ref result);
             }
 
             public override string ToString()
@@ -1171,6 +1248,11 @@ namespace CellexalVR.AnalysisLogic
             public override void GetAttributes(ref List<string> result)
             {
                 subExpr.GetAttributes(ref result);
+            }
+
+            public override void GetGroups(ref List<int> result)
+            {
+                subExpr.GetGroups(ref result);
             }
 
             public override string ToString()

@@ -1187,15 +1187,15 @@ MonoBehaviour:
   bitmapWidth: 4096
   bitmapHeight: 4096
   heatmapX: 250
-  heatmapY: 250
+  heatmapY: 330
   heatmapWidth: 3596
   heatmapHeight: 3596
   geneListX: 3846
   geneListWidth: 250
   attributeBarY: 10
-  groupBarY: 120
-  groupBarHeight: 100
-  attributeBarHeight: 100
+  groupBarY: 170
+  groupBarHeight: 140
+  attributeBarHeight: 140
   noAttribute: -2
   lastAttribute: -1
   attributeWidth: 0

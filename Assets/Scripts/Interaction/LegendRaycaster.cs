@@ -34,13 +34,9 @@ namespace CellexalVR.Interaction
 
         void Update()
         {
-            if (device == null && CrossSceneInformation.Normal)
-            {
-                device = SteamVR_Controller.Input((int)rightController.index);
-            }
-
             if (CrossSceneInformation.Normal || CrossSceneInformation.Tutorial)
             {
+                device = SteamVR_Controller.Input((int)rightController.index);
                 bool correctModel = controllerModelSwitcher.ActualModel == ControllerModelSwitcher.Model.TwoLasers
                                     || controllerModelSwitcher.ActualModel == ControllerModelSwitcher.Model.Keyboard
                                     || controllerModelSwitcher.ActualModel == ControllerModelSwitcher.Model.WebBrowser;
@@ -64,13 +60,13 @@ namespace CellexalVR.Interaction
                     if (localPos.x >= 0f && localPos.x <= 1f && localPos.y >= 0f && localPos.y <= 1f)
                     {
                         HandleHitGeneExpressionHistogram(localPos);
-                        // we hit the gene expression histogram, in the histogram area
-                        if (device.GetPressDown(Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger))
+                        if (device.GetPressDown(SteamVR_Controller.ButtonMask.Trigger))
                         {
                             // if the trigger was pressed
                             HandleClickDownGeneExpressionHistogram(localPos);
                         }
-                        else if (device.GetPressUp(Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger))
+                        // we hit the gene expression histogram, in the histogram area
+                        else if (device.GetPressUp(SteamVR_Controller.ButtonMask.Trigger))
                         {
                             // if the trigger was released
                             HandleClickUpGeneExpressionHistogram(localPos);
@@ -81,12 +77,22 @@ namespace CellexalVR.Interaction
                         // we hit the legend but not the right area
                         legendManager.geneExpressionHistogram.DeactivateHighlightArea();
                     }
+                    if (device.GetPressUp(Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger))
+                    {
+                        // if the trigger was released
+                        savedGeneExpressionHistogramHitX = -1;
+                    }
                 }
             }
             else
             {
                 // we hit nothing of interest
                 legendManager.geneExpressionHistogram.DeactivateHighlightArea();
+            }
+            if (device.GetPressUp(Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger))
+            {
+                // if the trigger was released
+                savedGeneExpressionHistogramHitX = -1;
             }
         }
 
@@ -112,7 +118,7 @@ namespace CellexalVR.Interaction
 
         private void HandleClickUpGeneExpressionHistogram(Vector3 hit)
         {
-            if (Time.time - clickStartTime < 0.5f)
+            if (Time.time - clickStartTime < 0.1f)
             {
                 legendManager.geneExpressionHistogram.DeactivateSelectedArea();
             }

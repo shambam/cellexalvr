@@ -93,10 +93,12 @@ namespace CellexalVR.AnalysisLogic
             {
                 headset = referenceManager.spectatorRig;
                 referenceManager.headset = headset;
+                headset.SetActive(true);
             }
             else
             {
                 headset = referenceManager.headset;
+                referenceManager.spectatorRig.SetActive(false);
             }
             //status = referenceManager.statusDisplay;
             //statusDisplayHUD = referenceManager.statusDisplayHUD;
@@ -242,7 +244,6 @@ namespace CellexalVR.AnalysisLogic
             int totalNbrOfCells = 0;
             foreach (string file in mdsFiles)
             {
-                print(file);
                 while (graphGenerator.isCreating)
                 {
                     yield return null;
@@ -464,6 +465,8 @@ namespace CellexalVR.AnalysisLogic
             float currentCoord;
             GameObject parent = GameObject.Instantiate(SpatialGraphPrefab);
             SpatialGraph sg = parent.GetComponent<SpatialGraph>();
+            sg.gameObject.layer = LayerMask.NameToLayer("GraphLayer");
+            graphManager.spatialGraphs.Add(sg);
             sg.referenceManager = referenceManager;
             float posIncr = 0;
             int sliceNr = 0;
@@ -517,7 +520,7 @@ namespace CellexalVR.AnalysisLogic
                 minCoords.y = gps.Min(v => (v.Item2.y));
                 minCoords.z = gps.Min(v => (v.Item2.z));
 
-                Graph combGraph = graphGenerator.CreateGraph(GraphGenerator.GraphType.MDS);
+                Graph combGraph = graphGenerator.CreateGraph(GraphGenerator.GraphType.SPATIAL);
                 yield return null;
                 graphManager.Graphs.Add(combGraph);
                 graphManager.originalGraphs.Add(combGraph);
@@ -525,7 +528,9 @@ namespace CellexalVR.AnalysisLogic
                 combGraph.GraphName = "Slice" + sliceNr;
                 combGraph.transform.parent = parent.transform;
                 combGraph.transform.localPosition = new Vector3(0, 0, 0);
+                //combGraph.
                 var gs = combGraph.gameObject.AddComponent<Spatial.GraphSlice>();
+                gs.referenceManager = referenceManager;
                 yield return null;
                 float sliceDist = 0.005f;
                 posIncr += sliceDist;
@@ -552,16 +557,17 @@ namespace CellexalVR.AnalysisLogic
                         }
                         gs.zCoord = gp.WorldPosition.z;
                         //gs.AddReplacement();
-                        combGraph = graphGenerator.CreateGraph(GraphGenerator.GraphType.MDS);
+                        combGraph = graphGenerator.CreateGraph(GraphGenerator.GraphType.SPATIAL);
                         yield return null;
                         graphManager.Graphs.Add(combGraph);
                         graphManager.originalGraphs.Add(combGraph);
                         combGraph.transform.parent = parent.transform;
                         yield return null;
                         gs = combGraph.gameObject.AddComponent<Spatial.GraphSlice>();
+                        gs.referenceManager = referenceManager;
                         gs.sliceNr = ++sliceNr;
-                        gs.zCoord = posIncr;
                         posIncr += sliceDist;
+                        //print(gs.zCoord);
                         combGraph.transform.localPosition = new Vector3(0, 0, 0);
                         combGraph.GraphName = "Slice" + sliceNr;
                         combGraph.gameObject.name = "Slice" + sliceNr;
@@ -575,7 +581,8 @@ namespace CellexalVR.AnalysisLogic
                         {
                             yield return null;
                         }
-                        gs.zCoord = posIncr;
+                        gs.zCoord = gp.WorldPosition.z;
+                        combGraph.transform.localPosition = new Vector3(0, 0, 0);
                         //gs.AddReplacement();
                         continue;
                     }
@@ -1402,7 +1409,8 @@ namespace CellexalVR.AnalysisLogic
             CellexalEvents.CommandFinished.Invoke(true);
             streamReader.Close();
             fileStream.Close();
-            selectionManager.DumpAnnotatedSelectionToTextFile();
+            //selectionManager.DumpAnnotatedSelectionToTextFile();
+            selectionManager.ConfirmSelection();
         }
         //[ConsoleCommand("inputReader", aliases: new string[] { "selectfromprevious", "sfp" })]
         //public void ReadAndSelectPreviousSelection(int index)

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using CellexalVR.Filters;
 
 namespace CellexalVR.AnalysisObjects
 {
@@ -25,6 +26,7 @@ namespace CellexalVR.AnalysisObjects
         public GameObject selectedArea;
         public TextMeshPro selectedAreaInfoText;
         public GameObject cutOffBarTopShape;
+        public TextMeshPro filterTextLabel;
 
         /// <summary>
         /// Local position of the lower left corner of the histogram in the <see cref="LegendManager"/> local pos.
@@ -70,6 +72,7 @@ namespace CellexalVR.AnalysisObjects
         private float[] heightsFloat;
         private Vector3 startPos;
         private LegendManager manager;
+        private bool attached;
 
         // local position of the center of the histogram
         private Vector3 center = new Vector3(0.0064f, -0.0129f, 0f);
@@ -93,6 +96,17 @@ namespace CellexalVR.AnalysisObjects
             manager = gameObject.GetComponentInParent<LegendManager>();
             HistogramMinPos = new Vector3(center.x - histogramWidth / 2f, center.y - histogramHeight / 2f, 0f);
             HistogramMaxPos = new Vector3(center.x + histogramWidth / 2f, center.y + histogramHeight / 2f, 0f);
+            CellexalEvents.LegendAttached.AddListener(ActivateExtraColumn);
+        }
+
+        private void ActivateExtraColumn()
+        {
+            attached = true;
+        }
+
+        private void DeActivateExtraColumn()
+        {
+            attached = false;
         }
 
         /// <summary>
@@ -393,7 +407,18 @@ namespace CellexalVR.AnalysisObjects
         /// <param name="maxX">The index of the right bar</param>
         public void MoveSelectedArea(int minX, int maxX)
         {
+            selectedAreaInfoText.text = highlightAreaInfoText.text;
             MoveArea(selectedArea, selectedAreaInfoText, minX, maxX);
+            if (attached)
+            {
+                if (minX > maxX)
+                {
+                    int temp = minX;
+                    minX = maxX;
+                    maxX = temp;
+                }
+                referenceManager.cullingFilterManager.AddGeneFilter(geneNameLabel.text, minX, maxX, float.Parse(xAxisMaxLabel.text));
+            }
         }
 
     }

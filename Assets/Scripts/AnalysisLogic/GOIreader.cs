@@ -23,7 +23,6 @@ namespace CellexalVR.AnalysisLogic
             selectionPath = "Data" + "/" + selectionPath;
 
             referenceManager.inputReader.RegisterOldGroup(selectionPath + "/GOIs_selection.txt");
-            referenceManager.selectionManager.ConfirmSelection();
 
             // iterate over all heatmap files
             string[] dirs = Directory.GetFiles(selectionPath, "GOIS_slice_*.txt");

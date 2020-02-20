@@ -46,28 +46,5 @@ namespace CellexalVR.Interaction
             base.OnInteractableObjectUngrabbed(e);
         }
 
-        //private void OnTriggerEnter(Collider other)
-        //{
-        //    if (referenceManager.controllerModelSwitcher.ActualModel == ControllerModelSwitcher.Model.TwoLasers
-        //        || referenceManager.controllerModelSwitcher.ActualModel == ControllerModelSwitcher.Model.Keyboard)  
-        //    {
-        //        if (other.gameObject.name.Equals("ControllerCollider(Clone)"))
-        //        {
-        //            CellexalEvents.ObjectGrabbed.Invoke();
-        //        }
-        //    }
-        //}
-
-        //private void OnTriggerExit(Collider other)
-        //{
-        //    if (referenceManager.controllerModelSwitcher.ActualModel == ControllerModelSwitcher.Model.TwoLasers
-        //        || referenceManager.controllerModelSwitcher.ActualModel == ControllerModelSwitcher.Model.Keyboard)
-        //    {
-        //        if (other.gameObject.name.Equals("ControllerCollider(Clone)"))
-        //        {
-        //            CellexalEvents.ObjectUngrabbed.Invoke();
-        //        }
-        //    }
-        //}
     }
 }

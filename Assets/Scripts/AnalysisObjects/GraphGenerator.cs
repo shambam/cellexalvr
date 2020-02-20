@@ -27,6 +27,7 @@ namespace CellexalVR.AnalysisObjects
         public ReferenceManager referenceManager;
         public GameObject graphpointsPrefab;
         public GameObject graphPrefab;
+        public GameObject spatialSlicePrefab;
         public GameObject AxesPrefabColoured;
         public GameObject AxesPrefabUncoloured;
         public Material graphPointMaterialPrefab;
@@ -41,7 +42,7 @@ namespace CellexalVR.AnalysisObjects
         public string DirectoryName { get; set; }
         public bool isCreating;
         public bool addingToExisting;
-        public enum GraphType { MDS, FACS, ATTRIBUTE, BETWEEN };
+        public enum GraphType { MDS, FACS, ATTRIBUTE, BETWEEN, SPATIAL };
         public Color[] geneExpressionColors;
         public Texture2D graphPointColors;
         public int graphCount;
@@ -121,12 +122,19 @@ namespace CellexalVR.AnalysisObjects
 
 
 
-
-            newGraph = Instantiate(graphPrefab).GetComponent<Graph>();
+            if (type == GraphType.SPATIAL)
+            {
+                meshToUse = graphpointStandardQLargeSzMesh;
+                newGraph = Instantiate(spatialSlicePrefab).GetComponent<Graph>();
+            }
+            else
+            {
+                newGraph = Instantiate(graphPrefab).GetComponent<Graph>();
+                newGraph.GetComponent<GraphInteract>().referenceManager = referenceManager;
+            }
             //graphManager.SetGraphStartPosition();
             newGraph.transform.position = startPositions[graphCount % 6];
             newGraph.referenceManager = referenceManager;
-            newGraph.GetComponent<GraphInteract>().referenceManager = referenceManager;
             isCreating = true;
             graphCount++;
             return newGraph;
@@ -524,6 +532,7 @@ namespace CellexalVR.AnalysisObjects
             {
                 case GraphType.MDS:
                 case GraphType.BETWEEN:
+                case GraphType.SPATIAL:
                 case GraphType.ATTRIBUTE:
                     newGraph.longestAxis = Mathf.Max(newGraph.diffCoordValues.x, newGraph.diffCoordValues.y, newGraph.diffCoordValues.z);
                     break;
@@ -837,14 +846,6 @@ namespace CellexalVR.AnalysisObjects
             StartCoroutine(referenceManager.graphManager.Graphs[0].transform.parent.GetComponent<SpatialGraph>().CreateMesh());
         }
 
-
-        public void MakeAllTransparent(bool toggle)
-        {
-            foreach (Graph graph in referenceManager.graphManager.originalGraphs)
-            {
-                graph.MakeAllPointsTransparent(toggle);
-            }
-        }
 
         /// <summary>
         /// Creates a subgraph based on some attrbiutes.

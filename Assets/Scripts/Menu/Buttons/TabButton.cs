@@ -17,7 +17,7 @@ namespace CellexalVR.Menu.Buttons
         protected bool controllerInside = false;
         protected SteamVR_Controller.Device device;
         private MeshRenderer meshRenderer;
-        private Color standardColor = Color.black;
+        private Color standardColor = Color.grey;
         private Color highlightColor = Color.blue;
         private readonly string laserCollider = "[VRTK][AUTOGEN][RightControllerScriptAlias][StraightPointerRenderer_Tracer]";
         private bool highlight;

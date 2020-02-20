@@ -40,7 +40,8 @@ namespace CellexalVR.Multiuser
             settingsMenu = referenceManager.settingsMenu.gameObject;
             console = referenceManager.configManager.gameObject;
 
-            gameObject.SetActive(false);
+            if (!CrossSceneInformation.Spectator)
+                gameObject.SetActive(false);
             //Cursor.lockState = CursorLockMode.Locked;
         }
 

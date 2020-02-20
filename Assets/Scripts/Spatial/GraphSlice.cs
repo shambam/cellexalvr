@@ -1,13 +1,10 @@
 ﻿using CellexalVR.AnalysisObjects;
 using CellexalVR.General;
-using CellexalVR.SceneObjects;
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
+using VRTK;
+using VRTK.GrabAttachMechanics;
+using VRTK.SecondaryControllerGrabActions;
 
 namespace CellexalVR.Spatial
 {
@@ -49,40 +46,16 @@ namespace CellexalVR.Spatial
             interactableObject.InteractableObjectUngrabbed += OnUngrabbed;
             originalPos = transform.localPosition;
             originalRot = transform.localRotation;
-            GetComponent<Rigidbody>().drag = Mathf.Infinity;
-            GetComponent<Rigidbody>().angularDrag = Mathf.Infinity;
-        }
-
-        private void Update()
-        {
-            // When slicemode is false the slices are to be kept in their original position.
-            // Since each slice has its own rigidbody and I dont want the parent to have a rigidbody it is synched here below instead.
-            if (!sliceMode && grabbing)
-            {
-                Vector3 tempPos = this.transform.position;
-                Quaternion tempRot = this.transform.rotation;
-                this.transform.localPosition = originalPos;
-                this.transform.localRotation = originalRot;
-                this.transform.parent.position = tempPos;
-                this.transform.parent.rotation = tempRot;
-            }
+            originalSc = transform.localScale;
+            //GetComponent<Rigidbody>().drag = Mathf.Infinity;
+            //GetComponent<Rigidbody>().angularDrag = Mathf.Infinity;
         }
 
         private void OnGrabbed(object sender, VRTK.InteractableObjectEventArgs e)
         {
-            //spatGraph.transform.SetParent(this.transform);
-            //spatGraph.SynchMovement(transform);
-            if (sliceMode)
-            {
-                // Show wire and replacement
-                //replacement.GetComponent<Renderer>().material.color = replacementHighlightCol;
-                //replacement.SetActive(true);
-                //wire.SetActive(true);
-                //var follow = wire.GetComponent<LineRendererFollowTransforms>();
-                //follow.transform1 = e.interactingObject.transform;
-                //follow.transform2 = replacement.transform;
-            }
-            else
+            if (grabbing)
+                return;
+            if (!sliceMode)
             {
                 grabbing = true;
             }
@@ -90,25 +63,7 @@ namespace CellexalVR.Spatial
 
         private void OnUngrabbed(object sender, VRTK.InteractableObjectEventArgs e)
         {
-            if (!sliceMode)
-            {
-                transform.localPosition = originalPos;
-                transform.localRotation = originalRot;
-                grabbing = false;
-            }
-            else
-            {
-                // Hide wire and replacement
-                //wire.SetActive(false);
-                //replacement.SetActive(false);
-                //replacement.GetComponent<Renderer>().material.color = replacementCol;
-            }
-            //if (!sliceMode)
-            //{
-            //    StartCoroutine(SynchSlices());
-            //}
-            //transform.SetParent(spatGraph.transform);
-            //StartCoroutine(MoveToBoardCoroutine());
+            grabbing = false;
         }
 
         /// <summary>
@@ -175,8 +130,22 @@ namespace CellexalVR.Spatial
         /// <returns></returns>
         public IEnumerator ActivateSlice(bool activate)
         {
+            foreach (BoxCollider bc in GetComponents<BoxCollider>())
+            {
+                bc.enabled = activate;
+            }
             if (activate)
             {
+                var rigidbody = gameObject.GetComponent<Rigidbody>();
+                if (rigidbody == null)
+                {
+                    rigidbody = gameObject.AddComponent<Rigidbody>();
+                }
+                rigidbody.useGravity = false;
+                rigidbody.isKinematic = false;
+                rigidbody.drag = 10;
+                rigidbody.angularDrag = 15;
+                GetComponent<VRTK_InteractableObject>().isGrabbable = true;
                 sliceMode = true;
                 Vector3 startPos = this.transform.localPosition;
                 Vector3 targetPos = new Vector3(this.transform.localPosition.x, this.transform.localPosition.y, zCoord);
@@ -192,6 +161,8 @@ namespace CellexalVR.Spatial
             }
             else
             {
+                GetComponent<VRTK_InteractableObject>().isGrabbable = false;
+                Destroy(GetComponent<Rigidbody>());
                 sliceMode = false;
                 //graph.transform.localPosition = Vector3.zero;
             }

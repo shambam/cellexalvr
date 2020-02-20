@@ -236,6 +236,10 @@ namespace CellexalVR.AnalysisObjects
             cellsPerBin[0] = referenceManager.cellManager.GetNumberOfCells() - expressions.Count;
             referenceManager.legendManager.desiredLegend = LegendManager.Legend.GeneExpressionLegend;
             referenceManager.legendManager.geneExpressionHistogram.CreateHistogram(geneName, cellsPerBin, highestExpression.ToString(), GeneExpressionHistogram.YAxisMode.Linear);
+            if (referenceManager.legendManager.currentLegend != referenceManager.legendManager.desiredLegend)
+            {
+                referenceManager.legendManager.ActivateLegend(referenceManager.legendManager.desiredLegend);
+            }
         }
 
         /// <summary>
@@ -284,6 +288,19 @@ namespace CellexalVR.AnalysisObjects
             networks.Remove(handler);
         }
 
+
+        /// <summary>
+        /// Toggles the transparency of all graph points on/off.
+        /// </summary>
+        /// <param name="toggle"></param>
+        public void ToggleGraphPointTransparency(bool toggle)
+        {
+            foreach (Graph graph in Graphs)
+            {
+                graph.MakeAllPointsTransparent(toggle);
+            }
+        }
+
         /// <summary>
         /// Clears expression colours from graph but keeps current selection colours.
         /// </summary>
@@ -326,8 +343,17 @@ namespace CellexalVR.AnalysisObjects
         {
             foreach (Graph g in Graphs)
             {
+                if (g.GraphName.Contains("Slice"))
+                {
+                    continue;
+                }
                 g.ResetPosition();
                 g.ResetSizeAndRotation();
+            }
+            foreach (SpatialGraph sg in spatialGraphs)
+            {
+                sg.ResetPosition();
+                sg.ResetSizeAndRotation();
             }
             //SetGraphStartPosition();
         }
@@ -360,6 +386,22 @@ namespace CellexalVR.AnalysisObjects
             foreach (Graph g in Graphs)
             {
                 if (g.GraphName == graphName)
+                {
+                    return g;
+                }
+            }
+            // no graph found
+            return null;
+        }
+        public SpatialGraph FindSpatialGraph(string graphName)
+        {
+            if (graphName == "" && spatialGraphs.Count > 0)
+            {
+                return spatialGraphs[0];
+            }
+            foreach (SpatialGraph g in spatialGraphs)
+            {
+                if (g.gameObject.name == graphName)
                 {
                     return g;
                 }

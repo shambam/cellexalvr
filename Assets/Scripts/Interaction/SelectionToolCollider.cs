@@ -179,6 +179,8 @@ namespace CellexalVR.Interaction
                     return;
                 }
                 selectedColor = Colors[currentColorIndex];
+                var main = particles.main;
+                main.startColor = Colors[currentColorIndex];
             }
         }
 

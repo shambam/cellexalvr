@@ -1,4 +1,5 @@
-﻿using CellexalVR.AnalysisLogic;
+﻿using Assets.Scripts.SceneObjects;
+using CellexalVR.AnalysisLogic;
 using CellexalVR.AnalysisObjects;
 using CellexalVR.DesktopUI;
 using CellexalVR.Filters;
@@ -34,6 +35,7 @@ namespace CellexalVR.Filters
         private FilterCreatorBlockPort previouslyClickedPort;
         private GameObject previewWire;
         private bool portClickedThisFrame = false;
+        private bool cullingFilter = false;
 
         // Key.Item1 is a gene name, Key.Item2 is a cell name, Value is the expression
         public Dictionary<Tuple<string, string>, float> GeneExprs { get; set; }
@@ -77,7 +79,6 @@ namespace CellexalVR.Filters
         /// <param name="path">A path to the file containing the filter.</param>
         [ConsoleCommand("filterManager", folder: "Data\\Mouse_HSPC", aliases: new string[] { "loadfilter", "lf" })]
         public void LoadFilter(string path)
-
         {
             loadingFilter = true;
             currentFilterPath = path;
@@ -184,8 +185,20 @@ namespace CellexalVR.Filters
                 resultBlock.SetLoadingTextState(FilterCreatorResultBlock.LoadingTextState.FINISHED);
             }
             runningSwapPercentCoroutine = null;
+            //GameObject obj = GameObject.Find("CullingCube(Clone)");
+            //if (obj)
+            //{
+            //    obj.GetComponent<CullingCube>().ActivateFilter();
+            //}
         }
+        /// <summary>
+        /// Changes the filter temporarily so it does not add points to selection but instead makes them clippable in the shader.
+        /// </summary>
+        public void ActivateCullingFilter()
+        {
+            cullingFilter = true;
 
+        }
         /// <summary>
         /// Adds a cell to evaluate later with the current filter.
         /// </summary>
@@ -224,7 +237,6 @@ namespace CellexalVR.Filters
             evaluating = true;
             cellsToEvaluate.AddRange(queuedCells);
             queuedCells.Clear();
-
             string[] cells = cellsToEvaluate.Select((p) => p.Item1.Label).ToArray();
             if (currentFilterGenes.Length > 0)
             {
@@ -265,9 +277,21 @@ namespace CellexalVR.Filters
                 int group = t.Item2;
                 if (currentFilter.Pass(cellManager.GetCell(gp.Label)))
                 {
-                    Color newColor = selectionManager.GetColor(group);
-                    selectionManager.AddGraphpointToSelection(gp, group, false, newColor);
-                    referenceManager.multiuserMessageSender.SendMessageSelectedAdd(gp.parent.GraphName, gp.Label, group, newColor);
+                    if (cullingFilter)
+                    {
+                        foreach (Graph g in referenceManager.graphManager.Graphs)
+                        {
+                            Graph.GraphPoint otherGp = g.FindGraphPoint(gp.Label);
+                            if (otherGp != null)
+                                g.MakePointUnCullable(otherGp, true);
+                        }
+                    }
+                    else
+                    {
+                        Color newColor = selectionManager.GetColor(group);
+                        selectionManager.AddGraphpointToSelection(gp, group, false, newColor);
+                        referenceManager.multiuserMessageSender.SendMessageSelectedAdd(gp.parent.GraphName, gp.Label, group, newColor);
+                    }
                 }
             }
 
@@ -276,6 +300,7 @@ namespace CellexalVR.Filters
             // wait half a second before evaluating again
             yield return new WaitForSeconds(0.5f);
             evaluating = false;
+            cullingFilter = false;
         }
 
         /// <summary>

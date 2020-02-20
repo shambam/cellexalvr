@@ -2,6 +2,7 @@
 using CellexalVR.Extensions;
 using CellexalVR.General;
 using CellexalVR.Interaction;
+using CellexalVR.Menu.Buttons;
 using CellexalVR.Menu.Buttons.Attributes;
 using CellexalVR.Menu.Buttons.Facs;
 using CellexalVR.Spatial;
@@ -146,16 +147,9 @@ namespace CellexalVR.Multiuser
         public void RecieveMessageColorByAttribute(string attributeType, bool toggle)
         {
             CellexalLog.Log("Recieved message to " + (toggle ? "toggle" : "untoggle") + " all graphs by attribute " + attributeType);
-            //Color col = new Color(r, g, b);
             referenceManager.cellManager.ColorByAttribute(attributeType, toggle);
-            //var attributeButton = GameObject.Find("/[CameraRig]/Controller (left)/Main Menu/Attribute Menu/AttributeTabPrefab(Clone)/" + attributeType);
             var attributeButton = referenceManager.attributeSubMenu.FindButton(attributeType);
             attributeButton.ToggleOutline(toggle);
-            //if (attributeButton)
-            //{
-            //    var outline = attributeButton.GetComponent<ColorByAttributeButton>().activeOutline;
-            //    attributeButton.storedState = toggle;
-            //}
             attributeButton.GetComponent<ColorByAttributeButton>().colored = toggle;
         }
 
@@ -163,10 +157,34 @@ namespace CellexalVR.Multiuser
         public void RecieveMessageColorByIndex(string indexName)
         {
             CellexalLog.Log("Recieved message to color all graphs by index " + indexName);
-            //Color col = new Color(r, g, b);
             referenceManager.cellManager.ColorByIndex(indexName);
             referenceManager.indexMenu.FindButton(indexName).GetComponent<ColorByIndexButton>().TurnOff();
         }
+
+        [PunRPC]
+        public void RecieveMessageToggleTransparency(bool toggle)
+        {
+            CellexalLog.Log("Recieved message to toggle transparency on gps" + toggle);
+            referenceManager.graphManager.ToggleGraphPointTransparency(toggle);
+            referenceManager.mainMenu.GetComponentInChildren<ToggleTransparencyButton>().Toggle = !toggle;
+        }
+
+        [PunRPC]
+        public void RecieveMessageAddCullingCube()
+        {
+            CellexalLog.Log("Recieved message to add culling cube");
+            referenceManager.cullingFilterManager.AddCube();
+        }
+
+        [PunRPC]
+        public void RecieveMessageRemoveCullingCube()
+        {
+            CellexalLog.Log("Recieved message to remove culling cube");
+            referenceManager.cullingFilterManager.RemoveCube();
+        }
+
+
+
         #endregion
 
         #region Keyboard
@@ -346,27 +364,33 @@ namespace CellexalVR.Multiuser
         public void RecieveMessageMoveGraph(string moveGraphName, float posX, float posY, float posZ, float rotX, float rotY, float rotZ, float rotW, float scaleX, float scaleY, float scaleZ)
         {
             Graph g = referenceManager.graphManager.FindGraph(moveGraphName);
-            bool graphExists = g != null;
-            if (graphExists)
+            SpatialGraph sg = referenceManager.graphManager.FindSpatialGraph(moveGraphName);
+            if (g != null)
             {
                 try
                 {
-                    //g.GetComponent<VRTK.VRTK_InteractableObject>().isGrabbable = false;
                     g.transform.position = new Vector3(posX, posY, posZ);
                     g.transform.rotation = new Quaternion(rotX, rotY, rotZ, rotW);
                     g.transform.localScale = new Vector3(scaleX, scaleY, scaleZ);
-                    //g.GetComponent<GraphInteract>().StopPositionSync();
                 }
                 catch (Exception e)
                 {
                     CellexalLog.Log("Could not move graph - Error: " + e);
                 }
             }
-            //else
-            //{
-            //    CellexalLog.Log("Could not find graph to move");
-            //}
-
+            else if (sg != null)
+            {
+                try
+                {
+                    sg.transform.position = new Vector3(posX, posY, posZ);
+                    sg.transform.rotation = new Quaternion(rotX, rotY, rotZ, rotW);
+                    sg.transform.localScale = new Vector3(scaleX, scaleY, scaleZ);
+                }
+                catch (Exception e)
+                {
+                    CellexalLog.Log("Could not move graph - Error: " + e);
+                }
+            }
         }
 
         [PunRPC]
@@ -487,6 +511,27 @@ namespace CellexalVR.Multiuser
                 spatialGraph.ActivateSlices();
             }
         }
+        //[PunRPC]
+        //public void RecieveMessageSpatialGraphGrabbed(string sliceName, string graphName)
+        //{
+        //    foreach (SpatialGraph spatialGraph in referenceManager.graphManager.spatialGraphs)
+        //    {
+        //        if (spatialGraph.gameObject.name.Equals(graphName))
+        //            spatialGraph.GetSlice(sliceName).ToggleGrabbing(true);
+        //    }
+        //}
+
+        //[PunRPC]
+        //public void RecieveMessageSpatialGraphUnGrabbed(string sliceName, string graphName)
+        //{
+        //    CellexalLog.Log("Recieved message to activate slices in spatial graph");
+        //    foreach (SpatialGraph spatialGraph in referenceManager.graphManager.spatialGraphs)
+        //    {
+        //        if (spatialGraph.gameObject.name.Equals(graphName))
+        //            spatialGraph.GetSlice(sliceName).ToggleGrabbing(false);
+        //    }
+        //}
+
 
         #endregion
 
@@ -553,7 +598,7 @@ namespace CellexalVR.Multiuser
                 }
                 catch (Exception e)
                 {
-                    CellexalLog.Log("Could not move heatmap - Error: " + e);
+                    CellexalLog.Log("Could not confirm selection - Error: " + e);
                 }
             }
         }
@@ -571,7 +616,7 @@ namespace CellexalVR.Multiuser
                 }
                 catch (Exception e)
                 {
-                    CellexalLog.Log("Could not move heatmap - Error: " + e);
+                    CellexalLog.Log("Could not move heatmap selection - Error: " + e);
                 }
             }
         }

@@ -129,7 +129,16 @@ namespace CellexalVR.Tools
             }
             referenceManager.multiuserMessageSender.SendMessageDrawLine(LineColor.r, LineColor.g, LineColor.b, xcoords, ycoords, zcoords);
 
-            lines.Add(SpawnNewLine(LineColor, newLinePositions));
+            LineRenderer newLine = SpawnNewLine(LineColor, newLinePositions);
+            lines.Add(newLine);
+            Vector3 center = newLine.GetPosition(newLine.positionCount - 1);
+            Vector3 halfExtents = Vector3.one * 0.1f;
+            LayerMask layerMask = 1 << LayerMask.NameToLayer("GraphLayer");
+            Collider[] collidesWith = Physics.OverlapBox(center, halfExtents, Quaternion.identity, layerMask, QueryTriggerInteraction.Collide);
+            if (collidesWith.Length > 0)
+            {
+                newLine.transform.parent = collidesWith[0].transform;
+            }
             foreach (LineRenderer line in temporaryLines)
             {
                 Destroy(line.gameObject);
@@ -144,12 +153,20 @@ namespace CellexalVR.Tools
         /// <param name="coords"> An array with the world space coordinates for each point the line should pass through. </param>
         public void DrawNewLine(Color col, Vector3[] coords)
         {
-            var newLine = Instantiate(linePrefab).GetComponent<LineRenderer>();
+            LineRenderer newLine = Instantiate(linePrefab).GetComponent<LineRenderer>();
             newLine.positionCount = coords.Length;
             newLine.SetPositions(coords);
             newLine.startColor = col;
             newLine.endColor = col;
             lines.Add(newLine);
+            Vector3 center = newLine.GetPosition(newLine.positionCount - 1);
+            Vector3 halfExtents = Vector3.one * 0.1f;
+            LayerMask layerMask = 1 << LayerMask.NameToLayer("GraphLayer");
+            Collider[] collidesWith = Physics.OverlapBox(center, halfExtents, Quaternion.identity, layerMask, QueryTriggerInteraction.Collide);
+            if (collidesWith.Length > 0)
+            {
+                newLine.transform.parent = collidesWith[0].transform;
+            }
         }
 
         /// <summary>
