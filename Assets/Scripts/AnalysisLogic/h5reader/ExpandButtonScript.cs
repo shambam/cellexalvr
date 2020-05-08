@@ -11,14 +11,13 @@ namespace CellexalVR.AnalysisLogic.H5reader
         public H5ReaderAnnotatorTextBoxScript parentScript;
         private SteamVR_TrackedObject rightController;
         private SteamVR_Controller.Device device;
-        private bool controllerInside;
+        private GameObject controller;
         public Image image;
         public bool isExpanded;
         public Sprite plusImage;
         public Sprite minusImage;
         public Sprite circleImage;
         public bool anchorInside;
-        public AnchorScript anchor;
 
         // Start is called before the first frame update
         void Start()
@@ -45,31 +44,23 @@ namespace CellexalVR.AnalysisLogic.H5reader
         {
             if (other.gameObject.name.Equals("ControllerCollider(Clone)"))
             {
-                controllerInside = true;
-                image.color = Color.yellow;
-            }
-            if (other.gameObject.name.Equals("AnchorB") && anchor == null)
-            {
-                anchor = other.gameObject.GetComponent<AnchorScript>();
+                controller = other.gameObject;
+
             }
         }
 
         private void OnTriggerExit(Collider other)
         {
-            if (other.gameObject.name.Equals("ControllerCollider(Clone)"))
+            if (other.gameObject == controller)
             {
-                controllerInside = false;
-                image.color = Color.white;
-            }
-            if (anchor && other.gameObject == anchor.gameObject)
-            {
-                anchor = null;
+                controller = null;
             }
         }
 
         public void pressButton()
         {
             AnchorScript anchorScript = GetComponentInChildren<AnchorScript>();
+            AnchorScript anchor = rightController.GetComponentInChildren<AnchorScript>();
             if (!parentScript.isBottom)
             {
                 isExpanded = !isExpanded;
