@@ -1,50 +1,81 @@
-﻿// Upgrade NOTE: upgraded instancing buffer 'Props' to new syntax.
+﻿Shader "Custom/SelectionToolHandler"
+{
+    Properties
+    {
+        _MainTex("Albedo", 2D) = "white" {}
+		_Color ("Color", Color) = (1,1,1,0.5)
+		_Emission("Emission", Range(0,1)) = 0.5
+		_PulseSpeed("Pulse Speed", float) = 1
+		_Glossiness ("Smoothness", Range(0,1)) = 0.5
+		_Metallic ("Metallic", Range(0,1)) = 0.0
+		_SelectionActive("SelectionActive", Range(0,1)) = 0.0
+    }
 
-Shader "Custom/SelectionToolHandler" {
-	Properties {
-		_Color ("Color", Color) = (1,1,1,.5)
-		_Emission ("Emmisive Color", Color) = (0,0,0,0)
-        _Shininess ("Shininess", Range (0.01, 1)) = 0.01
-		_MainTex ("Albedo (RGB)", 2D) = "white" {}
-	}
-	SubShader {
-		Tags { "Queue"="Transparent" "RenderType"="Transparent" }
-		LOD 200
-		
-		Blend SrcAlpha OneMinusSrcAlpha
+    CGINCLUDE
+        #define UNITY_SETUP_BRDF_INPUT MetallicSetup
+    ENDCG
 
+    SubShader
+    {
+        Tags
+        {
+            "Queue" = "Transparent"
+            "RenderType" = "Transparent"
+            "IgnoreProjector" = "True"
+        }
+        Blend SrcAlpha OneMinusSrcAlpha 
+        ZWrite Off
+        LOD 300
+        
 		CGPROGRAM
 		// Physically based Standard lighting model, and enable shadows on all light types
-		#pragma surface surf Standard fullforwardshadows
-
+		#pragma surface surf Standard fullforwardshadows alpha
+        // This line tells Unity to compile this pass for forward add, giving attenuation information for the light.
+        
 		// Use shader model 3.0 target, to get nicer looking lighting
 		#pragma target 3.0
 
 		sampler2D _MainTex;
 
-		struct Input {
+		struct Input
+		{
 			float2 uv_MainTex;
+			float4 pos : SV_POSITION;
+			float3 worldPos : TEXCOORD3;
 		};
 
 		half _Glossiness;
 		half _Metallic;
+		half _Emission;
 		fixed4 _Color;
-
-		// Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
-		// See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
-		// #pragma instancing_options assumeuniformscaling
-		UNITY_INSTANCING_BUFFER_START(Props)
-			// put more per-instance properties here
-		UNITY_INSTANCING_BUFFER_END(Props)
-
-		void surf (Input IN, inout SurfaceOutputStandard o) {
-			// Albedo comes from a texture tinted by color
-			fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
-			o.Albedo = c.rgb;
-			o.Alpha = tex2D (_MainTex, IN.uv_MainTex).a;
-			// Metallic and smoothness come from slider variables
+		float _PulseSpeed;
+		float _SelectionActive;
+        
+		void surf (Input IN, inout SurfaceOutputStandard o)
+		{
+            // magic function i found on the internet
+			o.Albedo = _Color; 
+			o.Alpha = 0.1;
+			
+			if (_SelectionActive > 0)
+			{
+                float time = _Time.z * 2;
+                float4 sinTime = _SinTime;
+                float3 pos = IN.worldPos * 30;
+                float shift = (sin(pos.y + time + sinTime.w)) * 2;// + sin(pos.y + time + sinTime.z)) * 2;// + sin(pos.z + time + sinTime.y));
+                shift = (shift + 3) / 6;
+                //float2 seed = pos.xy * pos.z;
+                //float noise = frac(sin(dot(seed ,float2(12.9898,78.233))) * 43758.5453);
+                //hue *= saturate(noise + 0.8);
+			    o.Metallic = _Metallic * shift;
+			    o.Smoothness = _Glossiness * shift;
+			    o.Emission = _Emission * shift/15;
+			}
+			
+			
+			
+			
 		}
-		ENDCG
-	}
-	FallBack "Diffuse"
+    ENDCG
+    }
 }

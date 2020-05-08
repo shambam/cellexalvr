@@ -2,8 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using CellexalVR.AnalysisLogic;
 using CellexalVR.AnalysisObjects;
+using CellexalVR.Extensions;
 using CellexalVR.General;
 using CellexalVR.Menu.Buttons;
 using UnityEngine;
@@ -16,12 +18,12 @@ namespace CellexalVR.AnalysisLogic
     public class NetworkReader : MonoBehaviour
     {
         public ReferenceManager referenceManager;
-        
-        public IEnumerator ReadNetworkFilesCoroutine(int layoutSeed)
+
+        public IEnumerator ReadNetworkFilesCoroutine(int layoutSeed, string path, string selectionFile)
         {
             CellexalLog.Log("Started reading network files");
             CellexalEvents.ScriptRunning.Invoke();
-            string networkDirectory = CellexalUser.UserSpecificFolder + @"\Resources\Networks";
+            string networkDirectory = path; //CellexalUser.UserSpecificFolder + @"\Resources\Networks";
             if (!Directory.Exists(networkDirectory))
             {
                 print(string.Format(
@@ -160,6 +162,14 @@ namespace CellexalVR.AnalysisLogic
 
                     var networkHandlerName =
                         "NetworkHandler_" + graphName + "-" + (referenceManager.selectionManager.fileCreationCtr + 1);
+                    GameObject existingHandler = GameObject.Find(networkHandlerName);
+                    while (existingHandler != null)
+                    {
+                        networkHandlerName += "_Copy";
+                        existingHandler = GameObject.Find(networkHandlerName);
+                        yield return null;
+                    }
+
                     networkHandler.name = networkHandlerName;
                 }
 
@@ -176,8 +186,10 @@ namespace CellexalVR.AnalysisLogic
                 maxNegPcor[colorString] = float.MinValue;
                 minNegPcor[colorString] = 0f;
                 Vector3 position = graph.ScaleCoordinates(new Vector3(x, y, z));
+                int group = referenceManager.selectionToolCollider.GetColorIndex(colorString);
                 NetworkCenter network =
-                    referenceManager.networkGenerator.CreateNetworkCenter(networkHandler, colorString, position, layoutSeed);
+                    referenceManager.networkGenerator.CreateNetworkCenter(networkHandler, group, position,
+                        layoutSeed);
                 foreach (Renderer r in network.GetComponentsInChildren<Renderer>())
                 {
                     if (r.gameObject.GetComponent<CellexalButton>() == null)
@@ -256,13 +268,15 @@ namespace CellexalVR.AnalysisLogic
                 // add the nodes if they don't already exist
                 if (!nodes.ContainsKey(node1))
                 {
-                    NetworkNode newNode = referenceManager.networkGenerator.CreateNetworkNode(geneName1, networks[color]);
+                    NetworkNode newNode =
+                        referenceManager.networkGenerator.CreateNetworkNode(geneName1, networks[color]);
                     nodes[node1] = newNode;
                 }
 
                 if (!nodes.ContainsKey(node2))
                 {
-                    NetworkNode newNode = referenceManager.networkGenerator.CreateNetworkNode(geneName2, networks[color]);
+                    NetworkNode newNode =
+                        referenceManager.networkGenerator.CreateNetworkNode(geneName2, networks[color]);
                     nodes[node2] = newNode;
                 }
 
@@ -319,9 +333,16 @@ namespace CellexalVR.AnalysisLogic
                             nodes.Values.Count + " nodes");
             CellexalEvents.CommandFinished.Invoke(true);
             CellexalEvents.ScriptFinished.Invoke();
+            string sessionEntryName = networkDirectory + " from " + selectionFile;
+            if (!referenceManager.sessionHistoryList.Contains(sessionEntryName, Definitions.HistoryEvent.NETWORK))
+            {
+                referenceManager.sessionHistoryList.AddEntry(sessionEntryName, Definitions.HistoryEvent.NETWORK,
+                    layoutSeed);
+            }
+
             networkHandler.CreateNetworkAnimation(graph.transform);
         }
-        
+
         /// <summary>
         /// Helper struct for sorting network keys.
         /// </summary>

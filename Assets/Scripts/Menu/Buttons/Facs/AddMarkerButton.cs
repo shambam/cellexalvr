@@ -31,14 +31,14 @@ namespace CellexalVR.Menu.Buttons.Facs
         {
             if (markers.Count < 3 && !markers.Contains(this.indexName))
             {
-                markers.Add(this.indexName);
+                markers.Add(indexName);
                 ToggleOutline(true);
                 //activeOutline.SetActive(true);
                 //activeOutline.GetComponent<MeshRenderer>().enabled = true;
             }
-            else if (markers.Contains(this.indexName))
+            else if (markers.Contains(indexName))
             {
-                markers.Remove(this.indexName);
+                markers.Remove(indexName);
                 ToggleOutline(false);
                 //activeOutline.SetActive(false);
             }

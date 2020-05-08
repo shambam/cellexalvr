@@ -13,6 +13,7 @@ using CellexalVR.Interaction;
 using CellexalVR.AnalysisLogic;
 using CellexalVR.DesktopUI;
 using System.Threading;
+using CellexalVR.Extensions;
 using CellexalVR.SceneObjects;
 using Unity.Burst;
 using CellexalVR.Spatial;
@@ -42,7 +43,16 @@ namespace CellexalVR.AnalysisObjects
         public string DirectoryName { get; set; }
         public bool isCreating;
         public bool addingToExisting;
-        public enum GraphType { MDS, FACS, ATTRIBUTE, BETWEEN, SPATIAL };
+
+        public enum GraphType
+        {
+            MDS,
+            FACS,
+            ATTRIBUTE,
+            BETWEEN,
+            SPATIAL
+        };
+
         public Color[] geneExpressionColors;
         public Texture2D graphPointColors;
         public int graphCount;
@@ -52,13 +62,16 @@ namespace CellexalVR.AnalysisObjects
         private GraphManager graphManager;
         private int nbrOfClusters;
         private int nbrOfMaxPointsPerClusters;
-        private Vector3[] startPositions =  {   new Vector3(-0.2f, 1.1f, -0.95f),
-                                            new Vector3(-0.9f, 1.1f, -0.4f),
-                                            new Vector3(-0.9f, 1.1f, 0.4f),
-                                            new Vector3(-0.2f, 1.1f, 0.95f),
-                                            new Vector3(0.8f, 1.1f, -0.4f),
-                                            new Vector3(0.5f, 1.1f, 0.7f)
-                                        };
+
+        private Vector3[] startPositions =
+        {
+            new Vector3(-0.2f, 1.1f, -0.95f),
+            new Vector3(-0.9f, 1.1f, -0.4f),
+            new Vector3(-0.9f, 1.1f, 0.4f),
+            new Vector3(-0.2f, 1.1f, 0.95f),
+            new Vector3(0.8f, 1.1f, -0.4f),
+            new Vector3(0.5f, 1.1f, 0.7f)
+        };
 
         //private Graph subGraph;
 
@@ -91,27 +104,27 @@ namespace CellexalVR.AnalysisObjects
                 meshToUse = graphpointLowQLargeSzMesh;
             }
             else if (CellexalConfig.Config.GraphPointQuality == "Standard"
-                        && CellexalConfig.Config.GraphPointSize == "Standard")
+                     && CellexalConfig.Config.GraphPointSize == "Standard")
             {
                 meshToUse = graphpointStandardQStandardSzMesh;
             }
             else if (CellexalConfig.Config.GraphPointQuality == "Low"
-                        && CellexalConfig.Config.GraphPointSize == "Standard")
+                     && CellexalConfig.Config.GraphPointSize == "Standard")
             {
                 meshToUse = graphpointLowQStandardSzMesh;
             }
             else if (CellexalConfig.Config.GraphPointQuality == "Standard"
-                        && CellexalConfig.Config.GraphPointSize == "Small")
+                     && CellexalConfig.Config.GraphPointSize == "Small")
             {
                 meshToUse = graphpointLowQSmallSzMesh;
             }
             else if (CellexalConfig.Config.GraphPointQuality == "Low"
-                        && CellexalConfig.Config.GraphPointSize == "Small")
+                     && CellexalConfig.Config.GraphPointSize == "Small")
             {
                 meshToUse = graphpointLowQSmallSzMesh;
             }
             else if (CellexalConfig.Config.GraphPointQuality == "Standard"
-                        && CellexalConfig.Config.GraphPointSize == "Large")
+                     && CellexalConfig.Config.GraphPointSize == "Large")
             {
                 meshToUse = graphpointStandardQLargeSzMesh;
             }
@@ -119,7 +132,6 @@ namespace CellexalVR.AnalysisObjects
             {
                 meshToUse = graphpointLowQLargeSzMesh;
             }
-
 
 
             if (type == GraphType.SPATIAL)
@@ -132,6 +144,7 @@ namespace CellexalVR.AnalysisObjects
                 newGraph = Instantiate(graphPrefab).GetComponent<Graph>();
                 newGraph.GetComponent<GraphInteract>().referenceManager = referenceManager;
             }
+
             //graphManager.SetGraphStartPosition();
             newGraph.transform.position = startPositions[graphCount % 6];
             newGraph.referenceManager = referenceManager;
@@ -155,22 +168,29 @@ namespace CellexalVR.AnalysisObjects
             if (nbrOfExpressionColors + nbrOfSelectionColors > 254)
             {
                 nbrOfSelectionColors = 254 - nbrOfExpressionColors;
-                CellexalLog.Log(string.Format("ERROR: Can not have more than 254 total expression and selection colors. Reducing selection colors to {0}. Change NumberOfExpressionColors and SelectionToolColors in the settings menu or config.xml.", nbrOfExpressionColors));
+                CellexalLog.Log(string.Format(
+                    "ERROR: Can not have more than 254 total expression and selection colors. Reducing selection colors to {0}. Change NumberOfExpressionColors and SelectionToolColors in the settings menu or config.xml.",
+                    nbrOfExpressionColors));
             }
             else if (nbrOfExpressionColors < 3)
             {
-                CellexalLog.Log("ERROR: Can not have less than 3 gene expression colors. Increasing to 3. Change NumberOfExpressionColors in the settings menu or config.xml.");
+                CellexalLog.Log(
+                    "ERROR: Can not have less than 3 gene expression colors. Increasing to 3. Change NumberOfExpressionColors in the settings menu or config.xml.");
                 nbrOfExpressionColors = 3;
             }
+
             int halfNbrOfExpressionColors = nbrOfExpressionColors / 2;
 
-            Color[] lowMidExpressionColors = Extensions.Extensions.InterpolateColors(lowColor, midColor, halfNbrOfExpressionColors);
-            Color[] midHighExpressionColors = Extensions.Extensions.InterpolateColors(midColor, highColor, nbrOfExpressionColors - halfNbrOfExpressionColors + 1);
+            Color[] lowMidExpressionColors =
+                Extensions.Extensions.InterpolateColors(lowColor, midColor, halfNbrOfExpressionColors);
+            Color[] midHighExpressionColors = Extensions.Extensions.InterpolateColors(midColor, highColor,
+                nbrOfExpressionColors - halfNbrOfExpressionColors + 1);
 
             geneExpressionColors = new Color[CellexalConfig.Config.GraphNumberOfExpressionColors + 1];
             geneExpressionColors[0] = CellexalConfig.Config.GraphZeroExpressionColor;
             Array.Copy(lowMidExpressionColors, 0, geneExpressionColors, 1, lowMidExpressionColors.Length);
-            Array.Copy(midHighExpressionColors, 1, geneExpressionColors, 1 + lowMidExpressionColors.Length, midHighExpressionColors.Length - 1);
+            Array.Copy(midHighExpressionColors, 1, geneExpressionColors, 1 + lowMidExpressionColors.Length,
+                midHighExpressionColors.Length - 1);
 
             //// reservered colors
             //graphpointColors[255] = Color.white;
@@ -182,11 +202,13 @@ namespace CellexalVR.AnalysisObjects
                 graphPointColors.SetPixel(pixel, 0, lowMidExpressionColors[i]);
                 pixel++;
             }
+
             for (int i = 1; i < nbrOfExpressionColors - halfNbrOfExpressionColors + 1; ++i)
             {
                 graphPointColors.SetPixel(pixel, 0, midHighExpressionColors[i]);
                 pixel++;
             }
+
             for (int i = 0; i < nbrOfSelectionColors; ++i)
             {
                 graphPointColors.SetPixel(pixel, 0, CellexalConfig.Config.SelectionToolColors[i]);
@@ -212,7 +234,8 @@ namespace CellexalVR.AnalysisObjects
             {
                 if (graph.graphPointClusters.Count > 0)
                 {
-                    graph.graphPointClusters[0].GetComponent<Renderer>().sharedMaterial.SetTexture("_GraphpointColorTex", graphPointColors);
+                    graph.graphPointClusters[0].GetComponent<Renderer>().sharedMaterial
+                        .SetTexture("_GraphpointColorTex", graphPointColors);
                 }
             }
         }
@@ -269,6 +292,7 @@ namespace CellexalVR.AnalysisObjects
                 axes = Instantiate(AxesPrefabUncoloured, graph.transform);
                 axes.SetActive(false);
             }
+
             axes.transform.localPosition = position - (Vector3.one * 0.01f);
             Vector3 size = graph.ScaleCoordinates(graph.maxCoordValues);
             float longestAx = Mathf.Max(Mathf.Max(size.x, size.y), size.z);
@@ -306,7 +330,6 @@ namespace CellexalVR.AnalysisObjects
                 {
                     firstCluster.Add(point);
                 }
-
             }
             //firstCluster.IntersectWith(newGraph.points.Values);
 
@@ -329,7 +352,8 @@ namespace CellexalVR.AnalysisObjects
             var stopwatch = new System.Diagnostics.Stopwatch();
             stopwatch.Start();
             List<Graph.GraphPoint> removedDuplicates = new List<Graph.GraphPoint>();
-            List<HashSet<Graph.GraphPoint>> clusters = SplitClusterRecursive(cluster, newGraph.octreeRoot, true, ref removedDuplicates);
+            List<HashSet<Graph.GraphPoint>> clusters =
+                SplitClusterRecursive(cluster, newGraph.octreeRoot, true, ref removedDuplicates);
             // remove the duplicates
             foreach (var c in clusters)
             {
@@ -339,6 +363,7 @@ namespace CellexalVR.AnalysisObjects
                     referenceManager.cellManager.GetCell(gp.Label).GraphPoints.Remove(gp);
                 }
             }
+
             // add colliders
             foreach (Graph.OctreeNode node in newGraph.octreeRoot.children)
             {
@@ -346,9 +371,11 @@ namespace CellexalVR.AnalysisObjects
                 collider.center = node.pos + node.size / 2f;
                 collider.size = node.size;
             }
+
             nbrOfClusters = clusters.Count;
             stopwatch.Stop();
-            CellexalLog.Log(string.Format("clustered {0} in {1}. nbr of clusters: {2}", newGraph.GraphName, stopwatch.Elapsed.ToString(), newGraph.nbrOfClusters));
+            CellexalLog.Log(string.Format("clustered {0} in {1}. nbr of clusters: {2}", newGraph.GraphName,
+                stopwatch.Elapsed.ToString(), newGraph.nbrOfClusters));
             return clusters;
         }
 
@@ -359,9 +386,9 @@ namespace CellexalVR.AnalysisObjects
         /// <param name="node">The current Octree node to add points and children to.</param>
         /// <param name="addClusters">True if we are yet to add clusters to return, the result is used for generating meshes.</param>
         /// <returns>A <see cref="List{T}"/> of <see cref="HashSet{T}"/> that each contain one cluster.</returns>
-        private List<HashSet<Graph.GraphPoint>> SplitClusterRecursive(HashSet<Graph.GraphPoint> cluster, Graph.OctreeNode node, bool addClusters, ref List<Graph.GraphPoint> removedDuplicates)
+        private List<HashSet<Graph.GraphPoint>> SplitClusterRecursive(HashSet<Graph.GraphPoint> cluster,
+            Graph.OctreeNode node, bool addClusters, ref List<Graph.GraphPoint> removedDuplicates)
         {
-
             //removedDuplicates = new List<Graph.GraphPoint>();
             var result = new List<HashSet<Graph.GraphPoint>>();
             float graphpointMeshSize = meshToUse.bounds.size.x;
@@ -420,11 +447,14 @@ namespace CellexalVR.AnalysisObjects
                 else if (pos.z > maxZ)
                     maxZ = pos.z;
             }
+
             splitCenter /= cluster.Count;
             node.center = splitCenter;
-            node.pos = new Vector3(minX - graphpointMeshExtent, minY - graphpointMeshExtent, minZ - graphpointMeshExtent);
+            node.pos = new Vector3(minX - graphpointMeshExtent, minY - graphpointMeshExtent,
+                minZ - graphpointMeshExtent);
             Vector3 nodePos = node.pos;
-            node.size = new Vector3(maxX - minX + graphpointMeshSize, maxY - minY + graphpointMeshSize, maxZ - minZ + graphpointMeshSize);
+            node.size = new Vector3(maxX - minX + graphpointMeshSize, maxY - minY + graphpointMeshSize,
+                maxZ - minZ + graphpointMeshSize);
             Vector3 nodeSize = node.size;
 
             // nodeSize.magnitude < 0.000031622776
@@ -440,6 +470,7 @@ namespace CellexalVR.AnalysisObjects
                         removedDuplicates.Add(gp);
                     }
                 }
+
                 cluster.Clear();
                 cluster.Add(firstPoint);
 
@@ -456,7 +487,6 @@ namespace CellexalVR.AnalysisObjects
 
             if (nodeDepth > 25f)
             {
-
                 CellexalLog.Log("Too many iterations reached when clustering, bailing out");
                 //CellexalLog.Log("points in cluster: " + cluster.Count + " depth: " + nodeDepth);
                 //cluster.All((gp) =>
@@ -483,38 +513,48 @@ namespace CellexalVR.AnalysisObjects
                 {
                     chosenClusterIndex += 1;
                 }
+
                 if (position.y > splitCenter.y)
                 {
                     chosenClusterIndex += 2;
                 }
+
                 if (position.z > splitCenter.z)
                 {
                     chosenClusterIndex += 4;
                 }
+
                 newClusters[chosenClusterIndex].Add(point);
             }
 
             node.children = new Graph.OctreeNode[newClusters.Count((HashSet<Graph.GraphPoint> c) => c.Count > 0)];
-            Vector3[] newOctreePos = new Vector3[] {
+            Vector3[] newOctreePos = new Vector3[]
+            {
                 nodePos,
-                new Vector3(splitCenter.x,  nodePos.y,      nodePos.z),
-                new Vector3(nodePos.x,      splitCenter.y,  nodePos.z),
-                new Vector3(splitCenter.x,  splitCenter.y,  nodePos.z),
-                new Vector3(nodePos.x,      nodePos.y ,     splitCenter.z),
-                new Vector3(splitCenter.x,  nodePos.y,      splitCenter.z),
-                new Vector3(nodePos.x,      splitCenter.y,  splitCenter.z),
+                new Vector3(splitCenter.x, nodePos.y, nodePos.z),
+                new Vector3(nodePos.x, splitCenter.y, nodePos.z),
+                new Vector3(splitCenter.x, splitCenter.y, nodePos.z),
+                new Vector3(nodePos.x, nodePos.y, splitCenter.z),
+                new Vector3(splitCenter.x, nodePos.y, splitCenter.z),
+                new Vector3(nodePos.x, splitCenter.y, splitCenter.z),
                 splitCenter
             };
 
             Vector3[] newOctreeSizes = new Vector3[]
             {
                 splitCenter - nodePos,
-                new Vector3(nodeSize.x - (splitCenter.x - nodePos.x), splitCenter.y - nodePos.y,                splitCenter.z - nodePos.z),
-                new Vector3(splitCenter.x - nodePos.x,                nodeSize.y - (splitCenter.y - nodePos.y), splitCenter.z - nodePos.z),
-                new Vector3(nodeSize.x - (splitCenter.x - nodePos.x), nodeSize.y - (splitCenter.y - nodePos.y), splitCenter.z - nodePos.z),
-                new Vector3(splitCenter.x - nodePos.x,                splitCenter.y - nodePos.y ,               nodeSize.z - (splitCenter.z - nodePos.z)),
-                new Vector3(nodeSize.x - (splitCenter.x - nodePos.x), splitCenter.y - nodePos.y,                nodeSize.z - (splitCenter.z - nodePos.z)),
-                new Vector3(splitCenter.x - nodePos.x,                nodeSize.y - (splitCenter.y - nodePos.y), nodeSize.z - (splitCenter.z - nodePos.z)),
+                new Vector3(nodeSize.x - (splitCenter.x - nodePos.x), splitCenter.y - nodePos.y,
+                    splitCenter.z - nodePos.z),
+                new Vector3(splitCenter.x - nodePos.x, nodeSize.y - (splitCenter.y - nodePos.y),
+                    splitCenter.z - nodePos.z),
+                new Vector3(nodeSize.x - (splitCenter.x - nodePos.x), nodeSize.y - (splitCenter.y - nodePos.y),
+                    splitCenter.z - nodePos.z),
+                new Vector3(splitCenter.x - nodePos.x, splitCenter.y - nodePos.y,
+                    nodeSize.z - (splitCenter.z - nodePos.z)),
+                new Vector3(nodeSize.x - (splitCenter.x - nodePos.x), splitCenter.y - nodePos.y,
+                    nodeSize.z - (splitCenter.z - nodePos.z)),
+                new Vector3(splitCenter.x - nodePos.x, nodeSize.y - (splitCenter.y - nodePos.y),
+                    nodeSize.z - (splitCenter.z - nodePos.z)),
                 nodeSize - (splitCenter - nodePos)
             };
 
@@ -535,15 +575,18 @@ namespace CellexalVR.AnalysisObjects
                     node.children[i] = newOctreeNode;
                 }
             }
+
             //call recursively for each new cluster
             for (int i = 0; i < newClusters.Count; ++i)
             {
-                var returnedClusters = SplitClusterRecursive(newClusters[i], node.children[i], addClusters, ref removedDuplicates);
+                var returnedClusters =
+                    SplitClusterRecursive(newClusters[i], node.children[i], addClusters, ref removedDuplicates);
                 if (returnedClusters != null)
                 {
                     result.AddRange(returnedClusters);
                 }
             }
+
             return result;
         }
 
@@ -561,20 +604,26 @@ namespace CellexalVR.AnalysisObjects
                 case GraphType.BETWEEN:
                 case GraphType.SPATIAL:
                 case GraphType.ATTRIBUTE:
-                    newGraph.longestAxis = Mathf.Max(newGraph.diffCoordValues.x, newGraph.diffCoordValues.y, newGraph.diffCoordValues.z);
+                    newGraph.longestAxis = Mathf.Max(newGraph.diffCoordValues.x, newGraph.diffCoordValues.y,
+                        newGraph.diffCoordValues.z);
                     break;
                 case GraphType.FACS:
-                    newGraph.longestAxis = Mathf.Max(newGraph.diffCoordValues.x, newGraph.diffCoordValues.y, newGraph.diffCoordValues.z) * 2;
+                    newGraph.longestAxis = Mathf.Max(newGraph.diffCoordValues.x, newGraph.diffCoordValues.y,
+                        newGraph.diffCoordValues.z) * 2;
                     break;
-
             }
+
             // making the largest axis longer by the length of two graphpoint meshes makes no part of the graphpoints peek out of the 1x1x1 meter bounding cube when positioned close to the borders
             //var graphPointMeshBounds = graphPointMesh.bounds;
             //float longestAxisGraphPointMesh = Mathf.Max(graphPointMeshBounds.size.x, graphPointMeshBounds.size.y, graphPointMeshBounds.size.z);
             //longestAxis += longestAxisGraphPointMesh;
             newGraph.scaledOffset = (newGraph.diffCoordValues / newGraph.longestAxis) / 2;
 
-            newGraph.points.Values.All((Graph.GraphPoint p) => { p.ScaleCoordinates(); return true; });
+            newGraph.points.Values.All((Graph.GraphPoint p) =>
+            {
+                p.ScaleCoordinates();
+                return true;
+            });
         }
 
         /// <summary>
@@ -588,7 +637,8 @@ namespace CellexalVR.AnalysisObjects
         /// <summary>
         /// Coroutine that makes some meshes every frame. Uses the new job system to do things parallel.
         /// </summary>
-        private IEnumerator MakeMeshesCoroutine(List<HashSet<Graph.GraphPoint>> clusters, BooleanExpression.Expr expr = null)
+        private IEnumerator MakeMeshesCoroutine(List<HashSet<Graph.GraphPoint>> clusters,
+            BooleanExpression.Expr expr = null)
         {
             var stopwatch = new System.Diagnostics.Stopwatch();
             stopwatch.Start();
@@ -599,13 +649,17 @@ namespace CellexalVR.AnalysisObjects
             Material graphPointMaterial = Instantiate(graphPointMaterialPrefab);
 
             // arrays used by the combine meshes job
-            NativeArray<Vector3> graphPointMeshVertices = new NativeArray<Vector3>(meshToUse.vertices, Allocator.TempJob);
+            NativeArray<Vector3> graphPointMeshVertices =
+                new NativeArray<Vector3>(meshToUse.vertices, Allocator.TempJob);
             NativeArray<int> graphPointMeshTriangles = new NativeArray<int>(meshToUse.triangles, Allocator.TempJob);
             NativeArray<int> clusterOffsets = new NativeArray<int>(nbrOfClusters, Allocator.TempJob);
             NativeArray<Vector3> positions = new NativeArray<Vector3>(newGraph.points.Count, Allocator.TempJob);
-            NativeArray<Vector3> resultVertices = new NativeArray<Vector3>(newGraph.points.Count * graphPointMeshVertexCount, Allocator.TempJob);
-            NativeArray<int> resultTriangles = new NativeArray<int>(newGraph.points.Count * graphPointMeshTriangleCount, Allocator.TempJob);
-            NativeArray<Vector2> resultUVs = new NativeArray<Vector2>(newGraph.points.Count * graphPointMeshVertexCount, Allocator.TempJob);
+            NativeArray<Vector3> resultVertices =
+                new NativeArray<Vector3>(newGraph.points.Count * graphPointMeshVertexCount, Allocator.TempJob);
+            NativeArray<int> resultTriangles =
+                new NativeArray<int>(newGraph.points.Count * graphPointMeshTriangleCount, Allocator.TempJob);
+            NativeArray<Vector2> resultUVs =
+                new NativeArray<Vector2>(newGraph.points.Count * graphPointMeshVertexCount, Allocator.TempJob);
 
             // set up cluster offsets
             clusterOffsets[0] = 0;
@@ -629,7 +683,6 @@ namespace CellexalVR.AnalysisObjects
                     j++;
                 }
             }
-
 
 
             // create a job to create and merge the meshes
@@ -672,15 +725,18 @@ namespace CellexalVR.AnalysisObjects
                 {
                     clusterSize = newGraph.points.Count - clusterOffset;
                 }
+
                 int nbrOfVerticesInCluster = clusterSize * graphPointMeshVertexCount;
                 int nbrOfTrianglesInCluster = clusterSize * graphPointMeshTriangleCount;
                 int vertexOffset = clusterOffset * graphPointMeshVertexCount;
                 int triangleOffset = clusterOffset * graphPointMeshTriangleCount;
 
                 // copy the vertices, uvs and triangles to the new mesh
-                newMesh.vertices = new NativeSlice<Vector3>(job.resultVertices, vertexOffset, nbrOfVerticesInCluster).ToArray();
+                newMesh.vertices = new NativeSlice<Vector3>(job.resultVertices, vertexOffset, nbrOfVerticesInCluster)
+                    .ToArray();
                 newMesh.uv = new NativeSlice<Vector2>(job.resultUVs, vertexOffset, nbrOfVerticesInCluster).ToArray();
-                newMesh.triangles = new NativeSlice<int>(job.resultTriangles, triangleOffset, nbrOfTrianglesInCluster).ToArray();
+                newMesh.triangles = new NativeSlice<int>(job.resultTriangles, triangleOffset, nbrOfTrianglesInCluster)
+                    .ToArray();
 
                 newMesh.RecalculateBounds();
                 newMesh.RecalculateNormals();
@@ -710,6 +766,7 @@ namespace CellexalVR.AnalysisObjects
                     }
                 }
             }
+
             job.positions.Dispose();
             job.clusterOffsets.Dispose();
             job.resultVertices.Dispose();
@@ -731,7 +788,8 @@ namespace CellexalVR.AnalysisObjects
             newGraph.textureWidth = nbrOfMaxPointsPerClusters;
             newGraph.textureHeight = nbrOfClusters;
             //Texture2D texture = new Texture2D(newGraph.textureWidth, newGraph.textureHeight, TextureFormat.ARGB32, false);
-            Texture2D texture = new Texture2D(newGraph.textureWidth, newGraph.textureHeight, TextureFormat.ARGB32, false, true);
+            Texture2D texture = new Texture2D(newGraph.textureWidth, newGraph.textureHeight, TextureFormat.ARGB32,
+                false, true);
 
             texture.filterMode = FilterMode.Point;
             texture.anisoLevel = 0;
@@ -742,6 +800,7 @@ namespace CellexalVR.AnalysisObjects
                     texture.SetPixel(i, j, Color.red);
                 }
             }
+
             texture.Apply();
             newGraph.texture = texture;
             var sharedMaterial = newGraph.graphPointClusters[0].GetComponent<Renderer>().sharedMaterial;
@@ -751,7 +810,8 @@ namespace CellexalVR.AnalysisObjects
             sharedMaterial.SetTexture("_GraphpointColorTex", graphPointColors);
 
             stopwatch.Stop();
-            CellexalLog.Log(string.Format("made meshes for {0} in {1}", newGraph.GraphName, stopwatch.Elapsed.ToString()));
+            CellexalLog.Log(string.Format("made meshes for {0} in {1}", newGraph.GraphName,
+                stopwatch.Elapsed.ToString()));
             isCreating = false;
         }
 
@@ -775,24 +835,19 @@ namespace CellexalVR.AnalysisObjects
         /// </summary>
         public struct CombineMeshesJob : IJobParallelFor
         {
-            [ReadOnly]
-            public NativeArray<Vector3> positions;
-            [ReadOnly]
-            public NativeArray<Vector3> vertices;
-            [ReadOnly]
-            public NativeArray<int> triangles;
-            [ReadOnly]
-            public NativeArray<int> clusterOffsets;
-            [ReadOnly]
-            public int clusterMaxSize;
-            [WriteOnly]
-            [NativeDisableParallelForRestriction]
+            [ReadOnly] public NativeArray<Vector3> positions;
+            [ReadOnly] public NativeArray<Vector3> vertices;
+            [ReadOnly] public NativeArray<int> triangles;
+            [ReadOnly] public NativeArray<int> clusterOffsets;
+            [ReadOnly] public int clusterMaxSize;
+
+            [WriteOnly] [NativeDisableParallelForRestriction]
             public NativeArray<Vector3> resultVertices;
-            [WriteOnly]
-            [NativeDisableParallelForRestriction]
+
+            [WriteOnly] [NativeDisableParallelForRestriction]
             public NativeArray<int> resultTriangles;
-            [WriteOnly]
-            [NativeDisableParallelForRestriction]
+
+            [WriteOnly] [NativeDisableParallelForRestriction]
             public NativeArray<Vector2> resultUVs;
 
             // each call to execute merges the meshes of one cluster
@@ -863,12 +918,11 @@ namespace CellexalVR.AnalysisObjects
         public void CreateSubGraphs()
         {
             List<string> attr = new List<string>
-        {
-            "celltype@Caudal.Mesoderm"
-        };
+            {
+                "celltype@Caudal.Mesoderm"
+            };
             CreateSubGraphs(attr);
         }
-
 
 
         [ConsoleCommand("graphGenerator", aliases: "cm")]
@@ -880,7 +934,8 @@ namespace CellexalVR.AnalysisObjects
 
         public void CreateMesh()
         {
-            StartCoroutine(referenceManager.graphManager.Graphs[0].transform.parent.GetComponent<SpatialGraph>().CreateMesh());
+            StartCoroutine(referenceManager.graphManager.Graphs[0].transform.parent.GetComponent<SpatialGraph>()
+                .CreateMesh());
         }
 
 
@@ -891,49 +946,60 @@ namespace CellexalVR.AnalysisObjects
         public void CreateSubGraphs(List<string> attributes)
         {
             BooleanExpression.Expr expr = new BooleanExpression.AttributeExpr(attributes[0], true);
-            string name = attributes[0];
-            if (name.Contains('@'))
-            {
-                name = name.Split('@')[1];
-            }
+            string subGraphName = attributes[0];
+            // if (subGraphName.Contains('@'))
+            // {
+            //     subGraphName = subGraphName.Split('@')[1];
+            // }
+
             for (int i = 1; i < attributes.Count; i++)
             {
-                if (attributes[i].Contains('@'))
-                {
-                    name += " - " + attributes[i].Split('@')[1];
-                }
-                else
-                {
-                    name += " - " + attributes[i];
-                }
+                // if (attributes[i].Contains('@'))
+                // {
+                //     subGraphName += " - " + attributes[i].Split('@')[1];
+                // }
+                // else
+                // {
+                // }
+                subGraphName += " - " + attributes[i];
+
                 BooleanExpression.Expr tempExpr = expr;
                 expr = new BooleanExpression.OrExpr(tempExpr, new BooleanExpression.AttributeExpr(attributes[i], true));
             }
-            StartCoroutine(CreateSubgraphsCoroutine(expr, attributes, graphManager.originalGraphs, name));
+
+            StartCoroutine(CreateSubgraphsCoroutine(expr, attributes, graphManager.originalGraphs, subGraphName));
         }
 
-        private IEnumerator CreateSubgraphsCoroutine(BooleanExpression.Expr expr, List<string> attributes, List<Graph> graphs, string name)
+        private IEnumerator CreateSubgraphsCoroutine(BooleanExpression.Expr expr, List<string> attributes,
+            List<Graph> graphs, string subGraphName)
         {
             foreach (Graph g in graphs)
             {
-                if (g.gameObject.activeSelf)
-                {
-                    string fullName = g.name + " - " + name;
-                    yield return StartCoroutine(CreateSubGraphsCoroutine(expr, attributes, g, fullName));
-                }
+                if (!g.gameObject.activeSelf) continue;
+                string fullName = g.name + " - " + subGraphName;
+                yield return StartCoroutine(CreateSubGraphsCoroutine(expr, attributes, g, fullName));
             }
+
+            if (!referenceManager.sessionHistoryList.Contains(subGraphName, Definitions.HistoryEvent.ATTRIBUTEGRAPH))
+            {
+                referenceManager.sessionHistoryList.AddEntry(subGraphName, Definitions.HistoryEvent.ATTRIBUTEGRAPH);
+            }
+
             CellexalEvents.CommandFinished.Invoke(true);
         }
 
-        private IEnumerator CreateSubGraphsCoroutine(BooleanExpression.Expr expr, List<string> attributes, Graph g, string name)
+
+        private IEnumerator CreateSubGraphsCoroutine(BooleanExpression.Expr expr, List<string> attributes, Graph g,
+            string subGraphName)
         {
             List<string> attributesToColor = new List<string>(attributes);
             while (isCreating)
             {
                 yield return null;
             }
+
             var subGraph = CreateGraph(GraphType.ATTRIBUTE);
-            subGraph.GraphName = name;
+            subGraph.GraphName = subGraphName;
             subGraph.tag = "SubGraph";
 
             StartCoroutine(g.CreateGraphSkeleton(true));
@@ -941,12 +1007,12 @@ namespace CellexalVR.AnalysisObjects
             {
                 yield return null;
             }
+
             GameObject skeleton = g.convexHull;
             skeleton.transform.parent = subGraph.gameObject.transform;
             skeleton.transform.localPosition = Vector3.zero;
 
             List<Cell> subset = referenceManager.cellManager.SubSet(expr);
-
             //Graph graph = g;
 
             foreach (Cell cell in subset)
@@ -954,6 +1020,7 @@ namespace CellexalVR.AnalysisObjects
                 var point = g.FindGraphPoint(cell.Label).Position;
                 AddGraphPoint(cell, point.x, point.y, point.z);
             }
+
             subGraph.maxCoordValues = g.ScaleCoordinates(g.maxCoordValues);
             subGraph.minCoordValues = g.ScaleCoordinates(g.minCoordValues);
             SliceClustering();
@@ -980,125 +1047,82 @@ namespace CellexalVR.AnalysisObjects
             if (g.hasVelocityInfo)
             {
                 referenceManager.velocitySubMenu.CreateButton(Directory.GetCurrentDirectory() +
-                    @"\Data\" + CellexalUser.DataSourceFolder + @"\" + g.GraphName + ".mds", name);
+                                                              @"\Data\" + CellexalUser.DataSourceFolder + @"\" +
+                                                              g.GraphName + ".mds", subGraphName);
                 subGraph.hasVelocityInfo = true;
             }
         }
 
-        public void CreatePointsBetweenGraphs(Cell[] cells, Vector3[] positions)
+        public void UpdateMeshToUse()
         {
-            newGraph = CreateGraph(GraphType.BETWEEN);
-            newGraph.transform.parent = graphManager.Graphs[0].transform;
-            newGraph.GraphName = "CTCT_graph";
-            //newGraph.transform.localScale = Vector3.one * 0.1f;
-            newGraph.transform.position = positions[0];
-            for (int i = 0; i < cells.Length; i++)
+            switch (CellexalConfig.Config.GraphPointQuality)
             {
-                AddGraphPoint(cells[i], positions[i].x, positions[i].y, positions[i].z);
-            }
-            //newGraph.maxCoordValues = graph.ScaleCoordinates(graph.maxCoordValues);
-            //newGraph.minCoordValues = graph.ScaleCoordinates(graph.minCoordValues);
-            SliceClustering();
-            graphManager.Graphs.Add(newGraph);
-            //foreach (BoxCollider col in graph.GetComponents<BoxCollider>())
-            //{
-            //    var newCol = newGraph.gameObject.AddComponent<BoxCollider>();
-            //    newCol.size = col.size;
-            //}
-        }
-
-
-        /// <summary>
-        /// Adds many boxcolliders to this graph. The idea is that when grabbing graphs we do not want to collide with all the small colliders on the graphpoints, so we put many boxcolliders that cover the graph instead.
-        /// </summary>
-        public void CreateColliders()
-        {
-            // maximum number of times we allow colliders to grow in size
-            int maxColliderIncreaseIterations = 10;
-            // how many more graphpoints there must be for it to be worth exctending a collider
-            float extensionThreshold = 0.1f /*CellexalConfig.GraphGrabbableCollidersExtensionThresehold*/;
-            // copy points dictionary
-            HashSet<Graph.GraphPoint> notIncluded = new HashSet<Graph.GraphPoint>(newGraph.points.Values);
-
-            LayerMask layerMask = 1 << LayerMask.NameToLayer("GraphPointLayer");
-
-            while (notIncluded.Count > (newGraph.points.Count / 100))
-            {
-                // get any graphpoint
-                Graph.GraphPoint point = notIncluded.First();
-                Vector3 center = point.Position;
-                Vector3 halfExtents = new Vector3(0.01f, 0.01f, 0.01f);
-                Vector3 oldHalfExtents = halfExtents;
-
-                for (int j = 0; j < maxColliderIncreaseIterations; ++j)
-                {
-                    // find the graphspoints it is near
-                    Collider[] collidesWith = Physics.OverlapBox(center, halfExtents, Quaternion.identity, ~layerMask, QueryTriggerInteraction.Collide);
-                    // should we increase the size?
-
-                    // halfextents for new boxes
-                    Vector3 newHalfExtents = halfExtents + oldHalfExtents;
-
-                    // check how many colliders there are surrounding us
-                    Collider[] collidesWithx1 = Physics.OverlapBox(center, newHalfExtents, Quaternion.identity, ~layerMask, QueryTriggerInteraction.Collide);
-
-                    bool extended = false;
-                    // increase the halfextents if it seems worth it
-                    int currentlyCollidingWith = (int)(collidesWith.Length * extensionThreshold);
-                    if (NumberOfNotIncludedColliders(collidesWithx1, notIncluded) > currentlyCollidingWith)
-                    {
-                        halfExtents.x += oldHalfExtents.x;
-                        center.x += oldHalfExtents.x / 2f;
-                        extended = true;
-                    }
-
-                    // remove all the graphpoints that collide with this new collider
-                    collidesWith = Physics.OverlapBox(center, halfExtents, Quaternion.identity, ~layerMask, QueryTriggerInteraction.Collide);
-                    RemoveGraphPointsFromSet(collidesWith, ref notIncluded);
-                    if (!extended) break;
-                }
-                // add the collider
-                BoxCollider newCollider = gameObject.AddComponent<BoxCollider>();
-                newCollider.center = transform.InverseTransformPoint(center);
-                newCollider.size = halfExtents * 2;
+                case "Standard" when CellexalConfig.Config.GraphPointSize == "Standard":
+                    meshToUse = graphpointStandardQStandardSzMesh;
+                    break;
+                case "Low" when CellexalConfig.Config.GraphPointSize == "Standard":
+                    meshToUse = graphpointLowQStandardSzMesh;
+                    break;
+                case "Standard" when CellexalConfig.Config.GraphPointSize == "Small":
+                case "Low" when CellexalConfig.Config.GraphPointSize == "Small":
+                    meshToUse = graphpointLowQSmallSzMesh;
+                    break;
+                case "Standard" when CellexalConfig.Config.GraphPointSize == "Large":
+                    meshToUse = graphpointStandardQLargeSzMesh;
+                    break;
+                default:
+                    meshToUse = graphpointLowQLargeSzMesh;
+                    break;
             }
         }
+        
 
         /// <summary>
-        /// Helper method to remove graphpoints from a dictionary.
+        /// Rebuilding graphs while when mesh has changed such as to another size or quality. The color of the points are kept
         /// </summary>
-        /// <param name="colliders"> An array with colliders attached to graphpoints. </param>
-        /// <param name="set"> A hashset containing graphpoints. </param>
-        private void RemoveGraphPointsFromSet(Collider[] colliders, ref HashSet<Graph.GraphPoint> set)
+        /// <returns></returns>
+        public IEnumerator RebuildGraphs()
         {
-            foreach (Collider c in colliders)
+            foreach (Graph graph in graphManager.originalGraphs)
             {
-                Graph.GraphPoint p = c.gameObject.GetComponent<Graph.GraphPoint>();
-                if (p != null)
+                newGraph = graph;
+                Texture2D oldTexture = graph.texture;
+                graph.minCoordValues = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+                graph.maxCoordValues = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+                Dictionary<string, Color32> oldTextureColors = new Dictionary<string, Color32>();
+                foreach (KeyValuePair<string, Graph.GraphPoint> point in newGraph.points)
                 {
-                    set.Remove(p);
+                    UpdateMinMaxCoords(point.Value.Position.x, point.Value.Position.y, point.Value.Position.z);
+                    oldTextureColors[point.Key] =
+                        oldTexture.GetPixel(point.Value.textureCoord.x, point.Value.textureCoord.y);
                 }
-            }
-        }
 
-        /// <summary>
-        /// Helper method to count number of not yet added grapphpoints we collided with.
-        /// </summary>
-        /// <param name="colliders"> An array of colliders attached to graphpoints. </param>
-        /// <param name="points"> A hashset containing graphpoints. </param>
-        /// <returns> The number of graphpoints that were present in the dictionary. </returns>
-        private int NumberOfNotIncludedColliders(Collider[] colliders, HashSet<Graph.GraphPoint> points)
-        {
-            int total = 0;
-            foreach (Collider c in colliders)
-            {
-                Graph.GraphPoint p = c.gameObject.GetComponent<Graph.GraphPoint>();
-                if (p != null)
+
+                foreach (GameObject cluster in newGraph.graphPointClusters)
                 {
-                    total += points.Contains(p) ? 1 : 0;
+                    Destroy(cluster);
+                    yield return null;
                 }
+
+                isCreating = true;
+
+                SliceClustering();
+                while (isCreating)
+                {
+                    yield return null;
+                }
+
+                foreach (KeyValuePair<string, Graph.GraphPoint> point in newGraph.points)
+                {
+                    Vector2Int pos = point.Value.textureCoord;
+                    Color32 oldColor = oldTextureColors[point.Key];
+                    graph.texture.SetPixels32(pos.x, pos.y, 1, 1, new Color32[] {oldColor});
+                }
+
+                graph.texture.Apply();
+                graph.graphPointClusters[0].GetComponent<Renderer>().sharedMaterial.mainTexture = graph.texture;
             }
-            return total;
         }
     }
 }
+

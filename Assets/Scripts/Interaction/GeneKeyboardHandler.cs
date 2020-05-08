@@ -3,31 +3,41 @@ using System.Collections;
 using CellexalVR.Interaction;
 using CellexalVR.AnalysisObjects;
 using System;
+using CellexalVR.General;
 
 namespace CellexalVR.Interaction
 {
-
     public class GeneKeyboardHandler : KeyboardHandler
     {
         public PreviousSearchesList previousSearchesList;
         public CorrelatedGenesList correlatedGenesList;
 
-        public override string[][] Layouts { get; protected set; } = {
+        public override string[][] Layouts { get; protected set; } =
+        {
             // lowercase
-            new string[] { "q", "w", "e", "r", "t", "y", "u", "i", "o", "p",
-                           "Shift", "a", "s", "d", "f", "g", "h", "j", "k", "l",
-                           "123\n!#%", "z", "x", "c", "v", "b", "n", "m", "Back", "Clear",
-                           "Enter"},
+            new string[]
+            {
+                "q", "w", "e", "r", "t", "y", "u", "i", "o", "p",
+                "Shift", "a", "s", "d", "f", "g", "h", "j", "k", "l",
+                "123\n!#%", "z", "x", "c", "v", "b", "n", "m", "Back", "Clear",
+                "Enter"
+            },
             // uppercase
-            new string[] { "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P",
-                           "Shift", "A", "S", "D", "F", "G", "H", "J", "K", "L",
-                           "123\n!#%", "Z", "X", "C", "V", "B", "N", "M", "Back", "Clear",
-                           "Enter"},
+            new string[]
+            {
+                "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P",
+                "Shift", "A", "S", "D", "F", "G", "H", "J", "K", "L",
+                "123\n!#%", "Z", "X", "C", "V", "B", "N", "M", "Back", "Clear",
+                "Enter"
+            },
             // special
-            new string[] {  "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
-                            "Shift", "!", "#", "%", "&", "/", "(", ")", "=", "@",
-                            "ABC\nabc", "\\", "-", "_", ".", ":", ",", ";", "Back", "Clear",
-                            "Enter" }
+            new string[]
+            {
+                "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
+                "Shift", "!", "#", "%", "&", "/", "(", ")", "=", "@",
+                "ABC\nabc", "\\", "-", "_", ".", ":", ",", ";", "Back", "Clear",
+                "Enter"
+            }
         };
 
         /// <summary>
@@ -77,6 +87,11 @@ namespace CellexalVR.Interaction
             var correlatedGenesListOnPrefab = outerMostPrefab.GetComponentInChildren<CorrelatedGenesList>();
             correlatedGenesListOnPrefab.BuildList(10, correlatedGenesListOnPrefab);
 
+            UnityEditor.EditorUtility.DisplayProgressBar("Building keyboard", "Building session history list", 0.7f);
+            var sessionHistoryListOnPrefab = outerMostPrefab.GetComponentInChildren<SessionHistoryList>();
+            sessionHistoryListOnPrefab.BuildList(10, sessionHistoryListOnPrefab);
+
+
             base.BuildKeyboard(scriptOnPrefab);
 
             ClosePrefab(outerMostPrefab);
@@ -97,14 +112,13 @@ namespace CellexalVR.Interaction
 
         void OnEnable()
         {
-            instance = (GeneKeyboardHandler)target;
+            instance = (GeneKeyboardHandler) target;
         }
 
         public override void OnInspectorGUI()
         {
             if (GUILayout.Button("Build keyboard"))
             {
-
                 instance.BuildKeyboard();
             }
 
@@ -117,9 +131,7 @@ namespace CellexalVR.Interaction
                 // I think this happens because BuildKeyboard opens a prefab using UnityEditor.PrefabUtility.LoadPrefabContents
                 // which opens a second (hidden) inspector which glitches out because it's called from OnInspectorGUI.
             }
-
         }
-
     }
 #endif
 }

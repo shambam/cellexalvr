@@ -21,8 +21,7 @@ namespace CellexalVR.SceneObjects
         public Transform cylinder;
         public GameObject helpVideoObj;
 
-        [HideInInspector]
-        public bool loaderMovedDown = false;
+        [HideInInspector] public bool loaderMovedDown = false;
         public GameObject keyboard;
         public bool loadingComplete = false;
         public List<string> pathsToLoad;
@@ -44,7 +43,6 @@ namespace CellexalVR.SceneObjects
         private float currentTime;
         private float arrivalTime;
         private MultiuserMessageSender multiuserMessageSender;
-        // multiple_exp private DatasetList datasetList;
 
         private void OnValidate()
         {
@@ -137,6 +135,7 @@ namespace CellexalVR.SceneObjects
             {
                 finalScale = new Vector3(1f, startScale.y, 1f);
             }
+
             if (moveLoader)
             {
                 finalPosition = distance;
@@ -145,6 +144,7 @@ namespace CellexalVR.SceneObjects
             {
                 finalPosition = transform.position + distance;
             }
+
             keyboard.SetActive(false);
             helpVideoObj.SetActive(false);
             // multiple_exp datasetList.gameObject.SetActive(false);
@@ -166,21 +166,28 @@ namespace CellexalVR.SceneObjects
                         timeEntered = Time.time;
                         cellsEntered = true;
                     }
+
                     if (!cellParent.GetComponent<CellsToLoad>().GraphsLoaded())
                     {
                         string path = cellParent.GetComponent<CellsToLoad>().Directory;
                         graphManager.directories.Add(path);
                         try
                         {
-                            multiuserMessageSender.SendMessageReadFolder(path);
-                            inputReader.ReadFolder(path);
+                            if (path.Contains(".html"))
+                            {
+                                referenceManager.reportReader.ReadFolder(path);
+                            }
+                            else
+                            {
+                                multiuserMessageSender.SendMessageReadFolder(path);
+                                inputReader.ReadFolder(path);
+                            }
                         }
                         catch (System.InvalidOperationException e)
                         {
                             CellexalLog.Log("Could not read folder. Caught exception - " + e.StackTrace);
                             ResetFolders(true);
                         }
-                        // new_keyboard referenceManager.keyboardStatusFolder.ClearKey();
                     }
 
                     Destroy(cellParent.GetComponent<FixedJoint>());
@@ -190,6 +197,7 @@ namespace CellexalVR.SceneObjects
                         child.gameObject.AddComponent<Rigidbody>();
                         cellsToDestroy.Add(child);
                     }
+
                     foreach (Transform child in cellsToDestroy)
                     {
                         child.parent = null;
@@ -262,9 +270,9 @@ namespace CellexalVR.SceneObjects
                 if (child.CompareTag("Folder") && child.gameObject.GetComponent<Rigidbody>() == null)
                 {
                     child.gameObject.AddComponent<Rigidbody>();
-
                 }
             }
+
             collidersDestroyed = true;
         }
 
@@ -276,6 +284,7 @@ namespace CellexalVR.SceneObjects
             {
                 Destroy(child.gameObject);
             }
+
             cellsToDestroy.Clear();
             ResetLoaderBooleans();
         }
@@ -305,12 +314,14 @@ namespace CellexalVR.SceneObjects
 
                 CellexalEvents.GraphsUnloaded.Invoke();
             }
+
             // must reset loader before generating new folders
             if (loaderMovedDown)
             {
                 loaderMovedDown = false;
                 MoveLoader(new Vector3(0f, 2f, 0f), 2);
             }
+
             ResetLoaderBooleans();
             inputFolderGenerator.GenerateFolders();
             referenceManager.inputFolderGenerator.gameObject.SetActive(true);

@@ -4,6 +4,7 @@ using CellexalVR.General;
 using CellexalVR.Menu.Buttons.Facs;
 using System.Collections.Generic;
 using System.IO;
+using CellexalVR.Extensions;
 using UnityEngine;
 
 namespace CellexalVR.AnalysisLogic
@@ -63,6 +64,11 @@ namespace CellexalVR.AnalysisLogic
             {
                 b.ToggleOutline(false);
                 //b.activeOutline.SetActive(false);
+            }
+
+            if (!referenceManager.sessionHistoryList.Contains(filePath, Definitions.HistoryEvent.FACSGRAPH))
+            {
+                referenceManager.sessionHistoryList.AddEntry(filePath, Definitions.HistoryEvent.FACSGRAPH);
             }
         }
 

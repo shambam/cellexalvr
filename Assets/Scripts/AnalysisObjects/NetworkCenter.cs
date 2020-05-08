@@ -22,7 +22,6 @@ using CellexalVR.Multiuser;
 
 namespace CellexalVR.AnalysisObjects
 {
-
     /// <summary>
     /// Represents the center of a network. It handles the enlarging when it is pressed.
     /// </summary>
@@ -39,11 +38,26 @@ namespace CellexalVR.AnalysisObjects
         public SaveNetworkAsImageButton saveImageButton;
         public GameObject movingOutlineCircle;
 
+        private int group;
+
+        public int Group
+        {
+            get => @group;
+            set
+            {
+                group = value;
+                cellsInGroup = referenceManager.cellManager.GetCells(group);
+            }
+        }
+
+        public Cell[] cellsInGroup;
+
         public float MaxNegPcor { get; set; }
         public float MinNegPcor { get; set; }
         public float MaxPosPcor { get; set; }
         public float MinPosPcor { get; set; }
         private int layoutSeed;
+
         public int LayoutSeed
         {
             get { return layoutSeed; }
@@ -53,9 +67,16 @@ namespace CellexalVR.AnalysisObjects
                 rand = new System.Random(value);
             }
         }
+
         public bool Enlarged { get; private set; }
         public bool isReplacement = false;
-        public enum Layout { TWO_D, THREE_D }
+
+        public enum Layout
+        {
+            TWO_D,
+            THREE_D
+        }
+
         public bool controllerInsideSomeNode;
 
         private ControllerModelSwitcher controllerModelSwitcher;
@@ -68,15 +89,14 @@ namespace CellexalVR.AnalysisObjects
         private bool enlarge = false;
         private int numColliders = 0;
         private List<NetworkNode> nodes = new List<NetworkNode>();
-        [HideInInspector]
-        public NetworkCenter replacing;
+        [HideInInspector] public NetworkCenter replacing;
         private List<Arc> arcs = new List<Arc>();
         private List<CombinedArc> combinedArcs = new List<CombinedArc>();
         private SteamVR_TrackedObject rightController;
         private NetworkGenerator networkGenerator;
         private MultiuserMessageSender multiuserMessageSender;
         private Layout currentLayout;
-        private bool[] layoutsCalculated = { false, false };
+        private bool[] layoutsCalculated = {false, false};
         private bool calculatingLayout = false;
         private bool switchingLayout = false;
         private Dictionary<NetworkNode, Vector3> positions;
@@ -93,20 +113,21 @@ namespace CellexalVR.AnalysisObjects
             }
         }
 
-        void Start()
+        private void Start()
         {
-            var referenceManager = GameObject.Find("InputReader").GetComponent<ReferenceManager>();
+            ReferenceManager referenceManager = GameObject.Find("InputReader").GetComponent<ReferenceManager>();
             if (CrossSceneInformation.Normal)
             {
                 controllerModelSwitcher = referenceManager.controllerModelSwitcher;
                 rightController = referenceManager.rightController;
             }
+
             networkGenerator = referenceManager.networkGenerator;
             multiuserMessageSender = referenceManager.multiuserMessageSender;
             networkHandler = GetComponentInParent<NetworkHandler>();
         }
 
-        void FixedUpdate()
+        private void FixedUpdate()
         {
             // moving kinematic rigidbodies
             if (enlarge)
@@ -117,6 +138,7 @@ namespace CellexalVR.AnalysisObjects
                     multiuserMessageSender.SendMessageEnlargeNetwork(Handler.name, name);
                     EnlargeNetwork();
                 }
+
                 if (isReplacement)
                 {
                     multiuserMessageSender.SendMessageBringBackNetwork(Handler.name, replacing.name);
@@ -141,15 +163,15 @@ namespace CellexalVR.AnalysisObjects
                 {
                     Vector3 midPoint1 = (a.t1.position + a.t2.position) / 2f;
                     Vector3 midPoint2 = (a.t3.position + a.t4.position) / 2f;
-                    a.renderer.SetPositions(new Vector3[] { midPoint1, midPoint2 });
+                    a.renderer.SetPositions(new Vector3[] {midPoint1, midPoint2});
                 }
 
                 foreach (CombinedArc a in combinedArcs)
                 {
                     if (a.center1 != this)
-                        a.renderer.SetPositions(new Vector3[] { transform.position, a.center2.position });
+                        a.renderer.SetPositions(new Vector3[] {transform.position, a.center2.position});
                     else
-                        a.renderer.SetPositions(new Vector3[] { transform.position, a.center1.position });
+                        a.renderer.SetPositions(new Vector3[] {transform.position, a.center1.position});
                 }
             }
 
@@ -158,42 +180,58 @@ namespace CellexalVR.AnalysisObjects
             {
                 if (interactableObject.IsGrabbed())
                 {
-                    multiuserMessageSender.SendMessageMoveNetworkCenter(Handler.name, name, transform.position, transform.rotation, transform.localScale);
+                    multiuserMessageSender.SendMessageMoveNetworkCenter(Handler.name, name, transform.position,
+                        transform.rotation, transform.localScale);
                 }
             }
-
         }
 
 
-        void OnTriggerEnter(Collider other)
+        private void OnTriggerEnter(Collider other)
         {
-            if (other.gameObject.name == "ControllerCollider(Clone)" /*other.transform.parent != null && other.transform.parent.name == "[VRTK][AUTOGEN][Controller][CollidersContainer]"*/)
+            if (other.gameObject.name ==
+                "ControllerCollider(Clone)" /*other.transform.parent != null && other.transform.parent.name == "[VRTK][AUTOGEN][Controller][CollidersContainer]"*/
+            )
             {
                 controllerInside = true;
                 numColliders++;
+                if (cellsInGroup != null)
+                {
+                    referenceManager.cellManager.HighlightCells(cellsInGroup, true);
+                }
             }
         }
 
-        void OnTriggerExit(Collider other)
+        private void OnTriggerExit(Collider other)
         {
-            if (other.gameObject.name == "ControllerCollider(Clone)" /*other.transform.parent != null && other.transform.parent.name == "[VRTK][AUTOGEN][Controller][CollidersContainer]"*/)
+            if (other.gameObject.name ==
+                "ControllerCollider(Clone)" /*other.transform.parent != null && other.transform.parent.name == "[VRTK][AUTOGEN][Controller][CollidersContainer]"*/
+            )
             {
                 numColliders--;
             }
+
             // We might collide with the network nodes' colliders. So OnTriggerExit is called a little too often,
             // so we must make sure we have exited all colliders.
             if (numColliders == 0)
             {
                 controllerInside = false;
+                if (cellsInGroup != null)
+                {
+                    referenceManager.cellManager.HighlightCells(cellsInGroup, false);
+                }
+
                 //controllerModelSwitcher.SwitchToDesiredModel();
             }
         }
 
         private void OnTriggerStay(Collider other)
         {
-            if (other.gameObject.name == "ControllerCollider(Clone)"/*other.transform.parent != null && other.transform.parent.name == "[VRTK][AUTOGEN][Controller][CollidersContainer]"*/)
+            if (other.gameObject.name ==
+                "ControllerCollider(Clone)" /*other.transform.parent != null && other.transform.parent.name == "[VRTK][AUTOGEN][Controller][CollidersContainer]"*/
+            )
             {
-                device = SteamVR_Controller.Input((int)rightController.index);
+                device = SteamVR_Controller.Input((int) rightController.index);
                 if (device.GetPressDown(SteamVR_Controller.ButtonMask.Trigger) && controllerInside)
                 {
                     numColliders = 0;
@@ -246,8 +284,8 @@ namespace CellexalVR.AnalysisObjects
                 return;
             currentLayout = layout;
             StartCoroutine(CalculateLayoutCoroutine(layout));
-
         }
+
         /// <summary>
         /// Starts a thread that calculates the layout.
         /// </summary>
@@ -272,6 +310,7 @@ namespace CellexalVR.AnalysisObjects
                 nodePos.Key.transform.localPosition = nodePos.Value;
                 nodePos.Key.RepositionEdges();
             }
+
             positions.Clear();
             yield break;
         }
@@ -290,20 +329,21 @@ namespace CellexalVR.AnalysisObjects
             float nonAdjecentNeighborConstant = 0.0003f;
 
 
-
             // start by giving all vertices a random position
             if (layout == Layout.THREE_D)
             {
                 foreach (var node in nodes)
                 {
-                    positions[node] = new Vector3((float)rand.NextDouble() - 0.5f, (float)rand.NextDouble() - 0.5f, (float)rand.NextDouble() - 0.5f);
+                    positions[node] = new Vector3((float) rand.NextDouble() - 0.5f, (float) rand.NextDouble() - 0.5f,
+                        (float) rand.NextDouble() - 0.5f);
                 }
             }
             else if (layout == Layout.TWO_D)
             {
-                foreach (var node in nodes)
+                for (int i = 0; i < nodes.Count; i++)
                 {
-                    positions[node] = new Vector3((float)rand.NextDouble() - 0.5f, (float)rand.NextDouble() - 0.5f, 0f);
+                    positions[nodes[i]] = new Vector3((float) rand.NextDouble() - 0.5f,
+                        (float) rand.NextDouble() - 0.5f, 0f);
                 }
             }
 
@@ -319,14 +359,17 @@ namespace CellexalVR.AnalysisObjects
                 {
                     nodeSet.Remove(node);
                 }
+
                 nGroups++;
             }
+
             //print(NetworkCenterName + " " + nGroups);
             if (nGroups < 9)
             {
                 desiredSpringLength *= (1f / Mathf.Log(nGroups + 1, 9f));
                 //nonAdjecentNeighborConstant *= (1f / Mathf.Log(nGroups + 1, 10f));
             }
+
             List<NetworkNode> removedNodes = new List<NetworkNode>();
             for (int i = 0; i < iterations; ++i)
             {
@@ -351,7 +394,10 @@ namespace CellexalVR.AnalysisObjects
                         var diff = (positions[neighbour] - positions[node1]);
                         var dir = diff.normalized;
 
-                        var appliedForce = diff * Mathf.Log(diff.magnitude / (desiredSpringLength * Mathf.Log(node1.neighbours.Count + 3f, 4f))) / node1.neighbours.Count;
+                        var appliedForce =
+                            diff * Mathf.Log(diff.magnitude /
+                                             (desiredSpringLength * Mathf.Log(node1.neighbours.Count + 3f, 4f))) /
+                            node1.neighbours.Count;
                         //print(diff.magnitude / (desiredSpringLength * Mathf.Log(node1.neighbours.Count + 3f, 4f)));
                         //print(0.1f + Mathf.Log(node1.neighbours.Count + 3f, 4f));
                         //if (diff.magnitude == 0)
@@ -374,6 +420,7 @@ namespace CellexalVR.AnalysisObjects
                         {
                             distance = 0.001f;
                         }
+
                         var dir = (positions[node2] - positions[node1]);
                         var appliedForce = dir.normalized / (distance * distance * nodes.Count);
                         //if (appliedForce.magnitude > maximumForce)
@@ -382,10 +429,12 @@ namespace CellexalVR.AnalysisObjects
                         //    continue;
                         forces[node1] -= appliedForce * nonAdjecentNeighborConstant;
                     }
+
                     foreach (var removedNode in removedNodes)
                     {
                         nodeSet.Add(removedNode);
                     }
+
                     removedNodes.Clear();
                 }
 
@@ -429,21 +478,28 @@ namespace CellexalVR.AnalysisObjects
                                         var node2pos = positions[node2];
                                         var neighbour2pos = positions[neighbour2];
 
-                                        float bottom = (node1pos.x - neighbour1pos.x) * (node2pos.y - neighbour2pos.y) - (node1pos.y - neighbour1pos.y) * (node2pos.x - neighbour2pos.x);
+                                        float bottom = (node1pos.x - neighbour1pos.x) * (node2pos.y - neighbour2pos.y) -
+                                                       (node1pos.y - neighbour1pos.y) * (node2pos.x - neighbour2pos.x);
                                         if (bottom == 0f)
                                         {
                                             // avoid division by zero
                                             bottom = 0.00001f;
                                         }
+
                                         // find intersection coordinates through determinants, thanks wikipedia
                                         float top1 = (node1pos.x * neighbour1pos.y - node1pos.y * neighbour1pos.x);
                                         float top2 = (node2pos.x * neighbour2pos.y - node2pos.y * neighbour2pos.x);
-                                        float intersectX = (top1 * (node2pos.x - neighbour2pos.x) - (node1pos.x - neighbour1pos.x) * top2) / bottom;
-                                        float intersectY = (top1 * (node2pos.y - neighbour2pos.y) - (node1pos.y - neighbour1pos.y) * top2) / bottom;
+                                        float intersectX =
+                                            (top1 * (node2pos.x - neighbour2pos.x) -
+                                             (node1pos.x - neighbour1pos.x) * top2) / bottom;
+                                        float intersectY =
+                                            (top1 * (node2pos.y - neighbour2pos.y) -
+                                             (node1pos.y - neighbour1pos.y) * top2) / bottom;
 
                                         var intersect = new Vector3(intersectX, intersectY, 0f);
 
-                                        if (Between(intersect, node1pos, neighbour1pos) && Between(intersect, node2pos, neighbour2pos))
+                                        if (Between(intersect, node1pos, neighbour1pos) &&
+                                            Between(intersect, node2pos, neighbour2pos))
                                         {
                                             swaps[hash]++;
                                             positions[neighbour1] = neighbour2pos;
@@ -469,6 +525,7 @@ namespace CellexalVR.AnalysisObjects
                     {
                         positions[node] = positions[node].normalized * 0.4f;
                     }
+
                     //node.transform.localPosition = positions[node];
                 }
 
@@ -482,6 +539,7 @@ namespace CellexalVR.AnalysisObjects
                 {
                     break;
                 }
+
                 /*
                 if (i % iterationsPerFrame == 0)
                 {
@@ -520,6 +578,7 @@ namespace CellexalVR.AnalysisObjects
                 //node.RepositionEdges();
                 //node.gameObject.GetComponent<BoxCollider>().enabled = false;
             }
+
             calculatingLayout = false;
             Handler.layoutApplied++;
         }
@@ -611,16 +670,18 @@ namespace CellexalVR.AnalysisObjects
                 lerpBy = (Mathf.Sin(t * Mathf.PI - Mathf.PI / 2f) + 1f) / 2f;
                 foreach (var node in nodes)
                 {
-                    node.transform.localPosition = Vector3.Lerp(node.LayoutPositions[oldLayoutPositionIndex], node.LayoutPositions[newLayoutPositionIndex], lerpBy);
+                    node.transform.localPosition = Vector3.Lerp(node.LayoutPositions[oldLayoutPositionIndex],
+                        node.LayoutPositions[newLayoutPositionIndex], lerpBy);
                     node.RepositionEdges();
                 }
+
                 yield return null;
             }
+
             switchingLayout = false;
             currentLayout = layout;
             //handler.runningScript = false;
         }
-
 
 
         /// <summary>
@@ -658,6 +719,7 @@ namespace CellexalVR.AnalysisObjects
             {
                 rigidbody = gameObject.AddComponent<Rigidbody>();
             }
+
             rigidbody.useGravity = false;
             rigidbody.isKinematic = false;
             rigidbody.drag = 10;
@@ -686,12 +748,14 @@ namespace CellexalVR.AnalysisObjects
             {
                 transform.position = new Vector3(0, 1f, 0);
             }
+
             if (!multiuserMessageSender.multiplayer)
             {
                 transform.position = referenceManager.headset.transform.position;
                 transform.rotation = referenceManager.headset.transform.rotation;
                 transform.position += referenceManager.headset.transform.forward * 1f;
             }
+
             transform.localScale = new Vector3(0.7f, 0.7f, 0.7f);
             transform.Rotate(-20f, 180, 180);
 
@@ -726,6 +790,7 @@ namespace CellexalVR.AnalysisObjects
             {
                 button.SetButtonActivated(true);
             }
+
             GetComponent<SphereCollider>().enabled = true;
             //handler.runningScript = false;
             //CellexalEvents.ScriptFinished.Invoke();
@@ -769,6 +834,7 @@ namespace CellexalVR.AnalysisObjects
             {
                 gameObject.GetComponent<VRTK_InteractableObject>().ForceStopInteracting();
             }
+
             yield return null;
             // now we can do things
             GetComponent<Renderer>().enabled = true;
@@ -796,10 +862,12 @@ namespace CellexalVR.AnalysisObjects
                     node.GetComponent<BoxCollider>().enabled = false;
                 }
             }
+
             foreach (CellexalButton button in GetComponentsInChildren<CellexalButton>())
             {
                 button.SetButtonActivated(false);
             }
+
             CellexalEvents.NetworkUnEnlarged.Invoke();
             //CellexalEvents.ScriptFinished.Invoke();
             //handler.runningScript = false;
@@ -811,14 +879,18 @@ namespace CellexalVR.AnalysisObjects
         private struct Arc
         {
             public LineRenderer renderer;
+
             public NetworkCenter center1, center2;
+
             // t1 and t2 are the genes' transforms in the first network
             // t3 and t4 are the genes' transforms in the second network
             public Transform t1, t2, t3, t4;
+
             // the gameobject that represents the arc
             public GameObject gameObject;
 
-            public Arc(LineRenderer renderer, NetworkCenter center1, NetworkCenter center2, Transform t1, Transform t2, Transform t3, Transform t4, GameObject gameObject)
+            public Arc(LineRenderer renderer, NetworkCenter center1, NetworkCenter center2, Transform t1, Transform t2,
+                Transform t3, Transform t4, GameObject gameObject)
             {
                 this.renderer = renderer;
                 this.center1 = center1;
@@ -841,7 +913,8 @@ namespace CellexalVR.AnalysisObjects
             public GameObject gameObject;
             public int nArcsCombined;
 
-            public CombinedArc(LineRenderer renderer, Transform center1, Transform center2, int nArcsCombined, GameObject gameObject)
+            public CombinedArc(LineRenderer renderer, Transform center1, Transform center2, int nArcsCombined,
+                GameObject gameObject)
             {
                 this.renderer = renderer;
                 this.center1 = center1;
@@ -867,9 +940,10 @@ namespace CellexalVR.AnalysisObjects
             Vector3 midPoint1 = (n1.transform.position + n2.transform.position) / 2f;
             Vector3 midPoint2 = (n3.transform.position + n4.transform.position) / 2f;
             renderer.useWorldSpace = true;
-            renderer.SetPositions(new Vector3[] { midPoint1, midPoint2 });
+            renderer.SetPositions(new Vector3[] {midPoint1, midPoint2});
 
-            Arc newArc = new Arc(renderer, n1.Center, n3.Center, n1.transform, n2.transform, n3.transform, n4.transform, edge);
+            Arc newArc = new Arc(renderer, n1.Center, n3.Center, n1.transform, n2.transform, n3.transform, n4.transform,
+                edge);
             arcs.Add(newArc);
             n3.Center.arcs.Add(newArc);
 
@@ -888,6 +962,14 @@ namespace CellexalVR.AnalysisObjects
         public void SetArcsVisible(bool toggleToState)
         {
             foreach (Arc arc in arcs)
+            {
+                arc.gameObject.SetActive(toggleToState);
+            }
+        }
+
+        public void SetArcsVisible(bool toggleToState, NetworkCenter otherCenter)
+        {
+            foreach (Arc arc in arcs.Where(x => x.center2 == otherCenter))
             {
                 arc.gameObject.SetActive(toggleToState);
             }
@@ -935,6 +1017,7 @@ namespace CellexalVR.AnalysisObjects
                         nArcs[arc.center2] = 1;
                 }
             }
+
             var max = 0;
             foreach (KeyValuePair<NetworkCenter, int> pair in nArcs)
             {
@@ -946,7 +1029,7 @@ namespace CellexalVR.AnalysisObjects
                     LineRenderer renderer = edge.GetComponent<LineRenderer>();
                     edge.transform.parent = transform.parent;
                     renderer.useWorldSpace = true;
-                    renderer.SetPositions(new Vector3[] { transform.position, pair.Key.transform.position });
+                    renderer.SetPositions(new Vector3[] {transform.position, pair.Key.transform.position});
                     edge.transform.localScale = Vector3.one;
 
                     GameObject arcText = Instantiate(simpleArcDescriptionPrefab);
@@ -959,6 +1042,7 @@ namespace CellexalVR.AnalysisObjects
                     combinedArcs.Add(newArc);
                 }
             }
+
             return max;
         }
 
@@ -970,7 +1054,7 @@ namespace CellexalVR.AnalysisObjects
         {
             foreach (CombinedArc arc in combinedArcs)
             {
-                var thickness = (int)(Mathf.Floor(((float)(arc.nArcsCombined) / max) * combinedArcsColors.Count));
+                var thickness = (int) (Mathf.Floor(((float) (arc.nArcsCombined) / max) * combinedArcsColors.Count));
                 arc.renderer.startWidth = thickness * 0.001f;
                 arc.renderer.endWidth = thickness * 0.001f;
                 //arc.renderer.startColor = combinedArcsColors[colorIndex];
@@ -983,7 +1067,6 @@ namespace CellexalVR.AnalysisObjects
         /// </summary>
         public void SaveNetworkAsTextFile()
         {
-
             if (nodes.Count == 0)
                 return;
 
@@ -1000,11 +1083,13 @@ namespace CellexalVR.AnalysisObjects
                 Directory.CreateDirectory(directoryPath);
                 CellexalLog.Log("Created directory " + directoryPath);
             }
+
             string filePath = directoryPath + "\\" + name + "_" + DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".txt";
             var stream = File.Create(filePath);
             var streamWriter = new StreamWriter(stream);
 
-            Dictionary<Tuple<NetworkNode, NetworkNode>, float> included = new Dictionary<Tuple<NetworkNode, NetworkNode>, float>(new TupleComparer());
+            Dictionary<Tuple<NetworkNode, NetworkNode>, float> included =
+                new Dictionary<Tuple<NetworkNode, NetworkNode>, float>(new TupleComparer());
             var nodeLocalPositionOffset = new Vector3(0.4f, 0.4f, 0f);
 
             // write the number of nodes
@@ -1027,10 +1112,11 @@ namespace CellexalVR.AnalysisObjects
                     {
                         continue;
                     }
-                    included[pair] = edge.Item4;
 
+                    included[pair] = edge.Item4;
                 }
             }
+
             // write the number of edges
             streamWriter.WriteLine(included.Count);
             // write the edges and their pcor
@@ -1038,6 +1124,7 @@ namespace CellexalVR.AnalysisObjects
             {
                 streamWriter.WriteLine(edge.Key.Item1.Label + "\t" + edge.Key.Item2.Label + "\t" + edge.Value);
             }
+
             streamWriter.Close();
             stream.Close();
 
@@ -1062,8 +1149,12 @@ namespace CellexalVR.AnalysisObjects
             foreach (var entry in networkGenerator.LineMaterials)
             {
                 Color unitycolor = entry.color;
-                lineBrushes[unitycolor] = new Pen(System.Drawing.Color.FromArgb((int)(unitycolor.r * 255), (int)(unitycolor.g * 255), (int)(unitycolor.b * 255)), 3f);
+                lineBrushes[unitycolor] =
+                    new Pen(
+                        System.Drawing.Color.FromArgb((int) (unitycolor.r * 255), (int) (unitycolor.g * 255),
+                            (int) (unitycolor.b * 255)), 3f);
             }
+
             var thickerBlackBrush = new Pen(System.Drawing.Color.Black, 5f);
             var textFont = new System.Drawing.Font(FontFamily.GenericMonospace, 12f, System.Drawing.FontStyle.Bold);
 
@@ -1072,7 +1163,9 @@ namespace CellexalVR.AnalysisObjects
 
             // draw a frame around the image with the network's color (the color of the group that the network stems from)
             Color col = GetComponent<Renderer>().material.color;
-            Pen selectionPen = new Pen(System.Drawing.Color.FromArgb((int)(col.r * 255), (int)(col.g * 255), (int)(col.b * 255)), 20f);
+            Pen selectionPen =
+                new Pen(System.Drawing.Color.FromArgb((int) (col.r * 255), (int) (col.g * 255), (int) (col.b * 255)),
+                    20f);
             graphics.DrawRectangle(selectionPen, 0, 0, bitmapWidth, bitmapHeight);
 
             // draw the edges
@@ -1091,9 +1184,9 @@ namespace CellexalVR.AnalysisObjects
 
                     graphics.DrawLine(thickerBlackBrush, pos1.x, pos1.y, pos2.x, pos2.y);
                     graphics.DrawLine(lineBrushes[edge.Item3.material.color], pos1.x, pos1.y, pos2.x, pos2.y);
-
                 }
             }
+
             foreach (var node in nodes)
             {
                 var bitmapPosition = node.transform.localPosition + geneLocalPositionOffset;
@@ -1101,6 +1194,7 @@ namespace CellexalVR.AnalysisObjects
                 bitmapPosition.y *= bitmapHeight;
                 graphics.FillEllipse(Brushes.Black, bitmapPosition.x - 5f, bitmapPosition.y - 5f, 10f, 10f);
             }
+
             // draw the gene names
             foreach (var node in nodes)
             {
@@ -1108,7 +1202,8 @@ namespace CellexalVR.AnalysisObjects
                 var bitmapPosition = node.transform.localPosition + geneLocalPositionOffset;
                 bitmapPosition.x *= bitmapWidth;
                 bitmapPosition.y *= bitmapHeight;
-                graphics.DrawString(nodeName, textFont, SystemBrushes.MenuText, bitmapPosition.x, bitmapPosition.y + 5f);
+                graphics.DrawString(nodeName, textFont, SystemBrushes.MenuText, bitmapPosition.x,
+                    bitmapPosition.y + 5f);
             }
 
             string networkImageDirectory = CellexalUser.UserSpecificFolder;
@@ -1125,12 +1220,11 @@ namespace CellexalVR.AnalysisObjects
                 CellexalLog.Log("Created directory " + networkImageDirectory);
             }
 
-            string networkImageFilePath = networkImageDirectory + "\\" + name + "_" + DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".png";
+            string networkImageFilePath = networkImageDirectory + "\\" + name + "_" +
+                                          DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".png";
             bitmap.Save(networkImageFilePath, ImageFormat.Png);
             CellexalLog.Log("Saved " + name + " as an image at " + networkImageFilePath);
             StartCoroutine(referenceManager.reportManager.LogNetwork(networkImageFilePath, this));
-
-
         }
 
 
@@ -1178,16 +1272,19 @@ namespace CellexalVR.AnalysisObjects
                 {
                     nn.UnHighlight();
                 }
+
                 if (highlightCircle != null)
                 {
                     Destroy(highlightCircle);
                     highlightCircle = null;
                 }
+
                 highlightCircle = Instantiate(movingOutlineCircle);
                 highlightCircle.GetComponent<MovingOutlineCircle>().camera = referenceManager.headset.transform;
                 highlightCircle.transform.position = nn.transform.position;
                 highlightCircle.transform.parent = transform;
             }
+
             //int nodeHit = Array.FindIndex(nodes, s => s.Equals(geneName, StringComparison.InvariantCultureIgnoreCase));
         }
 
@@ -1206,6 +1303,7 @@ namespace CellexalVR.AnalysisObjects
                     {
                         node.UnHighlight();
                     }
+
                     return;
                 }
             }

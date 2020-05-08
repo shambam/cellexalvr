@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using Valve.VR;
 using CellexalVR.DesktopUI;
+using CellexalVR.Extensions;
 
 namespace CellexalVR.General
 {
@@ -16,6 +18,7 @@ namespace CellexalVR.General
 
         private static string logDirectory;
         private static string logFilePath = "";
+        private static int maxNrOfLogFiles = 5;
         public static string LogFilePath
         {
             get { return logFilePath; }
@@ -29,11 +32,19 @@ namespace CellexalVR.General
             var now = DateTime.Now;
             var time = now.ToString("yyyy-MM-dd-HH-mm-ss");
 
-            logDirectory = Directory.GetCurrentDirectory() + "\\Output\\" + CellexalUser.Username;
+            logDirectory = (Directory.GetCurrentDirectory() + "/Output/" + CellexalUser.Username + "/Logs/").FixFilePath();
             if (!Directory.Exists(logDirectory))
             {
-                logThisLater.Add("\tCreated directory " + FixFilePath(logDirectory));
+                logThisLater.Add("\tCreated directory " + logDirectory);
                 Directory.CreateDirectory(logDirectory);
+            }
+
+            // To clean up some older log files.
+            string[] files = Directory.GetFiles(logDirectory);
+            int nrOfFilesToDelete = files.Length - maxNrOfLogFiles;
+            for (int i = 0; i < nrOfFilesToDelete; i++)
+            {
+                File.Delete(files[i]);
             }
 
             LogFilePath = logDirectory + "\\cellexal-log-" + time + ".txt";

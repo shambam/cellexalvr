@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace CellexalVR.Interaction
 {
-    public class ClickableReportPanel : ClickablePanel
+    public sealed class ClickableReportPanel : ClickablePanel
     {
         [HideInInspector]
         public TextMeshPro textMesh;
@@ -29,7 +29,7 @@ namespace CellexalVR.Interaction
         /// Sets the text of this panel.
         /// </summary>
         /// <param name="name">The new text that should be displayed.</param>
-        public virtual void SetText(string name)
+        public void SetText(string name)
         {
             if (!textMesh)
             {

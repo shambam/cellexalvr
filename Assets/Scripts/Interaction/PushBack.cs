@@ -3,6 +3,7 @@ using UnityEngine;
 using VRTK;
 using CellexalVR.General;
 using CellexalVR.AnalysisObjects;
+using CellexalVR.Spatial;
 
 namespace CellexalVR.Interaction
 {
@@ -56,10 +57,9 @@ namespace CellexalVR.Interaction
             if (!hit.collider) return;
             if (hit.transform.gameObject.name.Contains("Slice"))
             {
-                return;
+                if (!hit.transform.parent.GetComponent<SpatialGraph>().slicesActive) return;
             }
-            // don't let the thing become smaller than what it was originally
-            // this could cause some problems if the user rescales the objects while they are far away
+            // don't let the thing come too close
             if (Vector3.Distance(hit.transform.position, raycastingSource.position) < 0.5f)
             {
                 pull = false;
@@ -77,8 +77,8 @@ namespace CellexalVR.Interaction
             }
             else if (hit.transform.GetComponent<NetworkHandler>())
             {
-                hit.transform.LookAt(referenceManager.headset.transform);
-                hit.transform.Rotate(0, 0, 180);
+                // hit.transform.LookAt(referenceManager.headset.transform);
+                // hit.transform.Rotate(0, 0, 180);
                 referenceManager.multiuserMessageSender.SendMessageMoveNetwork(hit.transform.gameObject.name, hit.transform.localPosition, hit.transform.localRotation, hit.transform.localScale);
             }
             else if (hit.transform.GetComponent<NetworkCenter>())
@@ -107,9 +107,8 @@ namespace CellexalVR.Interaction
             if (!hit.collider) return;
             if (hit.transform.gameObject.name.Contains("Slice"))
             {
-                return;
+                if (!hit.transform.parent.GetComponent<SpatialGraph>().slicesActive) return;
             }
-
             Vector3 position = hit.transform.position;
             Vector3 dir = position - raycastingSource.position;
             dir = dir.normalized;
@@ -121,8 +120,8 @@ namespace CellexalVR.Interaction
             }
             else if (hit.transform.GetComponent<NetworkHandler>())
             {
-                hit.transform.LookAt(referenceManager.headset.transform);
-                hit.transform.Rotate(0, 0, 180);
+                // hit.transform.LookAt(referenceManager.headset.transform);
+                // hit.transform.Rotate(0, 0, 180);
                 referenceManager.multiuserMessageSender.SendMessageMoveNetwork(hit.transform.gameObject.name, hit.transform.localPosition, hit.transform.localRotation, hit.transform.localScale);
             }
             else if (hit.transform.GetComponent<NetworkCenter>())

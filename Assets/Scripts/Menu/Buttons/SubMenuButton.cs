@@ -1,6 +1,7 @@
 ﻿using CellexalVR.Menu.SubMenus;
 using CellexalVR.General;
 using UnityEngine;
+
 namespace CellexalVR.Menu.Buttons
 {
     /// <summary>
@@ -50,12 +51,15 @@ namespace CellexalVR.Menu.Buttons
                 var firstTab = tabs[0];
                 firstTab.SetTabActive(true);
                 firstTab.TabButton.SetHighlighted(true);
+                // menu.GetComponent<MenuWithTabs>().active = true;
             }
+
             var subMenuWithouthTabs = menu.GetComponent<MenuWithoutTabs>();
             if (subMenuWithouthTabs != null)
             {
                 subMenuWithouthTabs.SetMenuActive(true);
             }
+
             descriptionText.text = "";
         }
 
@@ -67,6 +71,7 @@ namespace CellexalVR.Menu.Buttons
                 {
                     infoMenu.SetActive(false);
                 }
+
                 // if this is a button, deactivate it
                 CellexalButton b = t.GetComponent<CellexalButton>();
                 if (b != null)
@@ -74,6 +79,7 @@ namespace CellexalVR.Menu.Buttons
                     b.StoreState();
                     b.SetButtonActivated(false);
                 }
+
                 // recursive call to include all children of children
                 DeactivateButtonsRecursive(t.gameObject);
             }
@@ -86,6 +92,8 @@ namespace CellexalVR.Menu.Buttons
         public void SetMenuActivated(bool activate)
         {
             // Turn on or off the menu it self
+            MenuWithTabs menuWithTabs = menu.GetComponent<MenuWithTabs>();
+            if (menuWithTabs) menuWithTabs.Active = activate;
             Renderer menuRenderer = menu.GetComponent<Renderer>();
             if (menuRenderer)
                 menuRenderer.enabled = activate;
@@ -117,7 +125,6 @@ namespace CellexalVR.Menu.Buttons
                     {
                         // if we are turning on the menu
                         // skip the tab prefabs
-                        var menuWithTabs = menu.GetComponent<MenuWithTabs>();
                         if (menuWithTabs && tab == menuWithTabs.tabPrefab) continue;
 
                         // if we have a saved tab that should be active, turn on that one and turn off the other ones.
@@ -128,6 +135,7 @@ namespace CellexalVR.Menu.Buttons
                         {
                             tab.SetTabActive(false);
                         }
+
                         SetGameObjectAndChildrenEnabled(tab.TabButton.gameObject, true);
                     }
                 }
@@ -142,9 +150,10 @@ namespace CellexalVR.Menu.Buttons
                 {
                     r.gameObject.SetActive(r.transform.parent.GetComponent<CellexalButton>().storedState);
                 }
-                r.enabled = active;
 
+                r.enabled = active;
             }
+
             foreach (var c in obj.GetComponentsInChildren<Collider>())
             {
                 c.enabled = active;
@@ -152,8 +161,8 @@ namespace CellexalVR.Menu.Buttons
                 {
                     c.gameObject.SetActive(c.transform.parent.GetComponent<CellexalButton>().storedState);
                 }
-                c.enabled = active;
 
+                c.enabled = active;
             }
         }
 

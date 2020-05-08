@@ -48,13 +48,6 @@ MonoBehaviour:
     type: 3}
   arrowMaterial: {fileID: 2100000, guid: 6aa41733870aa854081b3a08352ccc61, type: 2}
   standardMaterial: {fileID: 10301, guid: 0000000000000000f000000000000000, type: 0}
-  triprefab: {fileID: 0}
-  sphereprefab: {fileID: 0}
-  convexHullPrefab: {fileID: 0}
-  debug: {fileID: 0}
-  debug1: {fileID: 0}
-  debug2: {fileID: 0}
-  debug3: {fileID: 0}
 --- !u!1 &1136056702234574
 GameObject:
   m_ObjectHideFlags: 0
@@ -99,6 +92,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   folderPrefab: {fileID: 1998918754094950, guid: c5fadf1b47882c745b3e02a5a1ef6305,
+    type: 3}
+  sessionFolderPrefab: {fileID: 1998918754094950, guid: 7f064c5d70679584b9c77f687dc7eee1,
     type: 3}
   referenceManager: {fileID: 0}
 --- !u!1 &1473158195905826
@@ -236,6 +231,7 @@ MonoBehaviour:
     type: 3}
   graphPrefab: {fileID: 1128814461414928, guid: af929ffd1d0a8af409a829dde3bae8ca,
     type: 3}
+  spatialSlicePrefab: {fileID: 0}
   AxesPrefabColoured: {fileID: 1766706351881866, guid: a462447547b3c8449b5ff111f14b733f,
     type: 3}
   AxesPrefabUncoloured: {fileID: 246842845458500770, guid: d0dabd0c5f7b0c645955cc88638bad14,
@@ -394,3 +390,4 @@ MonoBehaviour:
   referenceManager: {fileID: 0}
   convexHullPrefab: {fileID: 7344177800078177054, guid: c595b76e9b05eef4aa217b65364217f7,
     type: 3}
+  debugSpheres: []

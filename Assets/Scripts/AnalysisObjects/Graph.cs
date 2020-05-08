@@ -15,7 +15,6 @@ using VRTK;
 
 namespace CellexalVR.AnalysisObjects
 {
-
     /// <summary>
     /// Represents a graph consisting of multiple GraphPoints.
     /// </summary>
@@ -25,18 +24,15 @@ namespace CellexalVR.AnalysisObjects
         public GameObject emptySkeletonPrefab;
         public Material lineMaterial;
         public GameObject movingOutlineCircle;
-        [HideInInspector]
-        public GameObject convexHull;
+        [HideInInspector] public GameObject convexHull;
         public List<GameObject> ctcGraphs = new List<GameObject>();
-        [HideInInspector]
-        public GraphManager graphManager;
+        [HideInInspector] public GraphManager graphManager;
         public GameObject infoParent;
         public TextMeshPro graphNameText;
         public TextMeshPro graphInfoText;
         public TextMeshPro graphNrText;
         public LegendManager legendManager;
-        [HideInInspector]
-        public GameObject axes;
+        [HideInInspector] public GameObject axes;
         public GameObject annotationsParent;
         public string[] axisNames = new string[3];
         public bool GraphActive = true;
@@ -58,28 +54,38 @@ namespace CellexalVR.AnalysisObjects
         public VelocityParticleEmitter velocityParticleEmitter;
         public GameObject lineParent;
         public bool hasVelocityInfo;
-        [HideInInspector]
-        public bool graphPointsInactive = false;
+        [HideInInspector] public bool graphPointsInactive = false;
+
         public string GraphName
         {
-            get { return graphName; }
+            get => graphName;
             set
             {
                 graphName = value;
-                graphNameText.text = value;
-                this.name = graphName;
-                this.gameObject.name = graphName;
+                // We don't want two objects with the exact same name. Could cause issues in find graph and in multi user sessions.
+                GameObject existingGraph = GameObject.Find(graphName);
+                while (existingGraph != null)
+                {
+                    graphName += "_Copy";
+                    existingGraph = GameObject.Find(graphName);
+                }
+
+                graphNameText.text = graphName;
+                name = graphName;
+                gameObject.name = graphName;
             }
         }
+
         public string FolderName
         {
-            get { return folderName; }
+            get => folderName;
             set
             {
                 folderName = value;
                 graphNameText.text = folderName + "_" + graphName;
             }
         }
+
         public int GraphNumber
         {
             get { return graphNr; }
@@ -91,7 +97,9 @@ namespace CellexalVR.AnalysisObjects
         }
 
         private MultiuserMessageSender multiuserMessageSender;
+
         private Vector3 startPosition;
+
         // For minimization animation
         private bool minimize;
         private bool maximize;
@@ -117,7 +125,6 @@ namespace CellexalVR.AnalysisObjects
         private string folderName;
         private int graphNr;
         private int nbrOfExpressionColors;
-
 
 
         private static LayerMask selectionToolLayerMask;
@@ -160,10 +167,12 @@ namespace CellexalVR.AnalysisObjects
                 multiuserMessageSender.SendMessageMoveGraph(GraphName,
                     graphTransform.position, graphTransform.rotation, graphTransform.localScale);
             }
+
             if (minimize)
             {
                 Minimize();
             }
+
             if (maximize)
             {
                 Maximize();
@@ -206,8 +215,8 @@ namespace CellexalVR.AnalysisObjects
             {
                 MakePointTransparent(gpPair.Value, toggle);
             }
-            isTransparent = toggle;
 
+            isTransparent = toggle;
         }
 
         /// <summary>
@@ -236,9 +245,11 @@ namespace CellexalVR.AnalysisObjects
                         obj.SetActive(true);
                     }
                 }
+
                 foreach (Collider c in GetComponentsInChildren<Collider>())
                     c.enabled = true;
             }
+
             currentTime += Time.deltaTime;
         }
 
@@ -256,12 +267,14 @@ namespace CellexalVR.AnalysisObjects
                     referenceManager.velocitySubMenu.buttons.Remove(veloButton);
                     Destroy(veloButton.gameObject);
                 }
+
                 referenceManager.graphManager.Graphs.Remove(this);
                 referenceManager.graphManager.attributeSubGraphs.Remove(this);
                 for (int i = 0; i < ctcGraphs.Count; i++)
                 {
                     ctcGraphs[i].GetComponent<GraphBetweenGraphs>().RemoveGraph();
                 }
+
                 ctcGraphs.Clear();
             }
             else if (tag == "FacsGraph")
@@ -272,8 +285,10 @@ namespace CellexalVR.AnalysisObjects
                 {
                     ctcGraphs[i].GetComponent<GraphBetweenGraphs>().RemoveGraph();
                 }
+
                 ctcGraphs.Clear();
             }
+
             shrinkSpeed = (transform.localScale.x - targetMinScale) / animationTime;
             currentTime = 0;
             minimize = true;
@@ -291,6 +306,7 @@ namespace CellexalVR.AnalysisObjects
             {
                 c.enabled = false;
             }
+
             foreach (GameObject obj in ctcGraphs)
             {
                 if (obj != null)
@@ -298,6 +314,7 @@ namespace CellexalVR.AnalysisObjects
                     obj.SetActive(false);
                 }
             }
+
             oldPos = transform.position;
             oldScale = transform.localScale;
             shrinkSpeed = (transform.localScale.x - targetMinScale) / animationTime;
@@ -325,6 +342,7 @@ namespace CellexalVR.AnalysisObjects
             {
                 targetPosition = referenceManager.minimizedObjectHandler.transform.position;
             }
+
             transform.position = Vector3.MoveTowards(transform.position, targetPosition, step);
             transform.localScale -= Vector3.one * Time.deltaTime * shrinkSpeed;
             transform.Rotate(Vector3.one * Time.deltaTime * 100);
@@ -344,6 +362,7 @@ namespace CellexalVR.AnalysisObjects
                     minimized = true;
                 }
             }
+
             currentTime += Time.deltaTime;
         }
 
@@ -381,14 +400,20 @@ namespace CellexalVR.AnalysisObjects
             public Vector2Int textureCoord;
             public Graph parent;
             private int group;
+
             public int Group
             {
                 get { return group; }
                 set { SetGroup(value); }
             }
+
             public bool unconfirmedInSelection;
-            public List<Selectable> lineBetweenCellsCubes;
-            public Vector3 WorldPosition { get { return parent.transform.TransformPoint(Position); } }
+
+            public Vector3 WorldPosition
+            {
+                get { return parent.transform.TransformPoint(Position); }
+            }
+
             public OctreeNode node;
 
             public GraphPoint(string label, float x, float y, float z, Graph parent)
@@ -400,7 +425,6 @@ namespace CellexalVR.AnalysisObjects
                 group = -1;
                 unconfirmedInSelection = false;
                 indexCounter++;
-                lineBetweenCellsCubes = new List<Selectable>();
             }
 
             public override string ToString()
@@ -443,7 +467,6 @@ namespace CellexalVR.AnalysisObjects
             public void HighlightGraphPoint(bool active)
             {
                 parent.HighlightGraphPoint(this, active);
-
             }
 
             public void ResetColor()
@@ -475,6 +498,7 @@ namespace CellexalVR.AnalysisObjects
         public class OctreeNode
         {
             public OctreeNode parent;
+
             /// <summary>
             /// Not always of length 8. Empty children are removed when the octree is constructed to save some memory.
             /// </summary>
@@ -484,14 +508,18 @@ namespace CellexalVR.AnalysisObjects
             /// Null if this is not a leaf. Only leaves represents points in the graph.
             /// </summary>
             public GraphPoint point;
+
             public Vector3 pos;
+
             /// <summary>
             /// Not the geometrical center, just a point inside the node that defines corners for its children, unless this is a leaf node.
             /// </summary>
             public Vector3 center;
+
             public Vector3 size;
             private int group = -1;
             private bool raycasted;
+
             /// <summary>
             /// The group that this node belongs to. -1 means no group, 0 or a positive number means some group.
             /// If this is a leaf node, this should be the same as the group that the selection tool has given the <see cref="GraphPoint"/>.
@@ -502,12 +530,16 @@ namespace CellexalVR.AnalysisObjects
                 get { return group; }
                 set { SetGroup(value); }
             }
+
             public bool rejected;
             public bool completelyInside;
 
-            public OctreeNode() { }
+            public OctreeNode()
+            {
+            }
 
             private bool nodeIterated;
+
             public bool NodeIterated
             {
                 get { return nodeIterated; }
@@ -517,6 +549,7 @@ namespace CellexalVR.AnalysisObjects
                     UpdateIterated();
                 }
             }
+
             /// <summary>
             /// Returns a string representation of this node and all its children. May produce very long strings for very large trees.
             /// </summary>
@@ -543,6 +576,7 @@ namespace CellexalVR.AnalysisObjects
                             child.ToStringRec(ref sb);
                             sb.Append(", ");
                         }
+
                         sb.Remove(sb.Length - 2, 2);
                         sb.Append(")");
                     }
@@ -556,6 +590,7 @@ namespace CellexalVR.AnalysisObjects
                 {
                     child.SetGroup(group);
                 }
+
                 if (parent != null && parent.group != group)
                 {
                     parent.NotifyGroupChange(group);
@@ -575,6 +610,7 @@ namespace CellexalVR.AnalysisObjects
                         break;
                     }
                 }
+
                 this.group = setGroupTo;
                 if (parent != null)
                 {
@@ -595,12 +631,14 @@ namespace CellexalVR.AnalysisObjects
                 }
             }
 
-            public List<OctreeNode> GetSkeletonNodesRecursive(OctreeNode node, List<OctreeNode> nodes = null, int currentNodeLevel = 0, int desiredNodeLevel = 0)
+            public List<OctreeNode> GetSkeletonNodesRecursive(OctreeNode node, List<OctreeNode> nodes = null,
+                int currentNodeLevel = 0, int desiredNodeLevel = 0)
             {
                 if (nodes == null)
                 {
                     nodes = new List<OctreeNode>();
                 }
+
                 foreach (OctreeNode child in node.children)
                 {
                     if (desiredNodeLevel == currentNodeLevel)
@@ -613,6 +651,7 @@ namespace CellexalVR.AnalysisObjects
                         child.GetSkeletonNodesRecursive(child, nodes, currentNodeLevel + 1, desiredNodeLevel);
                     }
                 }
+
                 return nodes;
             }
 
@@ -627,6 +666,7 @@ namespace CellexalVR.AnalysisObjects
                 {
                     return this;
                 }
+
                 foreach (OctreeNode child in children)
                 {
                     if (child.PointInside(point))
@@ -634,6 +674,7 @@ namespace CellexalVR.AnalysisObjects
                         return child.NodeContainingPoint(point);
                     }
                 }
+
                 return this;
             }
 
@@ -643,8 +684,8 @@ namespace CellexalVR.AnalysisObjects
             public bool PointInside(Vector3 point)
             {
                 return point.x >= pos.x && point.x <= pos.x + size.x
-                    && point.y >= pos.y && point.y <= pos.y + size.y
-                    && point.z >= pos.z && point.z <= pos.z + size.z;
+                                        && point.y >= pos.y && point.y <= pos.y + size.y
+                                        && point.z >= pos.z && point.z <= pos.z + size.z;
             }
 
             /// <summary>
@@ -657,7 +698,8 @@ namespace CellexalVR.AnalysisObjects
             {
                 raycasted = true;
                 Vector3 difference = selectionToolCenter - pointPosWorldSpace;
-                return !Physics.Raycast(pointPosWorldSpace, difference, difference.magnitude, Graph.selectionToolLayerMask);
+                return !Physics.Raycast(pointPosWorldSpace, difference, difference.magnitude,
+                    Graph.selectionToolLayerMask);
             }
 
             /// <summary>
@@ -688,7 +730,6 @@ namespace CellexalVR.AnalysisObjects
                         NodeIterated = true;
                         return this;
                     }
-
                 }
                 else
                 {
@@ -703,6 +744,7 @@ namespace CellexalVR.AnalysisObjects
                             }
                         }
                     }
+
                     // all children iterated
                     NodeIterated = true;
                     return null;
@@ -721,6 +763,7 @@ namespace CellexalVR.AnalysisObjects
                         return;
                     }
                 }
+
                 nodeIterated = true;
                 if (parent != null)
                 {
@@ -759,13 +802,16 @@ namespace CellexalVR.AnalysisObjects
             }
 
 #if UNITY_EDITOR
+
             #region DEBUG_FUNCTIONS
+
             public void DebugColorLeaves(Color color)
             {
                 if (point != null)
                 {
                     point.ColorSelectionColor(0, false);
                 }
+
                 foreach (var child in children)
                 {
                     child.DebugColorLeaves(color);
@@ -779,26 +825,25 @@ namespace CellexalVR.AnalysisObjects
                 {
                     Gizmos.DrawWireCube(gameobjectPos + pos + size / 2, size / 0.95f);
                 }
+
                 foreach (var child in children)
                 {
                     child.DrawDebugCubesRecursive(gameobjectPos, onlyLeaves, i);
                 }
-
             }
 
             public void DrawDebugCubesRecursive(Vector3 gameobjectPos, int i, int level)
             {
-
                 if (i == level)
                 {
                     Gizmos.DrawWireCube(gameobjectPos + pos + size / 2, size / 0.95f);
                     return;
                 }
+
                 foreach (var child in children)
                 {
                     child.DrawDebugCubesRecursive(gameobjectPos, i + 1, level);
                 }
-
             }
 
             public IEnumerator DrawSkeletonCubes(List<Vector3> nodePositions, List<Vector3> nodeSizes, int nodeLevel)
@@ -807,6 +852,7 @@ namespace CellexalVR.AnalysisObjects
                 {
                     nodePositions = new List<Vector3>();
                 }
+
                 foreach (OctreeNode child in children)
                 {
                     foreach (OctreeNode c in child.children)
@@ -822,10 +868,11 @@ namespace CellexalVR.AnalysisObjects
                             //}
                         }
                     }
+
                     yield return null;
                 }
-                NodeIterated = true;
 
+                NodeIterated = true;
             }
 
 
@@ -876,12 +923,16 @@ namespace CellexalVR.AnalysisObjects
                 {
                     return Color.white;
                 }
+
                 i = i % CellexalConfig.Config.SelectionToolColors.Length;
                 return CellexalConfig.Config.SelectionToolColors[i];
             }
+
             #endregion
+
 #endif
         }
+
         private void DrawDebugCube(Color color, Vector3 min, Vector3 max, bool inWorldSpace = false)
         {
             if (!inWorldSpace)
@@ -889,17 +940,18 @@ namespace CellexalVR.AnalysisObjects
                 min += transform.position;
                 max += transform.position;
             }
+
             Gizmos.color = color;
             Vector3[] corners = new Vector3[]
             {
-           min,
-           new Vector3(max.x, min.y, min.z),
-           new Vector3(min.x, max.y, min.z),
-           new Vector3(min.x, min.y, max.z),
-           new Vector3(max.x, max.y, min.z),
-           new Vector3(max.x, min.y, max.z),
-           new Vector3(min.x, max.y, max.z),
-           max
+                min,
+                new Vector3(max.x, min.y, min.z),
+                new Vector3(min.x, max.y, min.z),
+                new Vector3(min.x, min.y, max.z),
+                new Vector3(max.x, max.y, min.z),
+                new Vector3(max.x, min.y, max.z),
+                new Vector3(min.x, max.y, max.z),
+                max
             };
 
             Gizmos.DrawLine(corners[0], corners[1]);
@@ -914,7 +966,6 @@ namespace CellexalVR.AnalysisObjects
             Gizmos.DrawLine(corners[4], corners[7]);
             Gizmos.DrawLine(corners[5], corners[7]);
             Gizmos.DrawLine(corners[6], corners[7]);
-
         }
 
         private void DrawRejectionApproveCubes(OctreeNode node)
@@ -949,34 +1000,40 @@ namespace CellexalVR.AnalysisObjects
                 {
                     octreeRoot.DrawDebugCubesRecursive(transform.position, false, 0);
                 }
+
                 if (graphManager.drawDebugLines)
                 {
                     Gizmos.color = Color.white;
                     octreeRoot.DrawDebugLines(transform.position);
                 }
+
                 if (graphManager.drawDebugCubesOnLevel > -1)
                 {
                     octreeRoot.DrawDebugCubesRecursive(transform.position, 0, graphManager.drawDebugCubesOnLevel);
                 }
             }
+
             if (graphManager.drawSelectionToolDebugLines)
             {
                 Gizmos.color = Color.green;
-                DrawDebugCube(Color.green, transform.TransformPoint(debugGizmosMin), transform.TransformPoint(debugGizmosMax), true);
+                DrawDebugCube(Color.green, transform.TransformPoint(debugGizmosMin),
+                    transform.TransformPoint(debugGizmosMax), true);
             }
+
             if (graphManager.drawDebugRaycast)
             {
                 octreeRoot.DrawDebugRaycasts(transform.position, debugGizmosPos);
             }
+
             if (graphManager.drawDebugRejectionApprovedCubes)
             {
                 DrawRejectionApproveCubes(octreeRoot);
             }
+
             if (graphManager.drawDebugGroups)
             {
                 octreeRoot.DrawDebugGroups(transform.position);
             }
-
         }
 #endif
 
@@ -993,6 +1050,7 @@ namespace CellexalVR.AnalysisObjects
             {
                 convexHull = Instantiate(skeletonPrefab);
             }
+
             var nodes = octreeRoot.GetSkeletonNodesRecursive(octreeRoot, null, 0, 4);
             int posCount = nodes.Count;
             nodes.OrderBy(v => v.center.x).ToList();
@@ -1009,11 +1067,12 @@ namespace CellexalVR.AnalysisObjects
                 if (nodes.Count % 60 == 0)
                     yield return null;
             }
+
             LineRenderer line = convexHull.gameObject.AddComponent<LineRenderer>();
             line.material = lineMaterial;
             line.startWidth = line.endWidth = 0.02f;
             line.useWorldSpace = false;
-            line.alignment = LineAlignment.TransformZ;
+            // line.alignment = LineAlignment.TransformZ;
             line.positionCount = posCount;
             line.SetPositions(sortedNodes.ToArray());
             convexHull.SetActive(true);
@@ -1071,6 +1130,7 @@ namespace CellexalVR.AnalysisObjects
                     texture.SetPixel(i, j, Color.red);
                 }
             }
+
             texture.Apply();
             if (resetGroup)
             {
@@ -1093,7 +1153,7 @@ namespace CellexalVR.AnalysisObjects
 
         public Color GetGraphPointColor(GraphPoint gp)
         {
-            int group = (int)(255 * texture.GetPixel(gp.textureCoord.x, gp.textureCoord.y).r);
+            int group = (int) (255 * texture.GetPixel(gp.textureCoord.x, gp.textureCoord.y).r);
             return graphGenerator.graphPointColors.GetPixel(group, 0);
         }
 
@@ -1107,9 +1167,9 @@ namespace CellexalVR.AnalysisObjects
                     texture.SetPixel(i, j, Color.green);
                 }
             }
+
             texture.Apply();
         }
-
 
 
         /// <summary>
@@ -1121,6 +1181,7 @@ namespace CellexalVR.AnalysisObjects
             {
                 Destroy(circle);
             }
+
             topExprCircles.Clear();
         }
 
@@ -1146,8 +1207,9 @@ namespace CellexalVR.AnalysisObjects
             {
                 i = 255;
             }
-            Color32 finalColor = new Color32((byte)i, tex.g, tex.b, 255);
-            texture.SetPixels32(graphPoint.textureCoord.x, graphPoint.textureCoord.y, 1, 1, new Color32[] { finalColor });
+
+            Color32 finalColor = new Color32((byte) i, tex.g, tex.b, 255);
+            texture.SetPixels32(graphPoint.textureCoord.x, graphPoint.textureCoord.y, 1, 1, new Color32[] {finalColor});
             textureChanged = true;
         }
 
@@ -1160,7 +1222,7 @@ namespace CellexalVR.AnalysisObjects
         public void ColorGraphPointSelectionColor(GraphPoint graphPoint, int i, bool outline)
         {
             Color32 tex = texture.GetPixel(graphPoint.textureCoord.x, graphPoint.textureCoord.y);
-            byte greenChannel = (byte)(outline ? 4 : 0);
+            byte greenChannel = (byte) (outline ? 4 : 0);
             byte redChannel;
             if (i == -1)
             {
@@ -1168,10 +1230,11 @@ namespace CellexalVR.AnalysisObjects
             }
             else
             {
-                redChannel = (byte)(nbrOfExpressionColors + i);
+                redChannel = (byte) (nbrOfExpressionColors + i);
             }
+
             Color32 finalColor = new Color32(redChannel, greenChannel, tex.b, 255);
-            texture.SetPixels32(graphPoint.textureCoord.x, graphPoint.textureCoord.y, 1, 1, new Color32[] { finalColor });
+            texture.SetPixels32(graphPoint.textureCoord.x, graphPoint.textureCoord.y, 1, 1, new Color32[] {finalColor});
             textureChanged = true;
         }
 
@@ -1185,16 +1248,16 @@ namespace CellexalVR.AnalysisObjects
             byte greenChannel;
             if (tex.g == 190 && tex.r != 254)
             {
-                greenChannel = (byte)(active ? 190 : 0);
+                greenChannel = (byte) (active ? 190 : 0);
             }
             else
             {
-                greenChannel = (byte)(active ? 190 : tex.g);
+                greenChannel = (byte) (active ? 190 : tex.g);
             }
-            Color32 finalColor = new Color32(tex.r, greenChannel, tex.b, 255);
-            texture.SetPixels32(graphPoint.textureCoord.x, graphPoint.textureCoord.y, 1, 1, new Color32[] { finalColor });
-            textureChanged = true;
 
+            Color32 finalColor = new Color32(tex.r, greenChannel, tex.b, 255);
+            texture.SetPixels32(graphPoint.textureCoord.x, graphPoint.textureCoord.y, 1, 1, new Color32[] {finalColor});
+            textureChanged = true;
         }
 
         /// <summary>
@@ -1205,9 +1268,9 @@ namespace CellexalVR.AnalysisObjects
         public void MakePointUnCullable(GraphPoint graphPoint, bool culling)
         {
             Color32 tex = texture.GetPixel(graphPoint.textureCoord.x, graphPoint.textureCoord.y);
-            byte blueChannel = (byte)(culling ? 4 : 0);
+            byte blueChannel = (byte) (culling ? 4 : 0);
             Color32 finalColor = new Color32(tex.r, tex.g, blueChannel, 255);
-            texture.SetPixels32(graphPoint.textureCoord.x, graphPoint.textureCoord.y, 1, 1, new Color32[] { finalColor });
+            texture.SetPixels32(graphPoint.textureCoord.x, graphPoint.textureCoord.y, 1, 1, new Color32[] {finalColor});
             textureChanged = true;
         }
 
@@ -1219,17 +1282,18 @@ namespace CellexalVR.AnalysisObjects
             byte greenChannel;
             if (!isTransparent && tex.r != 254)
             {
-                greenChannel = (byte)(active ? 38 : 0);
+                greenChannel = (byte) (active ? 38 : 0);
             }
             else
             {
-                greenChannel = (byte)(active ? 38 : 190);
+                greenChannel = (byte) (active ? 38 : 190);
             }
-            Color32 finalColor = new Color32(tex.r, greenChannel, tex.b, 255);
-            texture.SetPixels32(graphPoint.textureCoord.x, graphPoint.textureCoord.y, 1, 1, new Color32[] { finalColor });
-            textureChanged = true;
 
+            Color32 finalColor = new Color32(tex.r, greenChannel, tex.b, 255);
+            texture.SetPixels32(graphPoint.textureCoord.x, graphPoint.textureCoord.y, 1, 1, new Color32[] {finalColor});
+            textureChanged = true;
         }
+
         /// <summary>
         /// Resets the color of the graph point back to its default.
         /// </summary>
@@ -1238,14 +1302,18 @@ namespace CellexalVR.AnalysisObjects
         {
             if (isTransparent)
             {
-                texture.SetPixels32(graphPoint.textureCoord.x, graphPoint.textureCoord.y, 1, 1, new Color32[] { new Color32(254, 0, 0, 255) });
+                texture.SetPixels32(graphPoint.textureCoord.x, graphPoint.textureCoord.y, 1, 1,
+                    new Color32[] {new Color32(254, 0, 0, 255)});
             }
             else
             {
-                texture.SetPixels32(graphPoint.textureCoord.x, graphPoint.textureCoord.y, 1, 1, new Color32[] { new Color32(255, 0, 0, 255) });
+                texture.SetPixels32(graphPoint.textureCoord.x, graphPoint.textureCoord.y, 1, 1,
+                    new Color32[] {new Color32(255, 0, 0, 255)});
             }
+
             textureChanged = true;
         }
+
         /// <summary>
         /// Finds a graph point by its name.
         /// </summary>
@@ -1275,7 +1343,7 @@ namespace CellexalVR.AnalysisObjects
 
                     Color32 tex = texture.GetPixel(i, j);
                     texture.SetPixels32(i, j, 1, 1,
-                        new Color32[] { new Color32(254, 190, tex.b, 255) });
+                        new Color32[] {new Color32(254, 190, tex.b, 255)});
                 }
             }
             //MakeAllPointsTransparent(true);
@@ -1284,17 +1352,20 @@ namespace CellexalVR.AnalysisObjects
             Color32[][] colorValues = new Color32[nbrOfExpressionColors][];
             for (byte i = 0; i < nbrOfExpressionColors - 3; ++i)
             {
-                colorValues[i] = new Color32[] { new Color32(i, 0, 0, 1) };
+                colorValues[i] = new Color32[] {new Color32(i, 0, 0, 1)};
             }
-            for (byte i = (byte)(nbrOfExpressionColors - 3); i < nbrOfExpressionColors; ++i)
+
+            for (byte i = (byte) (nbrOfExpressionColors - 3); i < nbrOfExpressionColors; ++i)
             {
-                colorValues[i] = new Color32[] { new Color32(i, 0, 0, 1) };
+                colorValues[i] = new Color32[] {new Color32(i, 0, 0, 1)};
             }
-            int topExpressedThreshold = (int)(nbrOfExpressionColors - nbrOfExpressionColors / 10f);
+
+            int topExpressedThreshold = (int) (nbrOfExpressionColors - nbrOfExpressionColors / 10f);
             if (CellexalConfig.Config.GraphMostExpressedMarker)
             {
                 ClearTopExprCircles();
             }
+
             foreach (CellExpressionPair pair in expressions)
             {
                 // If this is a subgraph it does not contain all cells...
@@ -1309,7 +1380,8 @@ namespace CellexalVR.AnalysisObjects
                         expressionColorIndex = nbrOfExpressionColors - 1;
                     }
 
-                    if (CellexalConfig.Config.GraphMostExpressedMarker && pair.Color >= topExpressedThreshold && !minimized)
+                    if (CellexalConfig.Config.GraphMostExpressedMarker && pair.Color >= topExpressedThreshold &&
+                        !minimized)
                     {
                         var circle = Instantiate(movingOutlineCircle);
                         circle.GetComponent<MovingOutlineCircle>().camera = referenceManager.headset.transform;
@@ -1317,11 +1389,13 @@ namespace CellexalVR.AnalysisObjects
                         circle.transform.parent = transform;
                         topExprCircles.Add(circle);
                     }
+
                     Color32 tex = texture.GetPixel(pos.x, pos.y);
                     Color32 finalCol = new Color32(colorValues[expressionColorIndex][0].r, 0, tex.b, 1);
-                    texture.SetPixels32(pos.x, pos.y, 1, 1, new Color32[] { finalCol });
+                    texture.SetPixels32(pos.x, pos.y, 1, 1, new Color32[] {finalCol});
                 }
             }
+
             texture.Apply();
             graphPointClusters[0].GetComponent<Renderer>().sharedMaterial.mainTexture = texture;
         }
@@ -1335,7 +1409,8 @@ namespace CellexalVR.AnalysisObjects
         /// <param name="selectionToolBoundsExtents">The selection tool's bounding box's extents in world space.</param>
         /// <param name="group">The group that the selection tool is set to color the graphpoints by.</param>
         /// <returns>A <see cref="List{CombinedGraphPoint}"/> with all <see cref="GraphPoint"/> that are inside the selecion tool.</returns>
-        public List<GraphPoint> MinkowskiDetection(Vector3 selectionToolPos, Vector3 selectionToolBoundsCenter, Vector3 selectionToolBoundsExtents, int group)
+        public List<GraphPoint> MinkowskiDetection(Vector3 selectionToolPos, Vector3 selectionToolBoundsCenter,
+            Vector3 selectionToolBoundsExtents, int group)
         {
             List<GraphPoint> result = new List<GraphPoint>(64);
 
@@ -1377,7 +1452,8 @@ namespace CellexalVR.AnalysisObjects
         /// <param name="node">The <see cref="OctreeNode"/> to evaluate.</param>
         /// <param name="group">The group to assign the node.</param>
         /// <param name="result">All leaf nodes found so far.</param>
-        private void MinkowskiDetectionRecursive(Vector3 selectionToolWorldPos, Vector3 boundingBoxMin, Vector3 boundingBoxMax, OctreeNode node, int group, ref List<GraphPoint> result)
+        private void MinkowskiDetectionRecursive(Vector3 selectionToolWorldPos, Vector3 boundingBoxMin,
+            Vector3 boundingBoxMax, OctreeNode node, int group, ref List<GraphPoint> result)
         {
             // minkowski difference selection tool bounding box and node
             // take advantage of both being AABB
@@ -1400,11 +1476,13 @@ namespace CellexalVR.AnalysisObjects
                         node.completelyInside = true;
                         CheckIfLeavesInside(selectionToolWorldPos, node, group, ref result);
                     }
+
                     return;
                 }
 
                 // check if this is a leaf node that is inside the selection tool. Can't rely on bounding boxes here, have to raycast to find collisions
-                if (node.point != null && node.Group != group && node.PointInsideSelectionTool(selectionToolWorldPos, transform.TransformPoint(node.center)))
+                if (node.point != null && node.Group != group &&
+                    node.PointInsideSelectionTool(selectionToolWorldPos, transform.TransformPoint(node.center)))
                 {
                     node.Group = group;
                     result.Add(node.point);
@@ -1416,7 +1494,8 @@ namespace CellexalVR.AnalysisObjects
                     {
                         if (child.Group != group)
                         {
-                            MinkowskiDetectionRecursive(selectionToolWorldPos, boundingBoxMin, boundingBoxMax, child, group, ref result);
+                            MinkowskiDetectionRecursive(selectionToolWorldPos, boundingBoxMin, boundingBoxMax, child,
+                                group, ref result);
                         }
                     }
                 }
@@ -1434,21 +1513,26 @@ namespace CellexalVR.AnalysisObjects
         /// <param name="node">The to evaluate.</param>
         /// <param name="group">The group to assign the node.</param>
         /// <param name="result">All leaf nodes found so far.</param>
-        private void CheckIfLeavesInside(Vector3 selectionToolWorldPos, OctreeNode node, int group, ref List<GraphPoint> result)
+        private void CheckIfLeavesInside(Vector3 selectionToolWorldPos, OctreeNode node, int group,
+            ref List<GraphPoint> result)
         {
-            if (node.point != null && node.PointInsideSelectionTool(selectionToolWorldPos, transform.TransformPoint(node.center)))
+            if (node.point != null &&
+                node.PointInsideSelectionTool(selectionToolWorldPos, transform.TransformPoint(node.center)))
             {
                 node.Group = group;
                 result.Add(node.point);
                 return;
             }
+
             foreach (var child in node.children)
             {
                 if (child.Group == group)
                 {
                     continue;
                 }
-                if (child.point != null && child.PointInsideSelectionTool(selectionToolWorldPos, transform.TransformPoint(child.center)))
+
+                if (child.point != null &&
+                    child.PointInsideSelectionTool(selectionToolWorldPos, transform.TransformPoint(child.center)))
                 {
                     child.Group = group;
                     result.Add(child.point);

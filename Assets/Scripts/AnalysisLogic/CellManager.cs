@@ -150,10 +150,10 @@ namespace CellexalVR.AnalysisLogic
         /// <param name="subSelection">The subselection of cells to select from.</param>
         /// <returns></returns>
         public Cell[] GetCells(int group, Cell[] subSelection)
-         {
-             return subSelection.Where(x => (x.GraphPoints[0].Group == group)).ToArray();
-         }
-                
+        {
+            return subSelection.Where(x => (x.GraphPoints[0].Group == group)).ToArray();
+        }
+
 
         public int GetNumberOfCells()
         {
@@ -349,6 +349,11 @@ namespace CellexalVR.AnalysisLogic
                 }
             }
 
+            if (!referenceManager.sessionHistoryList.Contains(geneName, Definitions.HistoryEvent.GENE))
+            {
+                referenceManager.sessionHistoryList.AddEntry(geneName, Definitions.HistoryEvent.GENE);
+            }
+
             if (triggerEvent)
             {
                 CellexalEvents.GraphsColoredByGene.Invoke();
@@ -415,6 +420,11 @@ namespace CellexalVR.AnalysisLogic
                 {
                     c.SaveExpression(geneName + " " + coloringMethod, removedGene);
                 }
+            }
+
+            if (!referenceManager.sessionHistoryList.Contains(geneName, Definitions.HistoryEvent.GENE))
+            {
+                referenceManager.sessionHistoryList.AddEntry(geneName, Definitions.HistoryEvent.GENE);
             }
 
             if (triggerEvent)
@@ -700,6 +710,11 @@ namespace CellexalVR.AnalysisLogic
                 }
 
                 cell.ColorByGeneExpression(group);
+            }
+
+            if (!referenceManager.sessionHistoryList.Contains(name, Definitions.HistoryEvent.FACS))
+            {
+                referenceManager.sessionHistoryList.AddEntry(name, Definitions.HistoryEvent.FACS);
             }
 
             CellexalEvents.GraphsColoredByIndex.Invoke();

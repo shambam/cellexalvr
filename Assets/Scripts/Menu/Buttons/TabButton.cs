@@ -19,10 +19,15 @@ namespace CellexalVR.Menu.Buttons
         private MeshRenderer meshRenderer;
         private Color standardColor = Color.grey;
         private Color highlightColor = Color.blue;
-        private readonly string laserCollider = "[VRTK][AUTOGEN][RightControllerScriptAlias][StraightPointerRenderer_Tracer]";
+
+        private readonly string laserCollider =
+            "[VRTK][AUTOGEN][RightControllerScriptAlias][StraightPointerRenderer_Tracer]";
+
         private bool highlight;
+
         private int frameCount;
-        private bool laserInside;
+
+        // private bool laserInside;
         private Transform raycastingSource;
 
         private void OnValidate()
@@ -41,15 +46,15 @@ namespace CellexalVR.Menu.Buttons
             {
                 rightController = referenceManager.rightController;
             }
-            this.tag = "Menu Controller Collider";
 
+            this.tag = "Menu Controller Collider";
         }
 
         protected virtual void Update()
         {
             if (!CrossSceneInformation.Normal) return;
 
-            device = SteamVR_Controller.Input((int)rightController.index);
+            device = SteamVR_Controller.Input((int) rightController.index);
             if (controllerInside && device.GetPressDown(SteamVR_Controller.ButtonMask.Trigger))
             {
                 Menu.TurnOffAllTabs();
@@ -57,15 +62,18 @@ namespace CellexalVR.Menu.Buttons
                 highlight = true;
                 SetHighlighted(highlight);
             }
+
             if (!tab.Active && highlight && !controllerInside)
             {
                 highlight = false;
                 SetHighlighted(highlight);
             }
+
             if (highlight && meshRenderer.material.color != highlightColor)
             {
                 SetHighlighted(highlight);
             }
+
             CheckForHit();
         }
 
@@ -75,32 +83,33 @@ namespace CellexalVR.Menu.Buttons
         /// </summary>
         private void CheckForHit()
         {
-            if (tab.Active) return;
+            if (!Menu.Active || tab.Active) return;
 
-            if (frameCount % 10 == 0)
+            if (frameCount % 10 != 0) return;
+            // laserInside = false;
+            RaycastHit hit;
+            raycastingSource = referenceManager.laserPointerController.origin;
+            Physics.Raycast(raycastingSource.position, raycastingSource.TransformDirection(Vector3.forward), out hit,
+                10);
+            if (hit.collider && hit.collider.transform == transform && referenceManager.rightLaser.enabled)
             {
-                laserInside = false;
-                RaycastHit hit;
-                raycastingSource = referenceManager.laserPointerController.origin;
-                Physics.Raycast(raycastingSource.position, raycastingSource.TransformDirection(Vector3.forward), out hit, 10);
-                if (hit.collider && hit.collider.transform == transform && referenceManager.rightLaser.IsTracerVisible())
-                {
-                    laserInside = true;
-                    frameCount = 0;
-                    controllerInside = laserInside;
-                    SetHighlighted(laserInside);
-                    return;
-                }
-                if (!(hit.collider || hit.transform == transform))
-                {
-                    laserInside = false;
-                    controllerInside = laserInside;
-                    SetHighlighted(laserInside);
-                }
-                controllerInside = laserInside;
-                SetHighlighted(laserInside);
+                // laserInside = true;
                 frameCount = 0;
+                controllerInside = true;
+                SetHighlighted(true);
+                return;
             }
+
+            controllerInside = false;
+            SetHighlighted(false);
+            frameCount = 0;
+            // if (!hit.collider || !hit.collider.transform == transform)
+            // {
+            // laserInside = false;
+            return;
+            // }
+            // controllerInside = laserInside;
+            // SetHighlighted(controllerInside);
         }
 
         protected void OnTriggerEnter(Collider other)
@@ -137,6 +146,7 @@ namespace CellexalVR.Menu.Buttons
             {
                 meshRenderer = GetComponent<MeshRenderer>();
             }
+
             meshRenderer.material.color = h ? highlightColor : standardColor;
         }
     }

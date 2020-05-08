@@ -40,6 +40,7 @@ namespace CellexalVR.AnalysisObjects
         public GameObject movingQuadX;
         public GameObject movingQuadY;
         public int selectionNr;
+        public string selectionFile;
         public TextMeshPro enlargedGeneText;
         public TextMeshPro highlightGeneText;
         public TextMeshPro highlightInfoText;
@@ -97,6 +98,7 @@ namespace CellexalVR.AnalysisObjects
         [HideInInspector]
         public int attributeWidth = 0;
         #endregion region
+        
 
         #region Private variables
         private MultiuserMessageSender multiuserMessageSender;

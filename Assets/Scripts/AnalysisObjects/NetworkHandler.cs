@@ -4,23 +4,27 @@ using CellexalVR.Interaction;
 using CellexalVR.Multiuser;
 using CellexalVR.Tools;
 using System.Collections.Generic;
+using CellexalVR.Extensions;
+using CellexalVR.Menu.Buttons.Networks;
+using CellexalVR.SceneObjects;
 using UnityEngine;
 using VRTK;
 
 namespace CellexalVR.AnalysisObjects
 {
-
     /// <summary>
     /// Represents a collection of networks placed on a skeleton like model of a graph.
     /// </summary>
     public class NetworkHandler : MonoBehaviour
     {
-
         public Material highlightMaterial;
         public Material normalMaterial;
         public List<NetworkCenter> Replacements { get; private set; }
         public bool removable;
+
         public bool removing = false;
+        // public GameObject wirePrefab;
+
         public ReferenceManager referenceManager;
         //public string NetworkHandlerName { get; internal set; }
 
@@ -49,6 +53,12 @@ namespace CellexalVR.AnalysisObjects
         private float currentTime = 0;
         private float animationTime = 0.7f;
 
+        private GameObject previewWire;
+        private bool buttonClickedThisFrame;
+        private ToggleArcsButton previouslyClickedButton;
+        private readonly Color highlightColor = Definitions.TronColor;
+        private Color standardColor;
+
         public int layoutApplied = 0;
 
         private void OnValidate()
@@ -72,13 +82,17 @@ namespace CellexalVR.AnalysisObjects
             GetComponent<NetworkHandlerInteract>().referenceManager = referenceManager;
             multiuserMessageSender = referenceManager.multiuserMessageSender;
             meshRenderer = GetComponent<MeshRenderer>();
-            highlightedMaterials = new Material[] { meshRenderer.materials[0], new Material(highlightMaterial) };
-            highlightedMaterials[1].SetFloat("_Thickness", 0.2f);
-            unhighlightedMaterials = new Material[] { meshRenderer.materials[0], new Material(normalMaterial) };
+            standardColor = GetComponent<LineRenderer>().startColor;
+            // highlightedMaterials = new Material[] {meshRenderer.materials[0], new Material(highlightMaterial)};
+            // highlightedMaterials[1].SetFloat("_Thickness", 0.2f);
+            // unhighlightedMaterials = new Material[] {meshRenderer.materials[0], new Material(normalMaterial)};
             this.transform.localScale = Vector3.zero;
             CellexalEvents.ScriptFinished.AddListener(() => removable = true);
             CellexalEvents.ScriptRunning.AddListener(() => removable = false);
             referenceManager.graphManager.AddNetwork(this);
+            // wirePrefab = referenceManager.filterManager.wirePrefab;
+            // previewWire = Instantiate(referenceManager.arcsSubMenu.wirePrefab, this.transform);
+            // previewWire.SetActive(false);
         }
 
 
@@ -86,21 +100,24 @@ namespace CellexalVR.AnalysisObjects
         {
             if (GetComponent<VRTK_InteractableObject>().IsGrabbed())
             {
-                multiuserMessageSender.SendMessageMoveNetwork(name, transform.position, transform.rotation, transform.localScale);
+                multiuserMessageSender.SendMessageMoveNetwork(name, transform.position, transform.rotation,
+                    transform.localScale);
             }
+
             if (minimize)
             {
                 Minimize();
             }
+
             if (maximize)
             {
                 Maximize();
             }
+
             if (createAnim)
             {
                 NetworkAnimation();
             }
-
         }
 
         /// <summary>
@@ -142,6 +159,7 @@ namespace CellexalVR.AnalysisObjects
                     // clear the list if this key did not match the last one
                     lastNodes.Clear();
                 }
+
                 lastNodes.Add(keypair);
                 lastKey = keypair;
             }
@@ -166,6 +184,20 @@ namespace CellexalVR.AnalysisObjects
                 // toggle the arcs off
                 network.SetArcsVisible(false);
                 network.SetCombinedArcsVisible(false);
+                // Also add toggle arcs buttons. 
+                GameObject newButton = Instantiate(referenceManager.arcsSubMenu.buttonPrefab, transform);
+                newButton.layer = LayerMask.NameToLayer("EnvironmentButtonLayer");
+                ToggleArcsButton toggleArcButton = newButton.GetComponent<ToggleArcsButton>();
+                referenceManager.arcsSubMenu.toggleArcButtonList.Add(toggleArcButton);
+                newButton.transform.localScale = network.transform.localScale / 6;
+                newButton.transform.localPosition = network.transform.localPosition + new Vector3(0, 0.13f, 0);
+                newButton.name = network.gameObject.name + "_ArcButton";
+                newButton.gameObject.SetActive(true);
+                newButton.GetComponent<Renderer>().enabled = true;
+                newButton.GetComponent<Collider>().enabled = true;
+                Color color = network.GetComponent<Renderer>().material.color;
+                toggleArcButton.ButtonColor = color;
+                toggleArcButton.SetNetwork(network);
             }
 
             // figure out how many combined arcs there are
@@ -191,6 +223,9 @@ namespace CellexalVR.AnalysisObjects
         {
             networks.Add(network);
             networks.RemoveAll(item => item == null);
+            // print(referenceManager == null);
+            // print((referenceManager.arcsSubMenu == null));
+            // print((referenceManager.arcsSubMenu.buttonPrefab == null));
         }
 
         /// <summary>
@@ -238,6 +273,7 @@ namespace CellexalVR.AnalysisObjects
                 {
                     network.GetComponent<Collider>().enabled = true;
                 }
+
                 foreach (NetworkCenter network in networks)
                 {
                     network.GetComponent<Collider>().enabled = true;
@@ -246,11 +282,12 @@ namespace CellexalVR.AnalysisObjects
                         foreach (Collider c in network.GetComponentsInChildren<Collider>())
                             c.enabled = true;
                     }
-
                 }
+
                 GetComponent<Collider>().enabled = true;
                 maximize = false;
             }
+
             currentTime += Time.deltaTime;
         }
 
@@ -264,6 +301,7 @@ namespace CellexalVR.AnalysisObjects
                 foreach (Collider c in network.GetComponentsInChildren<Collider>())
                     c.enabled = false;
             }
+
             foreach (Collider c in GetComponentsInChildren<Collider>())
                 c.enabled = false;
             originalPos = transform.position;
@@ -282,12 +320,15 @@ namespace CellexalVR.AnalysisObjects
             float step = speed * Time.deltaTime;
             if (delete)
             {
-                transform.position = Vector3.MoveTowards(transform.position, referenceManager.deleteTool.transform.position, step);
+                transform.position = Vector3.MoveTowards(transform.position,
+                    referenceManager.deleteTool.transform.position, step);
             }
             else
             {
-                transform.position = Vector3.MoveTowards(transform.position, referenceManager.minimizedObjectHandler.transform.position, step);
+                transform.position = Vector3.MoveTowards(transform.position,
+                    referenceManager.minimizedObjectHandler.transform.position, step);
             }
+
             transform.localScale -= Vector3.one * Time.deltaTime * shrinkSpeed;
             transform.Rotate(Vector3.one * Time.deltaTime * 100);
             if (Mathf.Abs(currentTime - animationTime) <= 0.05f || transform.localScale.x < 0)
@@ -298,17 +339,20 @@ namespace CellexalVR.AnalysisObjects
                     Destroy(gameObject);
                     return;
                 }
+
                 foreach (NetworkCenter network in networks)
                 {
                     foreach (Renderer r in network.GetComponentsInChildren<Renderer>())
                         r.enabled = false;
                 }
+
                 foreach (Renderer r in GetComponentsInChildren<Renderer>())
                     r.enabled = false;
                 minimize = false;
                 referenceManager.minimizeTool.GetComponent<Light>().range = 0.04f;
                 referenceManager.minimizeTool.GetComponent<Light>().intensity = 0.8f;
             }
+
             currentTime += Time.deltaTime;
         }
 
@@ -321,6 +365,7 @@ namespace CellexalVR.AnalysisObjects
             {
                 transform.position = new Vector3(0, 1, 0);
             }
+
             if (!multiuserMessageSender.multiplayer)
             {
                 transform.position = graph.position;
@@ -330,6 +375,7 @@ namespace CellexalVR.AnalysisObjects
                 //transform.rotation = referenceManager.headset.transform.rotation;
                 //transform.position += transform.forward * 1f;
             }
+
             //transform.Rotate(-20, 0, 0);
             targetPos = transform.position;
             createAnim = true;
@@ -344,13 +390,15 @@ namespace CellexalVR.AnalysisObjects
             if (!removable)
             {
                 Debug.Log("Script is running");
-                CellexalError.SpawnError("Delete failed", "Can not delete network yet. Wait for script to finish before removing it.");
+                CellexalError.SpawnError("Delete failed",
+                    "Can not delete network yet. Wait for script to finish before removing it.");
             }
 
             for (int i = 0; i < networks.Count; i++)
             {
                 Destroy(networks[i].gameObject);
             }
+
             networks.Clear();
             referenceManager.arcsSubMenu.DestroyTab(name.Split('_')[1]); // Get last part of nw name   
             referenceManager.networkGenerator.networkList.RemoveAll(item => item == null);
@@ -373,7 +421,6 @@ namespace CellexalVR.AnalysisObjects
                 createAnim = false;
                 transform.localScale = new Vector3(targetScale, targetScale, targetScale);
                 referenceManager.notificationManager.SpawnNotification("Transcription factor networks finished.");
-
             }
         }
 
@@ -409,6 +456,7 @@ namespace CellexalVR.AnalysisObjects
                     return network;
                 }
             }
+
             return null;
         }
 
@@ -424,6 +472,11 @@ namespace CellexalVR.AnalysisObjects
                 referenceManager.multiuserMessageSender.SendMessageHighlightNetworkNode(name, nc.name, geneName);
             }
         }
-    }
 
+        public void HighlightNetworkSkeleton(bool toggle)
+        {
+            LineRenderer lr = GetComponent<LineRenderer>();
+            lr.startColor = lr.endColor = toggle ? highlightColor : standardColor;
+        }
+    }
 }

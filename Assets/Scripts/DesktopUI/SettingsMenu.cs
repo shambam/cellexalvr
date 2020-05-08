@@ -302,6 +302,8 @@ namespace CellexalVR.DesktopUI
             int val = graphPointQualityDropdown.value;
             string quality = graphPointQualityDropdown.options[val].text;
             CellexalConfig.Config.GraphPointQuality = quality;
+            referenceManager.graphGenerator.UpdateMeshToUse();
+            StartCoroutine(referenceManager.graphGenerator.RebuildGraphs());
             //referenceManager.heatmapGenerator.InitColors();
         }
         public void SetGraphPointSize()
@@ -310,7 +312,9 @@ namespace CellexalVR.DesktopUI
             int val = graphPointSizeDropdown.value;
             string size = graphPointSizeDropdown.options[val].text;
             CellexalConfig.Config.GraphPointSize = size;
-            //referenceManager.heatmapGenerator.InitColors();
+            referenceManager.graphGenerator.UpdateMeshToUse();
+            StartCoroutine(referenceManager.graphGenerator.RebuildGraphs());
+            referenceManager.heatmapGenerator.InitColors();
         }
 
         public void SetNumberOfGraphColors()

@@ -12,12 +12,16 @@ namespace CellexalVR.General
         public static UnityEvent SelectionStarted = new UnityEvent();
         public static UnityEvent SelectionConfirmed = new UnityEvent();
         public static UnityEvent SelectionCanceled = new UnityEvent();
+        public static UnityEvent SelectedFromFile = new UnityEvent();
+        
+        public static UnityEvent AnnotationsCleared = new UnityEvent();
+        
 
         public static UnityEvent BeginningOfHistoryReached = new UnityEvent();
         public static UnityEvent BeginningOfHistoryLeft = new UnityEvent();
-        public static UnityEvent EndOfHistoryReached = new UnityEvent();
         public static UnityEvent EndOfHistoryLeft = new UnityEvent();
-
+        public static UnityEvent EndOfHistoryReached = new UnityEvent();
+        
         public static UnityEvent CreatingHeatmap = new UnityEvent();
         public static UnityEvent HeatmapCreated = new UnityEvent();
         public static UnityEvent HeatmapBurned = new UnityEvent();

@@ -1,31 +1,30 @@
 ﻿using CellexalVR.AnalysisObjects;
+using CellexalVR.General;
 using UnityEngine;
 namespace CellexalVR.Menu.Buttons.Networks
 {
     /// <summary>
     /// Represents a button that toggle all arcs between all networks on a graph skeleton.
     /// </summary>
-    public class ToggleAllArcsButton : CellexalButton
+    public class ToggleAllArcsButton : SliderButton
     {
-        public bool toggleToState;
+        // public bool toggleToState;
 
         public NetworkCenter[] networks;
-        public GameObject[] parentNetworks;
+        // public GameObject[] parentNetworks;
 
-        protected override string Description
-        {
-            get { return ""; }
-        }
+        protected override string Description => "";
 
-        public override void Click()
+        protected override void ActionsAfterSliding()
         {
             if (networks == null) return;
-            foreach (NetworkCenter network in networks)
-            {
-                network.SetCombinedArcsVisible(false);
-                network.SetArcsVisible(toggleToState);
-                referenceManager.multiuserMessageSender.SendMessageSetArcsVisible(toggleToState, network.name);
-            }
+            // foreach (NetworkCenter network in networks)
+            // {
+                // network.SetCombinedArcsVisible(false);
+                // network.SetArcsVisible(currentState);
+                // referenceManager.multiuserMessageSender.SendMessageSetArcsVisible(currentState, network.name);
+            // }
+            referenceManager.arcsSubMenu.ToggleAllArcs(currentState);
         }
 
         /// <summary>

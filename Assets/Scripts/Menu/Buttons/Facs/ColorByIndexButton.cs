@@ -14,7 +14,7 @@ namespace CellexalVR.Menu.Buttons.Facs
 
         private CellManager cellManager;
         private string indexName;
-
+        
 
         protected override string Description
         {

@@ -29,7 +29,7 @@ namespace CellexalVR.Menu.Buttons.General
 
         public override void Click()
         {
-            CellexalEvents.GraphsResetKeepSelection.Invoke();
+            // CellexalEvents.GraphsResetKeepSelection.Invoke();
             graphManager.ResetGraphsColor();
             referenceManager.multiuserMessageSender.SendMessageResetGraphColor();
         }

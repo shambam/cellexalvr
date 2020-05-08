@@ -434,14 +434,14 @@ namespace CellexalVR.Multiuser
         public void RecieveMessageAddAnnotation(string annotation, int index)
         {
             CellexalLog.Log("Recieved message to add annotation: " + annotation);
-            referenceManager.selectionManager.AddAnnotation(annotation, index);
+            referenceManager.annotationManager.AddAnnotation(annotation, index);
         }
 
         [PunRPC]
         public void RecieveMessageExportAnnotations()
         {
             CellexalLog.Log("Recieved message to export annotations");
-            referenceManager.selectionManager.DumpAnnotatedSelectionToTextFile();
+            referenceManager.annotationManager.DumpAnnotatedSelectionToTextFile();
         }
 
         [PunRPC]

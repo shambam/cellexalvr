@@ -47,12 +47,15 @@ namespace CellexalVR.Menu.Buttons
                     c.enabled = false;
             }
             //textMeshToUndarken.GetComponent<Renderer>().material.SetColor("_Color", Color.white);
-            //MenuWithTabs subMenu = menuToClose.GetComponent<MenuWithTabs>();
+            MenuWithTabs subMenu = menuToClose.GetComponent<MenuWithTabs>();
+            
             textMeshToUndarken.GetComponent<MeshRenderer>().enabled = true;
             foreach (CellexalButton b in buttonsToActivate.GetComponentsInChildren<CellexalButton>())
             {
                 b.SetButtonActivated(b.storedState);
             }
+
+            if (subMenu) subMenu.Active = false;
             CellexalEvents.MenuClosed.Invoke();
         }
     }

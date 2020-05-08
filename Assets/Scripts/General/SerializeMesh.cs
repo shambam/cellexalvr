@@ -10,8 +10,9 @@ namespace CellexalVR.Extensions
     public class SerializeMesh : MonoBehaviour
     {
         [HideInInspector] [SerializeField] Vector2[] uv;
-        [HideInInspector] [SerializeField] Vector3[] verticies;
+        [HideInInspector] [SerializeField] Vector3[] vertices;
         [HideInInspector] [SerializeField] int[] triangles;
+
         [HideInInspector] [SerializeField] bool serialized = false;
         // Use this for initialization
 
@@ -35,7 +36,7 @@ namespace CellexalVR.Extensions
             var mesh = GetComponent<MeshFilter>().mesh;
 
             uv = mesh.uv;
-            verticies = mesh.vertices;
+            vertices = mesh.vertices;
             triangles = mesh.triangles;
 
             serialized = true;
@@ -44,7 +45,7 @@ namespace CellexalVR.Extensions
         public Mesh Rebuild()
         {
             Mesh mesh = new Mesh();
-            mesh.vertices = verticies;
+            mesh.vertices = vertices;
             mesh.triangles = triangles;
             mesh.uv = uv;
 
@@ -53,6 +54,7 @@ namespace CellexalVR.Extensions
 
             return mesh;
         }
+
     }
 
 #if UNITY_EDITOR
@@ -63,7 +65,7 @@ namespace CellexalVR.Extensions
 
         void OnSceneGUI()
         {
-            obj = (SerializeMesh)target;
+            obj = (SerializeMesh) target;
         }
 
         public override void OnInspectorGUI()

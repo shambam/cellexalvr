@@ -1,4 +1,5 @@
 ﻿using CellexalVR.AnalysisObjects;
+using UnityEngine.UI;
 
 namespace CellexalVR.Menu.Buttons.Networks
 {
@@ -6,27 +7,26 @@ namespace CellexalVR.Menu.Buttons.Networks
     /// Represents a buttont that toggle all the combined arcs between all networks ina  graph skeleton,
     /// The combined arcs show the number of arcs that are between two networks.
     /// </summary>
-    public class ToggleAllCombinedArcsButton : CellexalButton
+    public class ToggleAllCombinedArcsButton : SliderButton
     {
 
-        public bool toggleToState;
+        // public bool toggleToState;
 
         private NetworkCenter[] networks;
+        private bool storeButtonState;
 
-        protected override string Description
-        {
-            get { return ""; }
-        }
+        protected override string Description => "";
 
-        public override void Click()
+        protected override void ActionsAfterSliding()
         {
             if (networks == null) return;
+            var allArcsButton = referenceManager.arcsSubMenu.GetComponentInChildren<ToggleAllArcsButton>();
+            if (allArcsButton.CurrentState) allArcsButton.CurrentState = !currentState;
 
             foreach (NetworkCenter network in networks)
             {
-                network.SetArcsVisible(false);
-                network.SetCombinedArcsVisible(toggleToState);
-                referenceManager.multiuserMessageSender.SendMessageSetCombinedArcsVisible(toggleToState, network.name);
+                network.SetCombinedArcsVisible(currentState);
+                referenceManager.multiuserMessageSender.SendMessageSetCombinedArcsVisible(currentState, network.name);
             }
         }
 

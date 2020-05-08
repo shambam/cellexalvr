@@ -1,3 +1,4 @@
+using CellexalVR.General;
 using UnityEngine;
 namespace CellexalVR.Interaction
 {
@@ -6,10 +7,9 @@ namespace CellexalVR.Interaction
     /// </summary>
     public class KeyboardSwitch : MonoBehaviour
     {
-
         public bool KeyboardActive { get; set; }
 
-        void Start()
+        private void Start()
         {
             SetKeyboardVisible(false);
         }
@@ -23,6 +23,8 @@ namespace CellexalVR.Interaction
             KeyboardActive = visible;
             foreach (Transform t in transform)
             {
+                // session history list is child to keyboardhandler to handle materials and raycasting but should not be toggled together with other keyboard stuff.
+                // if (t.gameObject.GetComponent<SessionHistoryList>()) return;
                 t.gameObject.SetActive(visible);
             }
         }

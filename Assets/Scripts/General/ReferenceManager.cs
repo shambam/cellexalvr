@@ -95,6 +95,7 @@ namespace CellexalVR.General
         public CellManager cellManager;
         public LineBundler lineBundler;
         public SelectionManager selectionManager;
+        public AnnotationManager annotationManager;
         public HeatmapGenerator heatmapGenerator;
         public NetworkGenerator networkGenerator;
         public GraphGenerator graphGenerator;
@@ -104,6 +105,7 @@ namespace CellexalVR.General
         public ConfigManager configManager;
         //public GameObject helperCylinder;
         public InputReader inputReader;
+        public ReportReader reportReader;
         public SQLite database;
         public LogManager logManager;
         public MultiuserMessageSender multiuserMessageSender;
@@ -139,6 +141,7 @@ namespace CellexalVR.General
         public ColoringOptionsList coloringOptionsList;
         public KeyboardHandler folderKeyboard;
         public KeyboardHandler webBrowserKeyboard;
+        public SessionHistoryList sessionHistoryList;
 
         #endregion
 
@@ -229,6 +232,7 @@ namespace CellexalVR.General
             cellManager = managersParent.GetComponentInChildren<CellManager>();
             lineBundler = managersParent.GetComponentInChildren<LineBundler>();
             selectionManager = managersParent.GetComponentInChildren<SelectionManager>();
+            annotationManager = managersParent.GetComponentInChildren<AnnotationManager>();
             heatmapGenerator = generatorsParent.GetComponentInChildren<HeatmapGenerator>();
             networkGenerator = generatorsParent.GetComponentInChildren<NetworkGenerator>();
             graphGenerator = generatorsParent.GetComponentInChildren<GraphGenerator>();
@@ -257,6 +261,7 @@ namespace CellexalVR.General
             convexHullGenerator = generatorsParent.GetComponentInChildren<ConvexHullGenerator>(true);
             filterManager = managersParent.GetComponentInChildren<FilterManager>(true);
             reportManager = managersParent.GetComponentInChildren<ReportManager>(true);
+            reportReader = reportManager.GetComponent<ReportReader>();
             floor = GameObject.Find("Floor").GetComponent<Floor>();
 
             geneKeyboard = GameObject.Find("Keyboard Setup").GetComponent<KeyboardHandler>();
@@ -267,6 +272,7 @@ namespace CellexalVR.General
             coloringOptionsList = GameObject.Find("Keyboard Setup/Coloring Options List").GetComponent<ColoringOptionsList>();
             folderKeyboard = GameObject.Find("Tron_Loader/Folder Keyboard").GetComponent<KeyboardHandler>();
             webBrowserKeyboard = GameObject.Find("WebBrowser/Web Keyboard").GetComponent<KeyboardHandler>();
+            sessionHistoryList = geneKeyboard.GetComponentInChildren<SessionHistoryList>();
 
             GameObject filterCreator = GameObject.Find("Filter Creator");
             filterBlockBoard = filterCreator.transform.Find("Filter Block Board").gameObject;

@@ -11,7 +11,27 @@ namespace CellexalVR.Extensions
     /// </summary>
     public static class Definitions
     {
-        public enum Measurement { INVALID, GENE, ATTRIBUTE, FACS }
+        public enum Measurement
+        {
+            INVALID,
+            GENE,
+            ATTRIBUTE,
+            FACS
+        }
+
+        public enum HistoryEvent
+        {
+            INVALID,
+            GENE,
+            ATTRIBUTE,
+            FACS,
+            SELECTION,
+            HEATMAP,
+            NETWORK,
+            FACSGRAPH,
+            ATTRIBUTEGRAPH
+        }
+
         public static string ToString(this Measurement m)
         {
             switch (m)
@@ -27,24 +47,61 @@ namespace CellexalVR.Extensions
                 default:
                     return "";
             }
-
         }
 
+        public static string ToString(this HistoryEvent m)
+        {
+            switch (m)
+            {
+                case HistoryEvent.SELECTION:
+                    return "selection";
+                case HistoryEvent.HEATMAP:
+                    return "heatmap";
+                case HistoryEvent.NETWORK:
+                    return "network";
+                case HistoryEvent.INVALID:
+                    return "invalid";
+                    break;
+                case HistoryEvent.GENE:
+                    return "gene";
+                case HistoryEvent.ATTRIBUTE:
+                    return "attribute";
+                case HistoryEvent.FACS:
+                    return "facs";
+                case HistoryEvent.FACSGRAPH:
+                    return "facs graph";
+                case HistoryEvent.ATTRIBUTEGRAPH:
+                    return "attribute graph";
+                default:
+                    return "";
+                
+            }
+        }
+
+        public static Color TronColor = new Color(.465f, .765f, .875f);
     }
 
-    public enum AttributeLogic { INVALID, NOT_INCLUDED, YES, NO }
+    public enum AttributeLogic
+    {
+        INVALID,
+        NOT_INCLUDED,
+        YES,
+        NO
+    }
 
     /// <summary>
     /// Extension methods and such.
     /// </summary>
     public static class Extensions
     {
-        public static UnityEngine.Color[] InterpolateColors(UnityEngine.Color color1, UnityEngine.Color color2, int numColors)
+        public static UnityEngine.Color[] InterpolateColors(UnityEngine.Color color1, UnityEngine.Color color2,
+            int numColors)
         {
             if (numColors == 1)
             {
-                return new UnityEngine.Color[] { color1 };
+                return new UnityEngine.Color[] {color1};
             }
+
             if (numColors < 1)
             {
                 CellexalError.SpawnError("Error when interpolating colors", "Can not interpolate less than 1 color.");
@@ -52,7 +109,6 @@ namespace CellexalVR.Extensions
             }
             else if (numColors > 255)
             {
-
             }
 
             var colors = new UnityEngine.Color[numColors];
@@ -71,7 +127,8 @@ namespace CellexalVR.Extensions
                 if (r < 0) r = 0;
                 if (g < 0) g = 0;
                 if (b < 0) b = 0;
-                colors[i] = new UnityEngine.Color(UnityEngine.Mathf.Sqrt(r), UnityEngine.Mathf.Sqrt(g), UnityEngine.Mathf.Sqrt(b));
+                colors[i] = new UnityEngine.Color(UnityEngine.Mathf.Sqrt(r), UnityEngine.Mathf.Sqrt(g),
+                    UnityEngine.Mathf.Sqrt(b));
             }
 
             return colors;
@@ -108,6 +165,7 @@ namespace CellexalVR.Extensions
                 foreach (Transform t in c)
                     queue.Enqueue(t);
             }
+
             return null;
         }
 
@@ -137,6 +195,7 @@ namespace CellexalVR.Extensions
                     return i;
                 }
             }
+
             return -1;
         }
 
@@ -176,6 +235,5 @@ namespace CellexalVR.Extensions
                     return "";
             }
         }
-
     }
 }

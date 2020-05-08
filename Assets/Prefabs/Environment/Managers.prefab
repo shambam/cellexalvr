@@ -1013,6 +1013,52 @@ MonoBehaviour:
   cullingCubePrefab: {fileID: 5730375503896762359, guid: 5893c8871c1a73148a294c06cfd29114,
     type: 3}
   cubeCounter: 0
+--- !u!1 &1108615598
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1108615599}
+  - component: {fileID: 1108615600}
+  m_Layer: 0
+  m_Name: AnnotationManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1108615599
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1108615598}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 4776004323092934}
+  m_RootOrder: 9
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1108615600
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1108615598}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41181ac52a27400eb2c9d72cf8f78b77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  annotationTextPrefab: {fileID: 1705337094365442, guid: 93a73264c7efedb43828e00f096623b9,
+    type: 3}
+  referenceManager: {fileID: 0}
 --- !u!1 &1245275573
 GameObject:
   m_ObjectHideFlags: 0
@@ -1721,6 +1767,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1889859668}
   - component: {fileID: 1889859669}
+  - component: {fileID: 1126007263}
   m_Layer: 0
   m_Name: ReportManager
   m_TagString: Untagged
@@ -1752,6 +1799,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d09efb02df7a34a41bbcee8d45ccac7d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  referenceManager: {fileID: 0}
+--- !u!114 &1126007263
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1889859667}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6272151f14ac40fb90b91236f0baa233, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   referenceManager: {fileID: 0}
@@ -26616,6 +26676,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86d6964ba2f17d748ae292461581dac3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  referenceManager: {fileID: 0}
   lineBetweenTwoGraphPointsPrefab: {fileID: 1930424304061810, guid: 7e6b0e9c0134dcb4985fdc0121d8fdb0,
     type: 3}
   pointClusterPrefab: {fileID: 3648292811063363965, guid: 0b612474faeaeae4aaf8107d94e8be22,
@@ -26816,6 +26877,7 @@ Transform:
   - {fileID: 4969540669519878}
   - {fileID: 1889859668}
   - {fileID: 1097964908}
+  - {fileID: 1108615599}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -32151,13 +32213,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   referenceManager: {fileID: 0}
-  annotationTextPrefab: {fileID: 1705337094365442, guid: 93a73264c7efedb43828e00f096623b9,
-    type: 3}
   selectionConfirmed: 0
   heatmapGrabbed: 0
   fileCreationCtr: 0
   hapticIntensity: 2000
-  groupCount: 0
 --- !u!114 &1971523611
 MonoBehaviour:
   m_ObjectHideFlags: 0

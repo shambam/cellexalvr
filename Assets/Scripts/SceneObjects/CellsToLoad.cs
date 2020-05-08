@@ -44,21 +44,12 @@ namespace CellexalVR.SceneObjects
             this.gameObject.name = directory;
         }
 
-        private void Update()
-        {
-            //if (GetComponent<VRTK_InteractableObject>().enabled)
-            //{
-            //    referenceManager.MultiuserMessageSender.SendMessageMoveCells(transform.parent.gameObject.name, transform.position, transform.rotation);
-            //    referenceManager.inputFolderGenerator.FindCells(this.gameObject.name);
-
-            //}
-        }
-
         public bool GraphsLoaded()
         {
             return graphsLoaded;
         }
 
+        
         internal void ResetPosition()
         {
             transform.localPosition = defaultPosition;

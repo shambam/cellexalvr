@@ -11,22 +11,23 @@ namespace CellexalVR.Interaction
     {
         public TMPro.TextMeshPro text;
 
-        private SelectionManager selectionManager;
+        private AnnotationManager annotationManager;
 
         protected override void Start()
         {
             base.Start();
-            selectionManager = referenceManager.selectionManager;
+            annotationManager = referenceManager.annotationManager;
         }
 
 
         /// <summary>
-        /// Click this panel, calling the dump function in selectionmanager.
+        /// Click this panel, calling the dump function in the annotation manager which will export the
+        /// cell names together with annotations to a text file.
         /// </summary>
         public override void Click()
         {
             referenceManager.multiuserMessageSender.SendMessageExportAnnotations();
-            selectionManager.DumpAnnotatedSelectionToTextFile();
+            annotationManager.DumpAnnotatedSelectionToTextFile();
         }
     }
 }

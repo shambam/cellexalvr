@@ -14,7 +14,6 @@ namespace CellexalVR.Spatial
     /// </summary>
     public class GraphSlice : MonoBehaviour
     {
-
         public ReferenceManager referenceManager;
         public bool sliceMode;
         public GameObject replacement;
@@ -35,6 +34,7 @@ namespace CellexalVR.Spatial
         private Color replacementCol;
         private Color replacementHighlightCol;
         private bool grabbing;
+        private int flipped = 1;
 
 
         private void Start()
@@ -72,10 +72,9 @@ namespace CellexalVR.Spatial
         /// <returns></returns>
         public IEnumerator MoveToGraphCoroutine()
         {
-            this.transform.parent = spatGraph.transform;
-            BoxCollider collider = graph.GetComponent<BoxCollider>();
-            Vector3 startPos = this.transform.localPosition;
-            Quaternion startRot = this.transform.localRotation;
+            transform.parent = spatGraph.transform;
+            Vector3 startPos = transform.localPosition;
+            Quaternion startRot = transform.localRotation;
             Quaternion targetRot = Quaternion.identity;
 
             float time = 1f;
@@ -83,19 +82,18 @@ namespace CellexalVR.Spatial
             while (t < time)
             {
                 float progress = Mathf.SmoothStep(0, time, t);
-                this.transform.localPosition = Vector3.Lerp(startPos, originalPos, progress);
-                this.transform.localRotation = Quaternion.Lerp(startRot, targetRot, progress);
+                transform.localPosition = Vector3.Lerp(startPos, originalPos, progress);
+                transform.localRotation = Quaternion.Lerp(startRot, targetRot, progress);
                 t += (Time.deltaTime / time);
                 yield return null;
             }
-            this.transform.localPosition = originalPos;
-            this.transform.localRotation = originalRot;
+
+            transform.localPosition = originalPos;
+            transform.localRotation = originalRot;
             //wire.SetActive(false);
             //replacement.GetComponent<Renderer>().material.color = replacementCol;
             //replacement.SetActive(false);
-
         }
-
 
 
         /// <summary>
@@ -119,7 +117,6 @@ namespace CellexalVR.Spatial
             lr.startColor = lr.endColor = new Color(255, 255, 255, 0.1f);
             lr.startWidth = lr.endWidth /= 2;
             wire.SetActive(false);
-
         }
 
         /// <summary>
@@ -128,35 +125,33 @@ namespace CellexalVR.Spatial
         /// </summary>
         /// <param name="activate"></param>
         /// <returns></returns>
-        public IEnumerator ActivateSlice(bool activate)
+        public void ActivateSlice(bool activate, bool move = true)
         {
             foreach (BoxCollider bc in GetComponents<BoxCollider>())
             {
                 bc.enabled = activate;
             }
+
             if (activate)
             {
-                var rigidbody = gameObject.GetComponent<Rigidbody>();
+                Rigidbody rigidbody = gameObject.GetComponent<Rigidbody>();
                 if (rigidbody == null)
                 {
                     rigidbody = gameObject.AddComponent<Rigidbody>();
                 }
+
                 rigidbody.useGravity = false;
                 rigidbody.isKinematic = false;
                 rigidbody.drag = 10;
                 rigidbody.angularDrag = 15;
                 GetComponent<VRTK_InteractableObject>().isGrabbable = true;
                 sliceMode = true;
-                Vector3 startPos = this.transform.localPosition;
-                Vector3 targetPos = new Vector3(this.transform.localPosition.x, this.transform.localPosition.y, zCoord);
-                float time = 1f;
-                float t = 0f;
-                while (t < time)
+                if (move)
                 {
-                    float progress = Mathf.SmoothStep(0, time, t);
-                    this.transform.localPosition = Vector3.Lerp(startPos, targetPos, progress);
-                    t += (Time.deltaTime / time);
-                    yield return null;
+                    Vector3 targetPos = new Vector3(transform.position.x, transform.position.y, zCoord);
+                    // transform.TransformPoint(targetPos);
+                    float time = 1f;
+                    StartCoroutine(MoveSlice(targetPos.x, targetPos.y, targetPos.z, time));
                 }
             }
             else
@@ -165,6 +160,40 @@ namespace CellexalVR.Spatial
                 Destroy(GetComponent<Rigidbody>());
                 sliceMode = false;
                 //graph.transform.localPosition = Vector3.zero;
+            }
+        }
+
+        public IEnumerator MoveSlice(float x, float y, float z, float animationTime, bool rotate = false)
+        {
+            Vector3 startPos = transform.localPosition;
+            Vector3 targetPosition = new Vector3(x, y, z);
+            float t = 0f;
+            while (t < animationTime)
+            {
+                float progress = Mathf.SmoothStep(0, animationTime, t);
+                transform.localPosition = Vector3.Lerp(startPos, targetPosition, progress);
+                t += (Time.deltaTime / animationTime);
+                if (rotate)
+                {
+                    transform.LookAt(referenceManager.headset.transform);
+                }
+
+                yield return null;
+            }
+        }
+
+        public IEnumerator FlipSlice(float animationTime)
+        {
+            flipped *= -1;
+            Vector3 center = GetComponent<BoxCollider>().bounds.center;
+            float t = 0f;
+            float angle = 5f;
+            float finalAngle = 0f;
+            while (finalAngle <= 180)
+            {
+                transform.RotateAround(center, transform.up, angle);
+                finalAngle += angle;
+                yield return null;
             }
         }
 

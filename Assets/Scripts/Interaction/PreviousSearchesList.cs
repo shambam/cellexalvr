@@ -1,4 +1,5 @@
-﻿using CellexalVR.AnalysisObjects;
+﻿using System;
+using CellexalVR.AnalysisObjects;
 using CellexalVR.Extensions;
 using CellexalVR.General;
 using CellexalVR.Multiuser;
@@ -42,7 +43,7 @@ namespace CellexalVR.Interaction
         {
             foreach (var node in previousSearchesListNodes)
             {
-                if (node.NameOfThing.ToLower() == name.ToLower() && node.Type == type && node.ColoringMethod == coloringMethod)
+                if (string.Equals(node.NameOfThing, name, StringComparison.CurrentCultureIgnoreCase) && node.Type == type && node.ColoringMethod == coloringMethod)
                     return true;
             }
             return false;

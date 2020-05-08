@@ -332,8 +332,8 @@ namespace CellexalVR.AnalysisObjects
         [ConsoleCommand("graphManager", aliases: new string[] { "resetcolor", "rc" })]
         public void ResetGraphsColor()
         {
-            CellexalEvents.GraphsReset.Invoke();
             selectionManager.CancelSelection();
+            selectionManager.Clear();
             foreach (Graph g in Graphs)
             {
                 g.ClearTopExprCircles();
@@ -344,6 +344,7 @@ namespace CellexalVR.AnalysisObjects
                 }
             }
             CellexalEvents.CommandFinished.Invoke(true);
+            CellexalEvents.GraphsReset.Invoke();
         }
 
         /// <summary>

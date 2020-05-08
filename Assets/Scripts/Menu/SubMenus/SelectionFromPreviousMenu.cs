@@ -2,24 +2,32 @@
 using CellexalVR.Menu;
 using CellexalVR.Menu.Buttons.Selection;
 using System.Collections.Generic;
+using System.IO;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace CellexalVR.Menu.SubMenus
 {
-
     /// <summary>
     /// Represents the sub menu that pops up when the <see cref="ColorByIndexButton"/> is pressed.
     /// </summary>
-    public class SelectionFromPreviousMenu : MonoBehaviour
+    public class SelectionFromPreviousMenu : MenuWithoutTabs
     {
-        public ReferenceManager referenceManager;
-        public GameObject buttonPrefab;
+        [FormerlySerializedAs("buttonPrefab")] public GameObject selectionButtonPrefab;
+        public GameObject annotationButtonPrefab;
+
         private MenuToggler menuToggler;
+
         // hard coded positions :)
-        private Vector3 buttonPos = new Vector3(-.39f, .77f, .282f);
-        private Vector3 buttonPosInc = new Vector3(.25f, 0, 0);
-        private Vector3 buttonPosNewRowInc = new Vector3(0, 0, -.15f);
-        private List<GameObject> buttons = new List<GameObject>();
+        private Vector3 selectionButtonPos = new Vector3(-.39f, .77f, .282f);
+        private Vector3 selectionButtonPosInc = new Vector3(.25f, 0, 0);
+        private Vector3 selectionButtonPosNewRowInc = new Vector3(0, 0, -.15f);
+        private Vector3 annotationButtonPos = new Vector3(-.39f, .77f, -.20f);
+        private Vector3 annotationButtonPosInc = new Vector3(.25f, 0, 0);
+        private Vector3 annotationButtonPosNewRowInc = new Vector3(0, 0, -.15f);
+        private List<GameObject> selectionButtons = new List<GameObject>();
+        private List<GameObject> annotationButtons = new List<GameObject>();
 
         private void OnValidate()
         {
@@ -33,6 +41,76 @@ namespace CellexalVR.Menu.SubMenus
         {
             referenceManager = GameObject.Find("InputReader").GetComponent<ReferenceManager>();
             menuToggler = referenceManager.menuToggler;
+            CellexalEvents.GraphsLoaded.AddListener(ReadSelectionFiles);
+            CellexalEvents.GraphsLoaded.AddListener(ReadAnnotationFiles);
+        }
+
+        private void ReadSelectionFiles()
+        {
+            string path = CellexalUser.UserSpecificFolder;
+            string[] files = Directory.GetFiles(path, "selection*.txt");
+            int i = 0;
+            foreach (string file in files)
+            {
+                GameObject buttonGameObject = Instantiate(selectionButtonPrefab, transform);
+                buttonGameObject.SetActive(true);
+                buttonGameObject.transform.localPosition = selectionButtonPos;
+
+                SelectionFromPreviousButton button = buttonGameObject.GetComponent<SelectionFromPreviousButton>();
+                button.Path = file;
+                string[] words = file.Split('\\');
+                button.buttonDescription.text = words[words.Length - 1];
+                selectionButtons.Add(buttonGameObject);
+                if ((i + 1) % 4 == 0)
+                {
+                    selectionButtonPos -= selectionButtonPosInc * 3;
+                    selectionButtonPos += selectionButtonPosNewRowInc;
+                }
+                else
+                {
+                    selectionButtonPos += selectionButtonPosInc;
+                }
+
+                i++;
+            }
+        }
+
+        public void ReadAnnotationFiles()
+        {
+            foreach (GameObject button in annotationButtons)
+            {
+                Destroy(button, .1f);
+            }
+
+            annotationButtonPos = new Vector3(-.39f, .77f, -.20f);
+            annotationButtons.Clear();
+            string path = CellexalUser.UserSpecificFolder + "\\AnnotatedSelections\\";
+            if (!Directory.Exists(path)) return;
+            string[] files = Directory.GetFiles(path, "*.txt");
+            int i = 0;
+            foreach (string file in files)
+            {
+                GameObject buttonGameObject = Instantiate(annotationButtonPrefab, transform);
+                buttonGameObject.SetActive(true);
+                buttonGameObject.transform.localPosition = annotationButtonPos;
+
+                SelectAnnotationButton button = buttonGameObject.GetComponent<SelectAnnotationButton>();
+                button.Path = file;
+                string[] words = file.Split('\\');
+                button.buttonDescription.text = words[words.Length - 1];
+                annotationButtons.Add(buttonGameObject);
+                if ((i + 1) % 4 == 0)
+                {
+                    annotationButtonPos -= annotationButtonPosInc * 3;
+                    annotationButtonPos += annotationButtonPosNewRowInc;
+                }
+                else
+                {
+                    annotationButtonPos += annotationButtonPosInc;
+                }
+
+                i++;
+            }
         }
 
         /// <summary>
@@ -42,42 +120,44 @@ namespace CellexalVR.Menu.SubMenus
         /// <param name="names"> An array with the names of the selections. </param>
         /// <param name="selectionCellNames"> An array of arrays with the names of the cells in each selection. </param>
         /// <param name="selectionGroups"> An array of arrays with the groups that each cell in each selection belong to. </param>
-        public void SelectionFromPreviousButton(string[] graphNames, string[] names, string[][] selectionCellNames, int[][] selectionGroups, Dictionary<int, Color>[] groupingColors)
+        public void SelectionFromPreviousButton(string[] graphNames, string[] names, string[][] selectionCellNames,
+            int[][] selectionGroups, Dictionary<int, Color>[] groupingColors)
         {
-
-            foreach (GameObject button in buttons)
+            foreach (GameObject button in selectionButtons)
             {
                 // wait 0.1 seconds so we are out of the loop before we start destroying stuff
                 Destroy(button.gameObject, .1f);
-                buttonPos = new Vector3(-.39f, .77f, .282f);
+                selectionButtonPos = new Vector3(-.39f, .77f, .282f);
             }
+
             for (int i = 0; i < names.Length; ++i)
             {
                 string name = names[i];
 
-                var buttonGameObject = Instantiate(buttonPrefab, transform);
+                var buttonGameObject = Instantiate(selectionButtonPrefab, transform);
                 buttonGameObject.SetActive(true);
                 if (!menuToggler)
                 {
                     menuToggler = referenceManager.menuToggler;
                 }
+
                 //menuToggler.AddGameObjectToActivate(buttonGameObject, gameObject);
                 //menuToggler.AddGameObjectToActivate(buttonGameObject.transform.GetChild(0).gameObject, gameObject);
-                buttonGameObject.transform.localPosition = buttonPos;
+                buttonGameObject.transform.localPosition = selectionButtonPos;
 
                 var button = buttonGameObject.GetComponent<SelectionFromPreviousButton>();
                 button.SetSelection(graphNames[i], name, selectionCellNames[i], selectionGroups[i], groupingColors[i]);
-                buttons.Add(buttonGameObject);
+                selectionButtons.Add(buttonGameObject);
 
                 // position the buttons in a 4 column grid.
                 if ((i + 1) % 4 == 0)
                 {
-                    buttonPos -= buttonPosInc * 3;
-                    buttonPos += buttonPosNewRowInc;
+                    selectionButtonPos -= selectionButtonPosInc * 3;
+                    selectionButtonPos += selectionButtonPosNewRowInc;
                 }
                 else
                 {
-                    buttonPos += buttonPosInc;
+                    selectionButtonPos += selectionButtonPosInc;
                 }
             }
         }
@@ -122,6 +202,5 @@ namespace CellexalVR.Menu.SubMenus
         //    }
 
         //}
-
     }
 }
