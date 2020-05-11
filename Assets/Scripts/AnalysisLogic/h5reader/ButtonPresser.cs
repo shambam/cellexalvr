@@ -32,7 +32,6 @@ namespace CellexalVR.AnalysisLogic.H5reader
             if (other.gameObject.name.Equals("ControllerCollider(Clone)"))
             {
                 controllerInside = true;
-                print(button.transition.ToString());
                 if(button.transition == Button.Transition.ColorTint)
                     button.targetGraphic.color = button.colors.highlightedColor;
                 if (button.transition == Button.Transition.Animation)

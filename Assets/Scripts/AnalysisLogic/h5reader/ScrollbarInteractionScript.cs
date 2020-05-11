@@ -50,24 +50,24 @@ namespace CellexalVR.AnalysisLogic.H5reader
                 if (slidingArea.rect.height > slidingArea.rect.width)
                 {
                     float y = slidingArea.transform.InverseTransformPoint(device.transform.pos).y;
-                    float height = slidingArea.rect.height;
+                    float height = slidingArea.rect.height - scrollbar.handleRect.rect.height/2f;
                     temp = Mathf.Clamp01(y / height + 0.5f);
                 }
                 else
                 {
                     float x = slidingArea.transform.InverseTransformPoint(device.transform.pos).x;
-                    float width = slidingArea.rect.width;
+                    float width = slidingArea.rect.width - scrollbar.handleRect.rect.width / 2f;
                     temp = Mathf.Clamp01(x / width + 0.5f);
                 }
 
 
                 scrollbar.value = temp;
+
+                Vector3 size = handleRect.rect.size;
+                size.z = 10;
+                boxCollider.size = size;
+
             }
-            Vector3 size = handleRect.rect.size;
-            size.z = 10;
-            boxCollider.size = size;
-
-
         }
 
     }

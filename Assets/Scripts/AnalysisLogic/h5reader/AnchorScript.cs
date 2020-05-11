@@ -9,7 +9,6 @@ namespace CellexalVR.AnalysisLogic.H5reader
 
         public ReferenceManager referenceManager;
         private SteamVR_TrackedObject rightController;
-        private SteamVR_Controller.Device device;
 
         public bool isAnchorA;
         public RectTransform rect;
@@ -28,7 +27,6 @@ namespace CellexalVR.AnalysisLogic.H5reader
                 referenceManager = GameObject.Find("InputReader").GetComponent<ReferenceManager>();
             }
             rightController = referenceManager.rightController;
-            device = SteamVR_Controller.Input((int)rightController.index);
         }
 
         public void AttachAnchorBToHand()
@@ -63,6 +61,7 @@ namespace CellexalVR.AnalysisLogic.H5reader
         // Update is called once per frame
         void Update()
         {
+            SteamVR_Controller.Device device = SteamVR_Controller.Input((int)rightController.index);
             if (device.GetPressDown(SteamVR_Controller.ButtonMask.Trigger) && !isAnchorA && isAttachedToHand && DistBetweenAnchors() > 0.10f && !expandButtonScript) //Pressing in free space return to hand
             {
                 transform.parent = anchorA.rect.parent;

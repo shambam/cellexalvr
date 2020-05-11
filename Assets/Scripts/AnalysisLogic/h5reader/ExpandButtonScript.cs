@@ -66,7 +66,6 @@ namespace CellexalVR.AnalysisLogic.H5reader
                 isExpanded = !isExpanded;
                 if (isExpanded)
                 {
-                    print("setting minus");
                     image.sprite = minusImage;
                 }
                 else
@@ -80,11 +79,8 @@ namespace CellexalVR.AnalysisLogic.H5reader
                 }
                 H5ReaderAnnotatorTextBoxScript parent = parentScript;
                 while (!parent.isTop)
-                {
                     parent = parent.transform.parent.GetComponent<H5ReaderAnnotatorTextBoxScript>();
-                }
-                float contentSize = parent.UpdatePosition(10f);
-                parent.GetComponentInParent<H5readerAnnotater>().display.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Top, 0, contentSize);
+                parent.GetComponentInParent<H5readerAnnotater>().resizeDisplay(parent.UpdatePosition(10f));
             }
             else if (anchorScript)
             {

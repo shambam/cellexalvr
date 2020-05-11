@@ -62,6 +62,7 @@ namespace CellexalVR.AnalysisLogic.H5reader
                     script.name = parentKey;
                     subkeys.Add(parentKey, script);
                     script.parentScript = this;
+                    go.SetActive(false);
                 }
                 subkeys[parentKey].Insert(newName, annotaterScript);
             }
@@ -74,8 +75,9 @@ namespace CellexalVR.AnalysisLogic.H5reader
                 script.isTop = false;
                 script.isBottom = true;
                 script.parentScript = this;
-                if(!isTop)
-                    go.SetActive(false);
+                go.SetActive(false);
+                //if (!isTop)
+                //    go.SetActive(false);
             }
         }
 
@@ -149,15 +151,13 @@ namespace CellexalVR.AnalysisLogic.H5reader
         {
             rect.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Top, offset, 0);
             rect.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, 5f, 0);
-            LayoutRebuilder.ForceRebuildLayoutImmediate(rect);
+            //LayoutRebuilder.ForceRebuildLayoutImmediate(rect);
             boxCollider.center = new Vector3(rect.rect.width / 2, -rect.rect.height / 2, 0);
             boxCollider.size = new Vector3(rect.rect.width, rect.rect.height, 1);
 
             expandButtonRect.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Top, 0, 8f);
             expandButtonRect.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Right, -15f, 8f);
             expandButtonBoxCollider.size = new Vector3(expandButtonRect.rect.size.x, expandButtonRect.rect.size.y,5);
-            
-            
 
             float temp = 0f;
             foreach (H5ReaderAnnotatorTextBoxScript k in subkeys.Values)

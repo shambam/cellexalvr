@@ -218,7 +218,7 @@ namespace CellexalVR.AnalysisLogic.H5reader
             startInfo.FileName = "py.exe";
 
             string file_name = filePath;
-            startInfo.Arguments = "ann.py " + file_name;
+            startInfo.Arguments = "python/ann.py " + file_name;
             p.StartInfo = startInfo;
             Thread t = new Thread(
                 () =>

@@ -74,7 +74,6 @@ namespace CellexalVR.AnalysisLogic.H5reader
             float timePassed = 0;
             while (timePassed < 1.0f)
             {
-                print(deltaPos);
                 // Increment the time to prevent an infinite loop
                 timePassed += Time.deltaTime;
                 // Slowly adjust the position and rotation so it approaches the spawn position and rotation

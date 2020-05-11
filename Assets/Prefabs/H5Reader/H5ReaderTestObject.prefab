@@ -169,6 +169,8 @@ GameObject:
   - component: {fileID: 6535196803681576956}
   - component: {fileID: 5333596803973606646}
   - component: {fileID: 833710146713875199}
+  - component: {fileID: 542968543843455082}
+  - component: {fileID: 8277572755457174613}
   m_Layer: 10
   m_Name: Scrollbar
   m_TagString: Untagged
@@ -251,10 +253,10 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 0
+  m_Transition: 1
   m_Colors:
-    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_NormalColor: {r: 0, g: 0.54901963, b: 0.9607843, a: 1}
+    m_HighlightedColor: {r: 0, g: 0.7911868, b: 1, a: 1}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
@@ -275,7 +277,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2084075143731890500}
   m_HandleRect: {fileID: 1060969340512877278}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 0.9999797
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -283,6 +285,31 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.Scrollbar+ScrollEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
+--- !u!114 &542968543843455082
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 529628620774725708}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a1bffc53dd335d4ab5a7ca0a6b2a7be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!65 &8277572755457174613
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 529628620774725708}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 20, y: 210, z: 10}
+  m_Center: {x: -10, y: 105, z: 0}
 --- !u!1 &690634848196122976
 GameObject:
   m_ObjectHideFlags: 0
@@ -446,6 +473,8 @@ GameObject:
   - component: {fileID: 3064697271962097151}
   - component: {fileID: 3290630796583259330}
   - component: {fileID: 8121016010504229324}
+  - component: {fileID: 8337599507734846088}
+  - component: {fileID: 6733407891452517711}
   m_Layer: 10
   m_Name: Scrollbar Horizontal
   m_TagString: Untagged
@@ -530,8 +559,8 @@ MonoBehaviour:
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
   m_Colors:
-    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_NormalColor: {r: 0, g: 0.54901963, b: 0.9607843, a: 1}
+    m_HighlightedColor: {r: 0, g: 0.7921569, b: 1, a: 1}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
     m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
@@ -552,14 +581,39 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 8498533256896878459}
   m_HandleRect: {fileID: 4486046732495522068}
   m_Direction: 0
-  m_Value: 0.000058379905
-  m_Size: 0.6166604
+  m_Value: 0.00005838765
+  m_Size: 0.61669177
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
     m_TypeName: UnityEngine.UI.Scrollbar+ScrollEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
+--- !u!114 &8337599507734846088
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1968243359458830166}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a1bffc53dd335d4ab5a7ca0a6b2a7be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!65 &6733407891452517711
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1968243359458830166}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 370, y: 20, z: 10}
+  m_Center: {x: 185, y: 10, z: 2}
 --- !u!1 &2011874140443010776
 GameObject:
   m_ObjectHideFlags: 0
@@ -1030,7 +1084,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0.38431376, b: 0.9607844, a: 1}
+  m_Color: {r: 0, g: 0.5471582, b: 0.9607843, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1053,7 +1107,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2279811896425908412}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dd018974020c4d94f9e2796ad2266be0, type: 3}
   m_Name: 
@@ -1072,7 +1126,7 @@ BoxCollider:
   m_GameObject: {fileID: 2279811896425908412}
   m_Material: {fileID: 0}
   m_IsTrigger: 1
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
@@ -1359,7 +1413,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.0010368635}
+  m_AnchoredPosition: {x: 0, y: -0.0034918655}
   m_SizeDelta: {x: -180, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!1 &6261854038129503913
@@ -1484,7 +1538,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 114.99558, y: 0}
+  m_AnchoredPosition: {x: 114.96506, y: 0}
   m_SizeDelta: {x: 600, y: 80}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &6929035296636578766
@@ -1498,8 +1552,6 @@ GameObject:
   - component: {fileID: 4486046732495522068}
   - component: {fileID: 1709784796917390804}
   - component: {fileID: 8498533256896878459}
-  - component: {fileID: 7001921437860010527}
-  - component: {fileID: 6808105730038975940}
   m_Layer: 10
   m_Name: Handle
   m_TagString: Untagged
@@ -1547,7 +1599,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0.40292788, b: 1, a: 1}
+  m_Color: {r: 0, g: 0.54901963, b: 0.9607843, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1563,36 +1615,6 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
---- !u!114 &7001921437860010527
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6929035296636578766}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dd018974020c4d94f9e2796ad2266be0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  referenceManager: {fileID: 0}
-  handleRect: {fileID: 4486046732495522068}
-  slidingArea: {fileID: 6565168188009271344}
-  scrollbar: {fileID: 8121016010504229324}
-  boxCollider: {fileID: 6808105730038975940}
---- !u!65 &6808105730038975940
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6929035296636578766}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &7398264057664047985
 GameObject:
   m_ObjectHideFlags: 0
@@ -3271,12 +3293,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7c59b24b896803349b913a697bfdba5c, type: 3}
---- !u!224 &7347498512858030419 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 8727108596470850657, guid: 7c59b24b896803349b913a697bfdba5c,
-    type: 3}
-  m_PrefabInstance: {fileID: 2083871335103726898}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &3290127004141066668 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3549827046853418142, guid: 7c59b24b896803349b913a697bfdba5c,
@@ -3289,6 +3305,12 @@ MonoBehaviour:
   m_Script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!224 &7347498512858030419 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 8727108596470850657, guid: 7c59b24b896803349b913a697bfdba5c,
+    type: 3}
+  m_PrefabInstance: {fileID: 2083871335103726898}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &4728392318699479474
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4170,12 +4192,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7c59b24b896803349b913a697bfdba5c, type: 3}
---- !u!224 &3059707367608853589 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 8727108596470850657, guid: 7c59b24b896803349b913a697bfdba5c,
-    type: 3}
-  m_PrefabInstance: {fileID: 6010802075177287732}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &8248151348689110215 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2386337531552171251, guid: 7c59b24b896803349b913a697bfdba5c,
@@ -4188,6 +4204,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!224 &3059707367608853589 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 8727108596470850657, guid: 7c59b24b896803349b913a697bfdba5c,
+    type: 3}
+  m_PrefabInstance: {fileID: 6010802075177287732}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &6015826643014609093
 PrefabInstance:
   m_ObjectHideFlags: 0

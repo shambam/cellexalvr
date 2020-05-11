@@ -81,7 +81,7 @@ namespace CellexalVR.AnalysisLogic.H5reader
 
             startInfo.FileName = "py.exe";
 
-            startInfo.Arguments = "crawl.py " + filePath;
+            startInfo.Arguments = "python/crawl.py " + filePath;
             p.StartInfo = startInfo;
             p.Start();
             reader = p.StandardOutput;
@@ -104,11 +104,16 @@ namespace CellexalVR.AnalysisLogic.H5reader
             }
             keys.FillContent(display);
             float contentSize = keys.UpdatePosition(10f);
-            print(contentSize);
-            display.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Top, 0, contentSize);
+            resizeDisplay(contentSize);
 
             title.text = filePath.Substring(filePath.LastIndexOf("\\") + 1);
 
+        }
+
+        public void resizeDisplay(float height)
+        {
+            print("Setting height: " + height);
+            display.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Top, 0, height+50f);
         }
 
         public void Destroy()
@@ -211,7 +216,6 @@ namespace CellexalVR.AnalysisLogic.H5reader
             switch (type)
             {
                 case 0:
-                    print("3D");
                     go = Instantiate(projectionObject, projectionRect);
                     rect = go.GetComponent<RectTransform>();
                     rect.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, rect.rect.width * (1.1f) * projectionObjectScripts.Count, rect.rect.width);
@@ -220,9 +224,9 @@ namespace CellexalVR.AnalysisLogic.H5reader
                     projection.Init(ProjectionObjectScript.projectionType.p3D);
                     projectionObjectScripts.Add(projection);
                     projection.h5readerAnnotater = this;
+                    projectionRect.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, 0, rect.rect.width * (1.1f) * projectionObjectScripts.Count);
                     break;
                 case 1:
-                    print("2D");
                     go = Instantiate(projectionObject, projectionRect);
                     projection = go.GetComponent<ProjectionObjectScript>();
                     projection.Init(ProjectionObjectScript.projectionType.p2D_sep);
@@ -230,9 +234,11 @@ namespace CellexalVR.AnalysisLogic.H5reader
                     rect.GetComponent<RectTransform>().SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, rect.rect.width * (1.1f) * projectionObjectScripts.Count, rect.rect.width);
                     projectionObjectScripts.Add(projection);
                     projection.h5readerAnnotater = this;
-
+                    projectionRect.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, 0, rect.rect.width * (1.1f) * projectionObjectScripts.Count);
                     break;
             }
+
+
         }
     }
 }
