@@ -281,7 +281,7 @@ namespace CellexalVR.AnalysisLogic.H5reader
 
                 //THERE ARE TOO MANY ATTRIBUTES AT THIS TIME
                 List<string> attr = JsonConvert.DeserializeObject<List<string>>(output);
-                attr.RemoveRange(1, attr.Count - 1);
+                attr.RemoveRange(0, attr.Count - 1);
                 attributes = attr;
 
             }
