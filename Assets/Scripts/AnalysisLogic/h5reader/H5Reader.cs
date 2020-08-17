@@ -271,6 +271,19 @@ namespace CellexalVR.AnalysisLogic.H5reader
 
                 output = reader.ReadLine();
                 projections = JsonConvert.DeserializeObject<List<string>>(output);
+
+                line = "list(f.obs.keys())";
+                writer.WriteLine(line);
+                while (reader.Peek() == 0)
+                    yield return null;
+
+                output = reader.ReadLine();
+
+                //THERE ARE TOO MANY ATTRIBUTES AT THIS TIME
+                List<string> attr = JsonConvert.DeserializeObject<List<string>>(output);
+                attr.RemoveRange(1, attr.Count - 1);
+                attributes = attr;
+
             }
 
 
@@ -388,10 +401,20 @@ namespace CellexalVR.AnalysisLogic.H5reader
         public IEnumerator GetAttributes(string attribute)
         {
             busy = true;
-            if (ascii)
-                writer.WriteLine("[s.decode('UTF-8') for s in " + "f['" + conf["attr_" + attribute] + "[:].tolist()]");
-            else
-                writer.WriteLine("f['" + conf["attr_" + attribute] + "'][:].tolist()");
+            string line = "";
+            if(fileType == FileTypes.loom)
+            {
+                if (ascii)
+                    line = "[s.decode('UTF-8') for s in " + "f['" + conf["attr_" + attribute] + "[:].tolist()]";
+                else
+                    line = "f['" + conf["attr_" + attribute] + "'][:].tolist()";
+            } 
+            else if(fileType == FileTypes.anndata) 
+            {
+                line = "f.obs['" + attribute + "'].tolist()";
+            }
+
+            writer.WriteLine(line);
             while (reader.Peek() == 0)
                 yield return null;
             string output = reader.ReadLine();
