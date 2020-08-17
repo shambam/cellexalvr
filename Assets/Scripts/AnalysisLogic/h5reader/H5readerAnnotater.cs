@@ -70,34 +70,7 @@ namespace CellexalVR.AnalysisLogic.H5reader
                     filePath = s;
             }
 
-            
-
-            if(filePath.EndsWith(".h5ad")){
-                Readh5ad(filePath);
-            }else if (filePath.EndsWith(".loom")){
-                Crawl(filePath);
-            }
-            
-        }
-
-        public void Readh5ad(string filePath){
-            p = new Process();
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.UseShellExecute = false;
-            startInfo.RedirectStandardInput = true;
-            startInfo.RedirectStandardOutput = true;
-            startInfo.RedirectStandardError = true;
-            startInfo.WindowStyle = ProcessWindowStyle.Minimized;
-
-            startInfo.FileName = "py.exe";
-
-            startInfo.Arguments = "python/Readh5ad.py " + filePath;
-            p.StartInfo = startInfo;
-            p.Start();
-            reader = p.StandardOutput;
-
-            float[][] matrix = JsonConvert.DeserializeObject<float[][]>(reader.ReadLine());
-            print(matrix);
+            Crawl(filePath);
         }
 
         public void Crawl(string filePath){

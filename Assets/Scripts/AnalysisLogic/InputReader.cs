@@ -111,7 +111,8 @@ namespace CellexalVR.AnalysisLogic
         private void ReadFileH5(string path, Dictionary<string, string> h5config)
         {
             bool confExists = Directory.EnumerateFiles("Data\\" + path, "*.conf").Any();
-            if (!confExists)
+            bool isAnndata = Directory.EnumerateFiles("Data\\" + path, "*.h5ad").Any();
+            if (!confExists && !isAnndata)
             {
                 if (h5config == null)
                 {

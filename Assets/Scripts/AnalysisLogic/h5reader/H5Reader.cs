@@ -33,6 +33,7 @@ namespace CellexalVR.AnalysisLogic.H5reader
         public bool busy;
         public ArrayList _expressionResult;
         public float[] _coordResult;
+        public float[][] _matrixCoordResult;
         public float[] _velResult;
         public string[] _attrResult;
         public List<string> attributes;
@@ -80,8 +81,16 @@ namespace CellexalVR.AnalysisLogic.H5reader
             {
                 if (s.EndsWith(".conf"))
                     configFile = s;
-                else if (s.EndsWith(".loom") || s.EndsWith(".h5ad"))
+                else if (s.EndsWith(".loom")){
                     filePath = s;
+                    fileType = FileTypes.loom;
+                }else if( s.EndsWith(".h5ad")){
+                    filePath = s;
+                    fileType = FileTypes.anndata;
+                    conf = new Dictionary<string, string>();
+                    return;
+                }
+
             }
 
 
@@ -175,19 +184,22 @@ namespace CellexalVR.AnalysisLogic.H5reader
             yield return null;
 
             var watch = Stopwatch.StartNew();
-            string line;
+            string line = "";
             if (conf.ContainsKey("custom_cellnames"))
             {
                 line = conf["custom_cellnames"];
             }
-            else
+            else if(fileType == FileTypes.loom)
             {
                 if (ascii)
                     line = "[s.decode('UTF-8') for s in f['" + conf["cellnames"] + "'][:].tolist()]";
                 else
                     line = "f['" + conf["cellnames"] + "'][:].tolist()";
             }
-            print("writing line " + line);
+            else if(fileType == FileTypes.anndata)
+            {
+                line = "f.obs.index.tolist()";
+            }
             writer.WriteLine(line);
 
 
@@ -213,15 +225,20 @@ namespace CellexalVR.AnalysisLogic.H5reader
 
             if (conf.ContainsKey("custom_genenames"))
             {
-                writer.WriteLine(conf["custom_genenames"]);
+                line = conf["custom_genenames"];
             }
-            else
+            else if(fileType == FileTypes.loom)
             {
                 if (ascii)
-                    writer.WriteLine("[s.decode('UTF-8') for s in f['" + conf["genenames"] + "'][:].tolist()]");
+                    line = "[s.decode('UTF-8') for s in f['" + conf["genenames"] + "'][:].tolist()]";
                 else
-                    writer.WriteLine("f['" + conf["genenames"] + "'][:].tolist()");
+                    line = "f['" + conf["genenames"] + "'][:].tolist()";
             }
+            else if(fileType == FileTypes.anndata)
+            {
+                line = "f.var.index.tolist()";
+            }
+            writer.WriteLine(line);
 
 
             while (reader.Peek() == 0)
@@ -243,6 +260,20 @@ namespace CellexalVR.AnalysisLogic.H5reader
                     yield return null;
             }
 
+
+            //Special anndata stuff
+            if(fileType == FileTypes.anndata){
+                line = "list(f.obsm.keys())";
+                writer.WriteLine(line);
+
+                while (reader.Peek() == 0)
+                    yield return null;
+
+                output = reader.ReadLine();
+                projections = JsonConvert.DeserializeObject<List<string>>(output);
+            }
+
+
             watch.Stop();
 
             UnityEngine.Debug.Log("H5reader booted and read all names in " + watch.ElapsedMilliseconds + " ms");
@@ -250,7 +281,10 @@ namespace CellexalVR.AnalysisLogic.H5reader
 
 
             UnityEngine.Debug.Log("nbr of cells: " + index2cellname.Length + " with distinct names: " +
-                                  index2cellname.Distinct().Count());
+                                index2cellname.Distinct().Count());
+
+
+        
         }
 
 
@@ -270,62 +304,81 @@ namespace CellexalVR.AnalysisLogic.H5reader
         /// <returns>Coroutine, use _coordResult</returns>
         public IEnumerator GetCoords(string projection)
         {
-            projection = projection.ToUpper();
+            string output;
             busy = true;
             var watch = Stopwatch.StartNew();
-            string output;
+            if(fileType == FileTypes.loom){
+                projection = projection.ToUpper();
+                
 
-            if (conf.ContainsKey("Y_" + projection))
-            {
-                conditions = "2D_sep";
-                writer.WriteLine("f['" + conf["X_" + projection] + "'][:].tolist()");
-                while (reader.Peek() == 0)
-                    yield return null;
-
-
-                output = reader.ReadLine();
-                float[] Xcoords = JsonConvert.DeserializeObject<float[]>(output);
-
-
-                writer.WriteLine("f['" + conf["Y_" + projection] + "'][:].tolist()");
-                while (reader.Peek() == 0)
-                    yield return null;
-
-                output = reader.ReadLine();
-                float[] Ycoords = JsonConvert.DeserializeObject<float[]>(output);
-
-                _coordResult = Xcoords.Concat(Ycoords).ToArray();
-
-                if (conf.ContainsKey("Z_" + projection))
+                if (conf.ContainsKey("Y_" + projection))
                 {
-                    conditions = "3D_sep";
+                    conditions = "2D_sep";
+                    writer.WriteLine("f['" + conf["X_" + projection] + "'][:].tolist()");
+                    while (reader.Peek() == 0)
+                        yield return null;
 
-                    writer.WriteLine("f['" + conf["Z_" + projection] + "'][:].tolist()");
+
+                    output = reader.ReadLine();
+                    float[] Xcoords = JsonConvert.DeserializeObject<float[]>(output);
+
+
+                    writer.WriteLine("f['" + conf["Y_" + projection] + "'][:].tolist()");
                     while (reader.Peek() == 0)
                         yield return null;
 
                     output = reader.ReadLine();
+                    float[] Ycoords = JsonConvert.DeserializeObject<float[]>(output);
 
-                    _coordResult = _coordResult.Concat(JsonConvert.DeserializeObject<float[]>(output)).ToArray();
+                    _coordResult = Xcoords.Concat(Ycoords).ToArray();
+
+                    if (conf.ContainsKey("Z_" + projection))
+                    {
+                        conditions = "3D_sep";
+
+                        writer.WriteLine("f['" + conf["Z_" + projection] + "'][:].tolist()");
+                        while (reader.Peek() == 0)
+                            yield return null;
+
+                        output = reader.ReadLine();
+
+                        _coordResult = _coordResult.Concat(JsonConvert.DeserializeObject<float[]>(output)).ToArray();
+                    }
                 }
-            }
-            else
-            {
-                writer.WriteLine("f['" + conf["X_" + projection] + "'][:,:].tolist()");
+                else
+                {
+                    writer.WriteLine("f['" + conf["X_" + projection] + "'][:,:].tolist()");
 
+                    while (reader.Peek() == 0)
+                        yield return null;
+
+                    output = reader.ReadLine();
+                    float[] coords = JsonConvert.DeserializeObject<float[]>(output);
+
+                    _coordResult = coords;
+                }
+
+
+                watch.Stop();
+                UnityEngine.Debug.Log("Reading all coords: " + watch.ElapsedMilliseconds);
+                busy = false;
+            } else if (fileType == FileTypes.anndata) {
+                string line = "f.obsm['" + projection + "'].tolist()";
+                writer.WriteLine(line);
                 while (reader.Peek() == 0)
                     yield return null;
 
                 output = reader.ReadLine();
-                float[] coords = JsonConvert.DeserializeObject<float[]>(output);
 
-                _coordResult = coords;
+                float[][] coords = JsonConvert.DeserializeObject<float[][]>(output);
+                conditions = "2D";
+                _matrixCoordResult = coords;
+
+                watch.Stop();
+                UnityEngine.Debug.Log("Reading all coords: " + watch.ElapsedMilliseconds);
+                busy = false;
             }
-
-
-            watch.Stop();
-            UnityEngine.Debug.Log("Reading all coords: " + watch.ElapsedMilliseconds);
-            busy = false;
+            
         }
 
         /// <summary>
@@ -404,40 +457,58 @@ namespace CellexalVR.AnalysisLogic.H5reader
             busy = true;
             _expressionResult = new ArrayList();
             int geneindex = genename2index[geneName.ToUpper()];
-            if (geneXcell)
+            string line = "";
+            if(fileType == FileTypes.loom)
             {
-                if (sparse)
-                    writer.WriteLine("f['" + conf["cellexpr"] + "'][" + geneindex + ",:].data.tolist()");
+                if (geneXcell)
+                {
+                    if (sparse)
+                        line = "f['" + conf["cellexpr"] + "'][" + geneindex + ",:].data.tolist()";
+                    else
+                        line = "f['" + conf["cellexpr"] + "'][" + geneindex + ",:][" + "f['" + conf["cellexpr"] + "'][" + geneindex +
+                                            ",:].nonzero()].tolist()";
+                }
                 else
-                    writer.WriteLine("f['" + conf["cellexpr"] + "'][" + geneindex + ",:][" + "f['" + conf["cellexpr"] + "'][" + geneindex +
-                                     ",:].nonzero()].tolist()");
-            }
-            else
+                {
+                    if (sparse)
+                        line = "f['" + conf["cellexpr"] + "'][:," + geneindex + "].data.tolist()";
+                    else
+                        line = "f['" + conf["cellexpr"] + "'][:," + geneindex + "][" + "f['" + conf["cellexpr"] + "'][:," +
+                                            geneindex + "].nonzero()].tolist()";
+                }
+            } 
+            else if (fileType == FileTypes.anndata) 
             {
-                if (sparse)
-                    writer.WriteLine("f['" + conf["cellexpr"] + "'][:," + geneindex + "].data.tolist()");
-                else
-                    writer.WriteLine("f['" + conf["cellexpr"] + "'][:," + geneindex + "][" + "f['" + conf["cellexpr"] + "'][:," +
-                                     geneindex + "].nonzero()].tolist()");
+                line = "f.X[" + geneindex + ",:].data.tolist()";
             }
+
+            writer.WriteLine(line);
 
             while (reader.Peek() == 0)
                 yield return null;
 
             string output = reader.ReadLine();
-            UnityEngine.Debug.Log(output);
 
             float[] expressions = JsonConvert.DeserializeObject<float[]>(output);
-            
-            if (geneXcell)
-                writer.WriteLine("f['" + conf["cellexpr"] + "'][" + geneindex + ",:].nonzero()[0].tolist()");
-            else
-                writer.WriteLine("f['" + conf["cellexpr"] + "'][:," + geneindex + "].nonzero()[0].tolist()");
-                
+            if(fileType == FileTypes.loom)
+            {
+                if (geneXcell)
+                    line = "f['" + conf["cellexpr"] + "'][" + geneindex + ",:].nonzero()[0].tolist()";
+                else
+                    line = "f['" + conf["cellexpr"] + "'][:," + geneindex + "].nonzero()[0].tolist()";
+            }
+            else if(fileType == FileTypes.anndata)
+            {
+                line = "f.X["+geneindex+",:].nonzero()[1].tolist()";
+            }
+
+            writer.WriteLine(line);
+
             while (reader.Peek() == 0)
                 yield return null;
 
             output = reader.ReadLine();
+
 
             int[] indices = JsonConvert.DeserializeObject<int[]>(output);
 
@@ -610,6 +681,7 @@ namespace CellexalVR.AnalysisLogic.H5reader
                 while (busy)
                     yield return null;
                 float[] coords = _coordResult;
+                
                 string[] cellNames = index2cellname;
                 combGraph.axisNames = new string[] {"x", "y", "z"};
                 int count = 0;
@@ -622,13 +694,17 @@ namespace CellexalVR.AnalysisLogic.H5reader
                         case "2D_sep":
                             x = coords[j];
                             y = coords[j + cellNames.Length];
-                            
                             z = j * 0.00001f; //summertwerk, should scale after maxcoord
                             break;
                         case "3D_sep":
                             x = coords[j];
                             y = coords[j + cellNames.Length];
                             z = coords[j + 2*cellNames.Length];
+                            break;
+                        case "2D":
+                            x = _matrixCoordResult[j][0];
+                            y = _matrixCoordResult[j][1];
+                            z = j * 0.00001f; //summertwerk, should scale after maxcoord
                             break;
                         default:
                             x = coords[j * 3];
