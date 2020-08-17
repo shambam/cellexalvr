@@ -259,7 +259,7 @@ namespace CellexalVR.General
             FPSCanvas = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/DesktopUI/FPS canvas.prefab");
             WaitingCanvas = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/DesktopUI/ScreenCanvas.prefab");
             SpectatorRig = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Environment/SpectatorRig.prefab");
-            H5Reader = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/H5Reader/H5ReaderTestObjectManager.prefab");
+            H5Reader = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/H5Reader/H5ReaderAnnotatorManager.prefab");
         }
 
         [Obsolete]
