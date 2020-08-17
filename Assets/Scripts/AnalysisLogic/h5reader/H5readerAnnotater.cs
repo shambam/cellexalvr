@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using TMPro;
 using UnityEngine;
+using Newtonsoft.Json;
 
 namespace CellexalVR.AnalysisLogic.H5reader
 {
@@ -70,6 +71,37 @@ namespace CellexalVR.AnalysisLogic.H5reader
                     filePath = s;
             }
 
+            
+
+            if(filePath.EndsWith(".h5ad")){
+                Readh5ad(filePath);
+            }else if (filePath.EndsWith(".loom")){
+                Crawl(filePath);
+            }
+            
+        }
+
+        public void Readh5ad(string filePath){
+            p = new Process();
+            ProcessStartInfo startInfo = new ProcessStartInfo();
+            startInfo.UseShellExecute = false;
+            startInfo.RedirectStandardInput = true;
+            startInfo.RedirectStandardOutput = true;
+            startInfo.RedirectStandardError = true;
+            startInfo.WindowStyle = ProcessWindowStyle.Minimized;
+
+            startInfo.FileName = "py.exe";
+
+            startInfo.Arguments = "python/Readh5ad.py " + filePath;
+            p.StartInfo = startInfo;
+            p.Start();
+            reader = p.StandardOutput;
+
+            float[][] matrix = JsonConvert.DeserializeObject<float[][]>(reader.ReadLine());
+            print(matrix);
+        }
+
+        public void Crawl(string filePath){
             projectionObjectScripts = new List<ProjectionObjectScript>();
             p = new Process();
             ProcessStartInfo startInfo = new ProcessStartInfo();
@@ -107,7 +139,6 @@ namespace CellexalVR.AnalysisLogic.H5reader
             resizeDisplay(contentSize);
 
             title.text = filePath.Substring(filePath.LastIndexOf("\\") + 1);
-
         }
 
         public void resizeDisplay(float height)
