@@ -6,7 +6,6 @@ using System.IO;
 using TMPro;
 using UnityEngine;
 using Newtonsoft.Json;
-
 namespace CellexalVR.AnalysisLogic.H5reader
 {
 
@@ -164,6 +163,13 @@ namespace CellexalVR.AnalysisLogic.H5reader
 
         public void AddToConfig(string key, string value, char dtype)
         {
+
+            //The cellnames are saved in ascii, we assume everything is saved in ascii.
+            if(!config.ContainsKey("ascii")){
+                if(key == "cellnames" && (dtype == 'a' || dtype == 'S'))
+                    config.Add("ascii","true");
+            }
+
             if (!config.ContainsKey(key))
                 config.Add(key, value);
             else
@@ -178,7 +184,10 @@ namespace CellexalVR.AnalysisLogic.H5reader
         public void RemoveFromConfig(string key)
         {
             print("Removing key" + key);
-
+            if(config.ContainsKey("ascii") && key == "cellnames"){
+                config.Remove("ascii");
+            }
+            
             if (config.ContainsKey(key))
             {
                 print("actually");
@@ -196,9 +205,6 @@ namespace CellexalVR.AnalysisLogic.H5reader
                 keys.UpdatePosition(10f);
             }
             string text = "";
-
-            if (configDataTypes.ContainsKey("cellnames") && (configDataTypes["cellnames"] == 'S' || configDataTypes["cellnames"] == 'a'))
-                text += "ascii true" + Environment.NewLine;
 
             foreach (KeyValuePair<string, string> entry in config)
             {
@@ -220,18 +226,12 @@ namespace CellexalVR.AnalysisLogic.H5reader
                 return;
             }
 
-    
+            
+
             using (StreamWriter outputFile = new StreamWriter(Path.Combine("Data\\" + path, "config.conf")))
             {
-                //The cellnames are saved in ascii, we guess everything is saved in ascii.
-                if (configDataTypes["cellnames"] == 'S' || configDataTypes["cellnames"] == 'a')
-                    outputFile.WriteLine("ascii true");
-
-                foreach (KeyValuePair<string, string> kvp in config)
-                {
-                    outputFile.WriteLine(kvp.Key + " " + kvp.Value.ToString());
-                }
-
+                string s = JsonConvert.SerializeObject(config, Formatting.Indented);
+                outputFile.WriteLine(s);
             }
             referenceManager.inputReader.ReadFolder(path);
             referenceManager.h5ReaderAnnotatorScriptManager.RemoveAnnotator(path);
