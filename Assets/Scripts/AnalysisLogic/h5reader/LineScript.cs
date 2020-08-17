@@ -11,11 +11,11 @@ namespace CellexalVR.AnalysisLogic.H5reader
         public string type;
         public GameObject linePrefab;
         public bool isMulti;
-        private H5readerAnnotater h5ReaderAnnotater;
+        private H5ReaderAnnotater h5ReaderAnnotater;
         // Start is called before the first frame update
         void Start()
         {
-            h5ReaderAnnotater = GetComponentInParent<H5readerAnnotater>();
+            h5ReaderAnnotater = GetComponentInParent<H5ReaderAnnotater>();
             line.positionCount = 10;
         }
 
