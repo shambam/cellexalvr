@@ -7,7 +7,7 @@ namespace CellexalVR.AnalysisLogic.H5reader
     public class H5ReaderAnnotatorScriptManager : MonoBehaviour
     {
         public GameObject annotatorPrefab;
-        public Dictionary<string, H5readerAnnotater> annotators = new Dictionary<string, H5readerAnnotater>();
+        public Dictionary<string, H5ReaderAnnotater> annotators = new Dictionary<string, H5ReaderAnnotater>();
         private ReferenceManager referenceManager;
 
         private Vector3 finalPoint;
@@ -46,7 +46,7 @@ namespace CellexalVR.AnalysisLogic.H5reader
 
                 StartCoroutine(SpawnAnimation(go));
 
-                H5readerAnnotater script = go.GetComponent<H5readerAnnotater>();
+                H5ReaderAnnotater script = go.GetComponent<H5ReaderAnnotater>();
                 script.Init(path);
                 annotators.Add(path, script);
             }

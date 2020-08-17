@@ -24,7 +24,7 @@ namespace CellexalVR.AnalysisLogic.H5reader
         public BoxCollider expandButtonBoxCollider;
         public GameObject KeyObject;
 
-        public H5readerAnnotater annotater;
+        public H5ReaderAnnotater annotater;
 
 
         public string name;
@@ -47,7 +47,7 @@ namespace CellexalVR.AnalysisLogic.H5reader
             rightController = referenceManager.rightController;
         }
 
-        public void Insert(string name, H5readerAnnotater annotaterScript)
+        public void Insert(string name, H5ReaderAnnotater annotaterScript)
         {
             annotater = annotaterScript;
             if (name.Contains("/"))

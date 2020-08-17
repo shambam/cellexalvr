@@ -20,7 +20,7 @@ namespace CellexalVR.AnalysisLogic.H5reader
         private Dictionary<string, char> dataTypes;
 
         public GameObject AnchorPrefab;
-        public H5readerAnnotater h5readerAnnotater;
+        public H5ReaderAnnotater h5readerAnnotater;
         private List<GameObject> instantiatedGameObjects;
 
         private Dictionary<projectionType, string[]> menu_setup;

@@ -80,7 +80,7 @@ namespace CellexalVR.AnalysisLogic.H5reader
                 H5ReaderAnnotatorTextBoxScript parent = parentScript;
                 while (!parent.isTop)
                     parent = parent.transform.parent.GetComponent<H5ReaderAnnotatorTextBoxScript>();
-                parent.GetComponentInParent<H5readerAnnotater>().resizeDisplay(parent.UpdatePosition(10f));
+                parent.GetComponentInParent<H5ReaderAnnotater>().resizeDisplay(parent.UpdatePosition(10f));
             }
             else if (anchorScript)
             {
@@ -95,7 +95,7 @@ namespace CellexalVR.AnalysisLogic.H5reader
                 }
                 else
                 {
-                    H5readerAnnotater h5ReaderAnnotater = anchorScript.anchorA.GetComponentInParent<H5readerAnnotater>();
+                    H5ReaderAnnotater h5ReaderAnnotater = anchorScript.anchorA.GetComponentInParent<H5ReaderAnnotater>();
 
 
                     if (anchorScript.line.type == "attrs")
@@ -130,7 +130,7 @@ namespace CellexalVR.AnalysisLogic.H5reader
                 }
                 else
                 {
-                    H5readerAnnotater h5ReaderAnnotater = anchor.anchorA.GetComponentInParent<H5readerAnnotater>();
+                    H5ReaderAnnotater h5ReaderAnnotater = anchor.anchorA.GetComponentInParent<H5ReaderAnnotater>();
                     if (anchor.line.type == "attrs")
                     {
                         h5ReaderAnnotater.AddToConfig("attr_" + name, path, dataType);

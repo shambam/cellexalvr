@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 namespace CellexalVR.AnalysisLogic.H5reader
 {
 
-    public class H5readerAnnotater : MonoBehaviour
+    public class H5ReaderAnnotater : MonoBehaviour
     {
         public RectTransform display;
         public GameObject textBoxPrefab;
