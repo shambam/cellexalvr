@@ -3,15 +3,15 @@ import sys
 import numpy
 
 def crawl(lib, push):
-	boi = {}
+	key_value = {}
 	for a in lib.keys():
 		if(hasattr(lib[a],'shape')):
-			boi[a] = lib[a].shape
+			key_value[a] = lib[a].shape
 			print(push + a + ": " + str(lib[a].shape) + "_"+ str(lib[a].dtype.kind))
 		else:
 			print(push + a + ":")
-			boi[a] = crawl(lib[a], push + str(a)+"/")
-	return boi
+			key_value[a] = crawl(lib[a], push + str(a)+"/")
+	return key_value
 	
 	
 file_name = sys.argv[1]
@@ -26,5 +26,3 @@ else:
 			crawl(f[sys.argv[2]],"")
 	except:
 		print("name not found")
-#print(mappen)
-
