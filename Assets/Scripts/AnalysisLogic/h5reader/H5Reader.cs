@@ -34,6 +34,7 @@ namespace CellexalVR.AnalysisLogic.H5reader
         public ArrayList _expressionResult;
         public float[] _coordResult;
         public float[][] _matrixCoordResult;
+        public float[][] _matrixVelResult;
         public float[] _velResult;
         public string[] _attrResult;
         public List<string> attributes;
@@ -41,7 +42,7 @@ namespace CellexalVR.AnalysisLogic.H5reader
         private string filePath;
         public string identifier;
         private Dictionary<string, string> conf;
-        private string conditions;
+        public string conditions;
 
         private List<string> projections;
         private List<string> velocities;
@@ -55,13 +56,13 @@ namespace CellexalVR.AnalysisLogic.H5reader
         private float LowestExpression { get; set; }
         private float HighestExpression { get; set; }
 
-        private enum FileTypes
+        public enum FileTypes
         {
             anndata = 0,
             loom = 1
         }
 
-        private FileTypes fileType;
+        public FileTypes fileType;
         private ReferenceManager referenceManager;
         /// <summary>
         /// H5reader
@@ -270,7 +271,19 @@ namespace CellexalVR.AnalysisLogic.H5reader
                     yield return null;
 
                 output = reader.ReadLine();
-                projections = JsonConvert.DeserializeObject<List<string>>(output);
+                List<string> obsm = JsonConvert.DeserializeObject<List<string>>(output);
+                foreach(string s in obsm)
+                {
+                    if(s.StartsWith("X_"))
+                    {
+                        projections.Add(s);
+                    } 
+                    else if(s.StartsWith("Vel_"))
+                    {
+                        velocities.Add(s);
+                    }
+                }
+
 
                 line = "list(f.obs.keys())";
                 writer.WriteLine(line);
@@ -279,7 +292,7 @@ namespace CellexalVR.AnalysisLogic.H5reader
 
                 output = reader.ReadLine();
 
-                //THERE ARE TOO MANY ATTRIBUTES AT THIS TIME
+                //TODO THERE ARE TOO MANY ATTRIBUTES AT THIS TIME
                 List<string> attr = JsonConvert.DeserializeObject<List<string>>(output);
                 attr.RemoveRange(0, attr.Count - 1);
                 attributes = attr;
@@ -405,7 +418,7 @@ namespace CellexalVR.AnalysisLogic.H5reader
             if(fileType == FileTypes.loom)
             {
                 if (ascii)
-                    line = "[s.decode('UTF-8') for s in " + "f['" + conf["attr_" + attribute] + "[:].tolist()]";
+                    line = "[s.decode('UTF-8') for s in f['" + conf["attr_" + attribute] + "'][:].tolist()]";
                 else
                     line = "f['" + conf["attr_" + attribute] + "'][:].tolist()";
             } 
@@ -432,35 +445,52 @@ namespace CellexalVR.AnalysisLogic.H5reader
             busy = true;
             var watch = Stopwatch.StartNew();
             string output;
-            if (conf.ContainsKey("velX_" + graph))
+            if(fileType == FileTypes.loom)
             {
-                conditions = "2D_sep";
+                if (conf.ContainsKey("velX_" + graph))
+                {
+                    conditions = "2D_sep";
 
-                writer.WriteLine("f['" + conf["velX_" + graph] + "'][:,:].tolist()");
-                while (reader.Peek() == 0)
-                    yield return null;
+                    writer.WriteLine("f['" + conf["velX_" + graph] + "'][:,:].tolist()");
+                    while (reader.Peek() == 0)
+                        yield return null;
 
-                output = reader.ReadLine();
-                float[] Xvel = JsonConvert.DeserializeObject<float[]>(output);
+                    output = reader.ReadLine();
+                    float[] Xvel = JsonConvert.DeserializeObject<float[]>(output);
 
-                writer.WriteLine("f['" + conf["velY_" + graph] + "'][:].tolist()");
-                while (reader.Peek() == 0)
-                    yield return null;
+                    writer.WriteLine("f['" + conf["velY_" + graph] + "'][:].tolist()");
+                    while (reader.Peek() == 0)
+                        yield return null;
 
-                output = reader.ReadLine();
-                float[] Yvel =  JsonConvert.DeserializeObject<float[]>(output);
+                    output = reader.ReadLine();
+                    float[] Yvel =  JsonConvert.DeserializeObject<float[]>(output);
 
-                _velResult = Xvel.Concat(Yvel).ToArray();
+                    _velResult = Xvel.Concat(Yvel).ToArray();
+                }
+                else
+                {
+                    writer.WriteLine("f['" + conf["vel_" + graph] + "'][:,:].tolist()");
+                    while (reader.Peek() == 0)
+                        yield return null;
+
+
+                    output = reader.ReadLine();
+                    _velResult = JsonConvert.DeserializeObject<float[]>(output);
+                }
             }
-            else
+            else if(fileType == FileTypes.anndata)
             {
-                writer.WriteLine("f['" + conf["vel_" + graph] + "'][:,:].tolist()");
+                string line = "f.obsm['" + graph + "'].tolist()";
+                writer.WriteLine(line);
                 while (reader.Peek() == 0)
                     yield return null;
 
-
                 output = reader.ReadLine();
-                _velResult = JsonConvert.DeserializeObject<float[]>(output);
+
+                float[][] coords = JsonConvert.DeserializeObject<float[][]>(output);
+                conditions = "vel_2D";
+                _matrixVelResult = coords;
+
             }
 
 

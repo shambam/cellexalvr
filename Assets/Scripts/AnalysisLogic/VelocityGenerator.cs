@@ -218,16 +218,26 @@ namespace CellexalVR.AnalysisLogic
             while (h5Reader.busy)
                 yield return null;
 
-            float[] vels = h5Reader._velResult;
             string[] cellNames = h5Reader.index2cellname;
+            float diffX,diffY,diffZ;
 
             for (int i = 0; i < cellNames.Length; i++)
             {
                 Graph.GraphPoint point = graph.FindGraphPoint(cellNames[i]);
+                if(h5Reader.fileType == H5Reader.FileTypes.anndata)
+                {
+                    diffX = h5Reader._matrixVelResult[i][0];
+                    diffY = h5Reader._matrixVelResult[i][1];
+                    diffZ = h5Reader._matrixVelResult[i][2];
 
-                float diffX = vels[i * 3]; //,System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
-                float diffY = vels[i * 3 + 1]; //, System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
-                float diffZ = vels[i * 3 + 2];// System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
+                } 
+                else 
+                {
+                    diffX = h5Reader._velResult[i * 3];
+                    diffY = h5Reader._velResult[i * 3 + 1];
+                    diffZ = h5Reader._velResult[i * 3 + 2];
+                }
+
                 Vector3 diff = new Vector3(diffX, diffY, diffZ);
                 //Method
                 Vector3 diffScaled = diff * 30; //arbitrary scaling, ofcourse.. DUH!
