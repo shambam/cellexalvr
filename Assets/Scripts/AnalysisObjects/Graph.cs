@@ -52,6 +52,9 @@ namespace CellexalVR.AnalysisObjects
         // public Texture2D texture;
         public Texture2D[] textures;
 
+
+        public bool scaled;
+
         // public Texture2D texture2;
         private bool textureChanged;
         public Vector3 minCoordValues = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);

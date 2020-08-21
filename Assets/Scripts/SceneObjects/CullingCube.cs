@@ -29,7 +29,16 @@ namespace Assets.Scripts.SceneObjects
             referenceManager = GameObject.Find("InputReader").GetComponent<ReferenceManager>();
             filterManager = referenceManager.filterManager;
             CellexalEvents.LegendAttached.AddListener(() => attachOnSideArea.SetActive(false));
+            foreach (Graph graph in referenceManager.graphManager.Graphs)
+            {
+                foreach (List<GameObject> lodGroup in graph.LODGroupClusters.Values)
+                {
+                    material = lodGroup[0].GetComponent<Renderer>().sharedMaterial;
+                    material.SetFloat("_CullingActive", 1f);
+                }
+            }
         }
+        
 
         private void Update()
         {
@@ -52,7 +61,7 @@ namespace Assets.Scripts.SceneObjects
                 foreach (List<GameObject> lodGroup in graph.LODGroupClusters.Values)
                 {
                     material = lodGroup[0].GetComponent<Renderer>().sharedMaterial;
-                    material.SetFloat("_Culling", value);
+                    material.SetFloat("_InverseCulling", value);
                 }
             }
         }
@@ -66,10 +75,9 @@ namespace Assets.Scripts.SceneObjects
             {
                 Graph.GraphPoint gp = g.FindGraphPoint(c.Label);
                 filterManager.ActivateCullingFilter();
-                referenceManager.filterManager.AddCellToEval(gp, referenceManager.selectionToolCollider.CurrentColorIndex);
-
+                referenceManager.filterManager.AddCellToEval(gp,
+                    referenceManager.selectionToolCollider.CurrentColorIndex);
             }
         }
     }
 }
-

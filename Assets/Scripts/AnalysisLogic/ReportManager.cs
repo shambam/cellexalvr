@@ -35,7 +35,6 @@ namespace CellexalVR.AnalysisLogic
         /// </summary>
         public IEnumerator LogStart()
         {
-
             //string script = "if ( !is.null(cellexalObj@usedObj$sessionPath) ) { \n" +
             //                "cellexalObj @usedObj$sessionPath = NULL \n" +
             //                " cellexalObj @usedObj$sessionRmdFiles = NULL \n" +

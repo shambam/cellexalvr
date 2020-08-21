@@ -26,8 +26,9 @@ namespace CellexalVR.Spatial
         private Quaternion rotationBeforeDispersing;
 
         public bool slicesActive;
-        public List<Graph> slices = new List<Graph>();
-        public Dictionary<string, GraphPoint> points = new Dictionary<string, GraphPoint>();
+        // public List<Graph> slices = new List<Graph>();
+        // public Dictionary<string, GraphPoint> points = new Dictionary<string, GraphPoint>();
+        // public List<Tuple<string, Vector3>> points = new List<Tuple<string, Vector3>>();
         public GameObject chunkManagerPrefab;
         public GameObject contourParent;
         public Material opaqueMat;
@@ -36,7 +37,9 @@ namespace CellexalVR.Spatial
         public GameObject wirePrefab;
         public GameObject brainModel;
         public GameObject cubePrefab;
-
+        public Dictionary<string, Graph.GraphPoint> pointsDict = new Dictionary<string, Graph.GraphPoint>();
+        public List<GraphSlice> slices = new List<GraphSlice>();
+        
         private void Start()
         {
             rightController = referenceManager.rightController;
@@ -71,7 +74,7 @@ namespace CellexalVR.Spatial
             {
                 if (rdevice.GetPressDown(SteamVR_Controller.ButtonMask.Trigger))
                 {
-                    ActivateSlices();
+                    ActivateSlices(!slicesActive);
                     referenceManager.multiuserMessageSender.SendMessageActivateSlices();
                 }
             }
@@ -95,27 +98,29 @@ namespace CellexalVR.Spatial
             }
         }
 
-        public IEnumerator AddSlices()
+        public void AddSlices()
         {
-            foreach (Graph graph in GetComponentsInChildren<Graph>())
+            // foreach (Graph graph in GetComponentsInChildren<Graph>())
+            foreach (GraphSlice slice in slices)
             {
-                foreach (BoxCollider bc in graph.GetComponents<BoxCollider>())
-                {
-                    Vector3 size = bc.size;
-                    size.z += 0.01f;
-                    bc.size = size;
-                    bc.enabled = false;
-                }
+                // foreach (BoxCollider bc in graph.GetComponents<BoxCollider>())
+                // {
+                //     Vector3 size = bc.size;
+                //     size.z += 0.01f;
+                //     bc.size = size;
+                //     bc.enabled = false;
+                // }
 
-                foreach (KeyValuePair<string, Graph.GraphPoint> gpPair in graph.points)
-                {
-                    points[gpPair.Key] = gpPair.Value;
-                }
+                // foreach (KeyValuePair<string, Graph.GraphPoint> gpPair in graph.points)
+                // {
+                //     points.Add(new Tuple<string, Vector3>(gpPair.Key, gpPair.Value.Position));
+                //     // points[gpPair.Key] = gpPair.Value;
+                // }
 
-                slices.Add(graph);
+                slices.Add(slice);
             }
 
-            yield return null;
+            // yield return null;
         }
 
         /// <summary>
@@ -303,9 +308,9 @@ namespace CellexalVR.Spatial
 
         private IEnumerator FlipSlices()
         {
-            foreach (Graph graph in slices)
+            foreach (GraphSlice slice in slices)
             {
-                GraphSlice slice = graph.GetComponent<GraphSlice>();
+                // GraphSlice slice = graph.GetComponent<GraphSlice>();
                 StartCoroutine(slice.FlipSlice(1f));
                 yield return new WaitForSeconds(0.01f);
             }
@@ -315,11 +320,11 @@ namespace CellexalVR.Spatial
         /// Activate/Deactive slicemode. Activating means making each slice of the graph interactable independently of the others.
         /// Deactivating will reorganise them back to their original orientation and they will be moved as one object.
         /// </summary>
-        public void ActivateSlices(bool move = true)
+        public void ActivateSlices(bool activate, bool move = true)
         {
             foreach (GraphSlice gs in GetComponentsInChildren<GraphSlice>())
             {
-                if (!slicesActive)
+                if (activate)
                 {
                     Destroy(_rigidBody);
                     Destroy(GetComponent<Collider>());
@@ -348,15 +353,16 @@ namespace CellexalVR.Spatial
                 }
             }
 
-            slicesActive = !slicesActive;
+            slicesActive = activate;
         }
 
         public void ToggleGraphPointsTransparency(bool toggle)
         {
-            foreach (Graph graph in slices)
-            {
-                graph.MakeAllPointsTransparent(toggle);
-            }
+            GetComponent<Graph>().MakeAllPointsTransparent(toggle);
+            // foreach (Graph graph in slices)
+            // {
+            //     graph.MakeAllPointsTransparent(toggle);
+            // }
         }
 
         /// <summary>
@@ -364,7 +370,7 @@ namespace CellexalVR.Spatial
         /// </summary>
         private void ResetSlices()
         {
-            foreach (GraphSlice gs in GetComponentsInChildren<GraphSlice>())
+            foreach (GraphSlice gs in slices)
             {
                 StartCoroutine(gs.MoveToGraphCoroutine());
             }
@@ -397,4 +403,6 @@ namespace CellexalVR.Spatial
             transform.localRotation = Quaternion.identity;
         }
     }
+    
+    
 }

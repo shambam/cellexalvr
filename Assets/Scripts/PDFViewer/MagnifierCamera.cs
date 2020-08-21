@@ -11,7 +11,6 @@ namespace CellexalVR.PDFViewer
         public ReferenceManager referenceManager;
         public Camera magnifyingCamera;
         public GameObject screenQuad;
-        public GameObject cubePrefab;
 
         private SteamVR_Controller.Device device;
         private SteamVR_TrackedObject rightController;

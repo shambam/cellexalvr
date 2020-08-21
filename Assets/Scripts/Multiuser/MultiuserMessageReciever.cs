@@ -747,7 +747,7 @@ namespace CellexalVR.Multiuser
             CellexalLog.Log("Recieved message to activate slices in spatial graph");
             foreach (SpatialGraph spatialGraph in referenceManager.graphManager.spatialGraphs)
             {
-                spatialGraph.ActivateSlices();
+                spatialGraph.ActivateSlices(!spatialGraph.slicesActive);
             }
         }
         //[PunRPC]

@@ -166,6 +166,7 @@ namespace CellexalVR.AnalysisLogic
             {
                 graph.MakeAllPointsTransparent(highlight);
             }
+
             foreach (Cell cell in cellsToHighlight)
             {
                 foreach (Graph.GraphPoint gp in cell.GraphPoints)
@@ -181,6 +182,7 @@ namespace CellexalVR.AnalysisLogic
             {
                 graph.MakeAllPointsTransparent(highlight);
             }
+
             referenceManager.multiuserMessageSender.SendMessageHighlightCells(group, highlight);
             foreach (Cell cell in cellsToHighlight)
             {

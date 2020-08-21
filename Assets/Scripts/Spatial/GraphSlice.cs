@@ -1,6 +1,7 @@
 ﻿using CellexalVR.AnalysisObjects;
 using CellexalVR.General;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using VRTK;
 using VRTK.GrabAttachMechanics;
@@ -19,9 +20,14 @@ namespace CellexalVR.Spatial
         public GameObject replacement;
         public GameObject wire;
         public int sliceNr;
-        public float zCoord;
-
-
+        // public float xCoord;
+        // public float yCoord;
+        // public float zCoord;
+        public Vector3 sliceCoords = new Vector3();
+        public Dictionary<string, Graph.GraphPoint> points = new Dictionary<string, Graph.GraphPoint>();
+        public List<GameObject> LODGroupParents = new List<GameObject>();
+        public Dictionary<int, List<GameObject>> LODGroupClusters = new Dictionary<int, List<GameObject>>();
+        
         protected Graph graph;
 
         private Vector3 originalPos;
@@ -105,7 +111,7 @@ namespace CellexalVR.Spatial
             replacementPrefab = spatGraph.replacementPrefab;
             replacement = Instantiate(replacementPrefab, transform.parent);
             Vector3 maxCoords = graph.ScaleCoordinates(graph.maxCoordValues);
-            replacement.transform.localPosition = new Vector3(0, maxCoords.y + 0.2f, zCoord);
+            replacement.transform.localPosition = new Vector3(0, maxCoords.y + 0.2f, sliceCoords.z);
             replacement.gameObject.name = "repl" + this.gameObject.name;
             replacementCol = replacement.GetComponent<Renderer>().material.color;
             replacementHighlightCol = new Color(replacementCol.r, replacementCol.g, replacementCol.b, 1.0f);
@@ -148,7 +154,7 @@ namespace CellexalVR.Spatial
                 sliceMode = true;
                 if (move)
                 {
-                    Vector3 targetPos = new Vector3(transform.position.x, transform.position.y, zCoord);
+                    Vector3 targetPos = sliceCoords;
                     // transform.TransformPoint(targetPos);
                     float time = 1f;
                     StartCoroutine(MoveSlice(targetPos.x, targetPos.y, targetPos.z, time));
