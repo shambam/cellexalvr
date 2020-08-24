@@ -278,7 +278,7 @@ namespace CellexalVR.AnalysisLogic.H5reader
                     {
                         projections.Add(s);
                     } 
-                    else if(s.StartsWith("Vel_"))
+                    else if(s.StartsWith("velocity_"))
                     {
                         velocities.Add(s);
                     }
