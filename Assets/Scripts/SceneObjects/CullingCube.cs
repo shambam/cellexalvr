@@ -31,7 +31,7 @@ namespace Assets.Scripts.SceneObjects
             CellexalEvents.LegendAttached.AddListener(() => attachOnSideArea.SetActive(false));
             foreach (Graph graph in referenceManager.graphManager.Graphs)
             {
-                foreach (List<GameObject> lodGroup in graph.LODGroupClusters.Values)
+                foreach (List<GameObject> lodGroup in graph.lodGroupClusters.Values)
                 {
                     material = lodGroup[0].GetComponent<Renderer>().sharedMaterial;
                     material.SetFloat("_CullingActive", 1f);
@@ -45,7 +45,7 @@ namespace Assets.Scripts.SceneObjects
             if (referenceManager.graphGenerator.isCreating) return;
             foreach (Graph graph in referenceManager.graphManager.Graphs)
             {
-                foreach (List<GameObject> lodGroup in graph.LODGroupClusters.Values)
+                foreach (List<GameObject> lodGroup in graph.lodGroupClusters.Values)
                 {
                     material = lodGroup[0].GetComponent<Renderer>().sharedMaterial;
                     material.SetMatrix(boxNr == 1 ? "_BoxMatrix" : "_BoxMatrix2", transform.worldToLocalMatrix);
@@ -58,7 +58,7 @@ namespace Assets.Scripts.SceneObjects
             float value = invert ? -1 : 1;
             foreach (Graph graph in referenceManager.graphManager.Graphs)
             {
-                foreach (List<GameObject> lodGroup in graph.LODGroupClusters.Values)
+                foreach (List<GameObject> lodGroup in graph.lodGroupClusters.Values)
                 {
                     material = lodGroup[0].GetComponent<Renderer>().sharedMaterial;
                     material.SetFloat("_InverseCulling", value);

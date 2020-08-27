@@ -289,13 +289,22 @@ namespace CellexalVR.AnalysisLogic
             Graph graph = referenceManager.graphGenerator.CreateGraph(GraphGenerator.GraphType.SPATIAL);
             // GameObject graph = GameObject.Instantiate(referenceManager.inputReader.spatialGraphPrefab);
             // GameObject graph = GameObject.Instantiate(referenceManager.inputReader.spatialGraphPrefab);
-            SpatialGraph sg = graph.GetComponent<SpatialGraph>();
-            GraphSlicer graphSlicer = graph.GetComponent<GraphSlicer>();
+            SpatialGraph sg = graph.gameObject.AddComponent<SpatialGraph>();
             graph.gameObject.layer = LayerMask.NameToLayer("GraphLayer");
-            referenceManager.graphManager.spatialGraphs.Add(sg);
+            // referenceManager.graphManager.spatialGraphs.Add(sg);
+            // referenceManager.graphManager.Graphs.Add(graph);
             sg.referenceManager = referenceManager;
-
+            GraphSlice graphSlice = graph.GetComponent<GraphSlice>();
+            // GraphSlice graphSlice = Instantiate(referenceManager.graphGenerator.spatialSlicePrefab, graph.transform)
+            //     .GetComponent<GraphSlice>();
+            graphSlice.gameObject.name = "Slice0";
+            GraphSlicer graphSlicer = graphSlice.GetComponent<GraphSlicer>();
+            graphSlicer.spatialGraph = sg;
+            graphSlice.spatialGraph = sg;
+            graphSlice.referenceManager = referenceManager;
+            // graphSlice.points = sg.pointsDict;
             int sliceNr = 0;
+
             using (StreamReader mdsStreamReader = new StreamReader(file))
             {
                 int i = 0;
@@ -322,6 +331,7 @@ namespace CellexalVR.AnalysisLogic
                         Cell cell = referenceManager.cellManager.AddCell(cellName);
                         Graph.GraphPoint gp = referenceManager.graphGenerator.AddGraphPoint(cell, x, y, z);
                         sg.pointsDict.Add(cellName, gp);
+                        graphSlice.points.Add(cellName, gp);
 
                         itemsThisFrame++;
                     }
@@ -361,9 +371,24 @@ namespace CellexalVR.AnalysisLogic
 
             // StartCoroutine(graphSlicer.SliceGraph());
 
-            var allPoints = new List<Dictionary<string, Graph.GraphPoint>>();
-            allPoints.Add(sg.pointsDict);
-            StartCoroutine(graphSlicer.BuildSpatialGraph(allPoints, 0));
+            // List<Dictionary<string, Graph.GraphPoint>> allPoints = new List<Dictionary<string, Graph.GraphPoint>>
+            // {
+            //     graphSlice.points
+            // };
+            // spatialGraph.slices.Add(graphSlice);
+            StartCoroutine(graphSlicer.BuildSpat(new[] {graphSlice}));
+
+            while (graphSlice.buildingSlice)
+            {
+                yield return null;
+            }
+
+            foreach (List<GameObject> gpCluster in graphSlice.lodGroupClusters.Values)
+            {
+                gpCluster.ForEach(x => x.SetActive(true));
+            }
+
+            // StartCoroutine(graphSlicer.BuildSpatialGraph(allPoints, 0));
         }
     }
 }

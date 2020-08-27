@@ -123,7 +123,7 @@ namespace CellexalVR.AnalysisObjects
             referenceManager.graphManager.Graphs.Add(newGraph);
             fromGraph.ctcGraphs.Add(newGraph.gameObject);
             toGraph.ctcGraphs.Add(newGraph.gameObject);
-            if (!(fromGraph.GraphActive && toGraph.GraphActive))
+            if (!(fromGraph.graphActive && toGraph.graphActive))
             {
                 gameObject.SetActive(false);
             }

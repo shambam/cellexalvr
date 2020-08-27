@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting;
 using CellexalVR.AnalysisLogic;
 using CellexalVR.AnalysisObjects;
 using CellexalVR.General;
@@ -13,9 +14,10 @@ namespace CellexalVR.Spatial
     {
         public ReferenceManager referenceManager;
         public GameObject slicer;
+        public SpatialGraph spatialGraph;
 
 
-        private SpatialGraph spatialGraph;
+        private Graph graph;
         private GraphGenerator graphGenerator;
         private bool removingOldSlices;
         private bool buildingGraph;
@@ -27,17 +29,23 @@ namespace CellexalVR.Spatial
         private Dictionary<string, Graph.GraphPoint> pointsDict = new Dictionary<string, Graph.GraphPoint>();
         private Vector3 minCoords = Vector3.negativeInfinity;
         private Vector3 diffVect = Vector3.negativeInfinity;
+        private GraphSlice slice;
 
         private void Start()
         {
-            spatialGraph = GetComponent<SpatialGraph>();
-            referenceManager = spatialGraph.referenceManager;
+            slice = GetComponent<GraphSlice>();
+            referenceManager = GameObject.Find("InputReader").GetComponent<ReferenceManager>();
+            graph = GetComponent<Graph>();
+            spatialGraph = slice.spatialGraph;
+            // graph = spatialGraph.GetComponent<Graph>();
+            // referenceManager = spatialGraph.referenceManager;
             // plane = slicer.AddComponent<Plane>();
         }
 
         private void Update()
         {
             if (referenceManager.consoleManager.consoleGameObject.activeSelf) return;
+            if (slicer == null || !slicer.activeSelf) return;
             if (Input.GetKeyDown(KeyCode.K))
             {
                 StartCoroutine(SliceGraph(true, 0));
@@ -55,13 +63,7 @@ namespace CellexalVR.Spatial
 
             if (Input.GetKeyDown(KeyCode.P))
             {
-                print("Start slicing Graph");
                 StartCoroutine(SliceGraph(false, activateSlices: true));
-            }
-
-            if (Input.GetKeyDown(KeyCode.G))
-            {
-                spatialGraph.ActivateSlices(!spatialGraph.slicesActive);
             }
         }
 
@@ -70,50 +72,125 @@ namespace CellexalVR.Spatial
         {
             GC.Collect();
             Resources.UnloadUnusedAssets();
+
+
+            Dictionary<string, Color32> oldTextureColors = SaveOldTexture();
             // if (spatialGraph.slices.Count > 0)
 
             // StartCoroutine(BuildSpatialGraph(useSlicer, axis, dividers));
-            List<Dictionary<string, Graph.GraphPoint>> slices = new List<Dictionary<string, Graph.GraphPoint>>();
+            // List<Dictionary<string, Graph.GraphPoint>> slices = new List<Dictionary<string, Graph.GraphPoint>>();
+            List<GraphSlice> sls = new List<GraphSlice>();
             if (automatic)
             {
-                slices = AutoDividePointsIntoSlices(axis);
+                sls = AutoDividePointsIntoSlices(slice.points, axis);
             }
             else
             {
-                slices = ManuallyDividePointsIntoSections(spatialGraph.pointsDict);
+                sls = ManuallyDividePointsIntoSections(slice.points);
             }
 
-            if (slices.Any(x => x.Count != 0))
+            // Texture2D[] oldTextures = new Texture2D[graph.textures.Length];
+            // for (int i = 0; i < graph.textures.Length; i++)
+            // {
+            //     oldTextures[i] = graph.textures[i];
+            // }
+
+            // Texture2D oldTexture = graph.textures[0];
+            // if (slices.Any(x => x.Count != 0))
+            if (sls.Any(x => x.points.Count == 0)) yield break;
+            StartCoroutine(BuildSpat(sls.ToArray()));
+
+            while (sls.Any(x => x.buildingSlice))
             {
-                if (GetComponentsInChildren<GraphSlice>().Any(x => x.LODGroupClusters[0].Count > 0))
+                yield return null;
+            }
+
+            RemoveOldSlice();
+
+
+            // for (int i = 0; i < graph.textures.Length; i++)
+            // {
+            //     graph.textures[i] = oldTextures[i];
+            // }
+
+            SliceManager manager = gameObject.AddComponent<SliceManager>();
+            manager.referenceManager = referenceManager;
+            for (int i = 0; i < sls.Count; i++)
+            {
+                GraphSlice gs = sls[i].GetComponent<GraphSlice>();
+                Graph graph = gs.GetComponent<Graph>();
+                gs.transform.parent = manager.transform;
+                manager.slices.Add(gs);
+                Vector3 p = transform.localPosition;
+                float pos = -0.5f + i * (1f / (sls.Count - 1));
+                p[axis] = pos;
+                gs.sliceCoords[axis] = pos;
+
+
+                // int k = 0;
+                foreach (KeyValuePair<string, Graph.GraphPoint> point in gs.points)
                 {
-                    removingOldSlices = true;
-                    StartCoroutine(RemoveOldSlices());
+                    Vector2Int textureCoord = point.Value.textureCoord[0];
+                    Color32 oldColor = oldTextureColors[point.Key];
+
+                    graph.textures[0].SetPixels32(textureCoord.x, textureCoord.y, 1, 1, new Color32[] {oldColor});
                 }
 
-                while (removingOldSlices)
+                for (int j = 0; j < gs.LODGroupParents.Count; j++)
                 {
-                    yield return null;
-                }
-                
-                StartCoroutine(BuildSpatialGraph(slices, axis));
-                while (buildingGraph)
-                {
-                    yield return null;
+                    graph.lodGroupClusters[j][0].GetComponent<Renderer>().sharedMaterial.mainTexture =
+                        graph.textures[0];
                 }
 
-                foreach (GameObject obj in oldGraphObjects)
+                graph.textures[0].Apply();
+
+                foreach (List<GameObject> gpCluster in graph.lodGroupClusters.Values)
                 {
-                    Destroy(obj);
-                    // referenceManager.graphManager.spatialGraphs.Remove(graph.GetComponent<SpatialGraph>());
-                    yield return null;
+                    gpCluster.ForEach(x => x.SetActive(true));
                 }
+
 
                 if (activateSlices)
                 {
-                    spatialGraph.ActivateSlices(true);
+                    manager.ActivateSlices(true);
                 }
             }
+        }
+
+        private Dictionary<string, Color32> SaveOldTexture()
+        {
+            Texture2D oldTexture = graph.textures[0];
+            Dictionary<string, Color32> oldTextureColors = new Dictionary<string, Color32>();
+            int k = 0;
+            foreach (KeyValuePair<string, Graph.GraphPoint> point in graph.points)
+            {
+                Vector2Int textureCoord = point.Value.textureCoord[0];
+                oldTextureColors[point.Key] =
+                    oldTexture.GetPixel(textureCoord.x, textureCoord.y);
+            }
+
+            return oldTextureColors;
+        }
+
+
+        private void RemoveOldSlice()
+        {
+            spatialGraph.slices.Remove(GetComponent<GraphSlice>());
+            referenceManager.graphManager.Graphs.Remove(graph);
+            // Destroy(gameObject);
+            // Destroy(GetComponent<LODGroup>());
+            // foreach (Transform child in transform)
+            // {
+            //     Destroy(child.gameObject);
+            // }
+            foreach (GameObject obj in graph.lodGroupParents)
+            {
+                Destroy(obj);
+            }
+
+            slicer.SetActive(false);
+
+            Destroy(graph);
         }
 
         private IEnumerator RemoveOldSlices()
@@ -121,7 +198,7 @@ namespace CellexalVR.Spatial
             // spatialGraph.ActivateSlices(false);
             oldGraphObjects = new List<GameObject>();
             foreach (GraphSlice slice in spatialGraph.slices)
-            // foreach (GameObject cluster in GetComponent<Graph>().LODGroupClusters[0])
+                // foreach (GameObject cluster in GetComponent<Graph>().LODGroupClusters[0])
             {
                 oldGraphObjects.Add(slice.gameObject);
                 Destroy(slice);
@@ -134,22 +211,32 @@ namespace CellexalVR.Spatial
             removingOldSlices = false;
         }
 
-        private List<Dictionary<string, Graph.GraphPoint>> AutoDividePointsIntoSlices(int axis = 0)
+
+        private static List<Graph.GraphPoint> SortPoints(IReadOnlyCollection<Graph.GraphPoint> points, int axis)
         {
-            List<Dictionary<string, Graph.GraphPoint>> slices = new List<Dictionary<string, Graph.GraphPoint>>();
-            Dictionary<string, Graph.GraphPoint> slice = new Dictionary<string, Graph.GraphPoint>();
+            List<Graph.GraphPoint> sortedPoints = new List<Graph.GraphPoint>(points.Count);
+            foreach (Graph.GraphPoint gp in points)
+            {
+                sortedPoints.Add(gp);
+            }
+
+            sortedPoints.Sort((x, y) => x.Position[axis].CompareTo(y.Position[axis]));
+
+            return sortedPoints;
+        }
+
+        private List<GraphSlice> AutoDividePointsIntoSlices(Dictionary<string, Graph.GraphPoint> points, int axis = 0)
+        {
+            List<GraphSlice> slices = new List<GraphSlice>();
+
+            // List<Dictionary<string, Graph.GraphPoint>> slices = new List<Dictionary<string, Graph.GraphPoint>>();
+            // Dictionary<string, Graph.GraphPoint> slice = new Dictionary<string, Graph.GraphPoint>();
             List<Graph.GraphPoint> sortedPoints = new List<Graph.GraphPoint>(spatialGraph.pointsDict.Count);
             if (axis == 0)
             {
                 if (sortedPointsX == null)
                 {
-                    sortedPointsX = new List<Graph.GraphPoint>(spatialGraph.pointsDict.Count);
-                    foreach (Graph.GraphPoint gp in spatialGraph.pointsDict.Values)
-                    {
-                        sortedPointsX.Add(gp);
-                    }
-
-                    sortedPointsX.Sort((x, y) => x.Position[axis].CompareTo(y.Position[axis]));
+                    sortedPointsX = SortPoints(points.Values.ToList(), 0);
                 }
 
                 sortedPoints = sortedPointsX;
@@ -159,13 +246,7 @@ namespace CellexalVR.Spatial
             {
                 if (sortedPointsY == null)
                 {
-                    sortedPointsY = new List<Graph.GraphPoint>(spatialGraph.pointsDict.Count);
-                    foreach (Graph.GraphPoint gp in spatialGraph.pointsDict.Values)
-                    {
-                        sortedPointsY.Add(gp);
-                    }
-
-                    sortedPointsY.Sort((x, y) => x.Position[axis].CompareTo(y.Position[axis]));
+                    sortedPointsY = SortPoints(points.Values.ToList(), 1);
                 }
 
                 sortedPoints = sortedPointsY;
@@ -174,22 +255,26 @@ namespace CellexalVR.Spatial
             {
                 if (sortedPointsZ == null)
                 {
-                    sortedPointsZ = new List<Graph.GraphPoint>(spatialGraph.pointsDict.Count);
-                    foreach (Graph.GraphPoint gp in spatialGraph.pointsDict.Values)
-                    {
-                        sortedPointsZ.Add(gp);
-                    }
-
-                    sortedPointsZ.Sort((x, y) => x.Position[axis].CompareTo(y.Position[axis]));
+                    sortedPointsZ = SortPoints(points.Values.ToList(), 2);
                 }
 
                 sortedPoints = sortedPointsZ;
             }
 
             // spatialGraph.points.Sort((x, y) => x.Item2[axis].CompareTo(y.Item2[axis]));
+            int sliceNr = 0;
+            GraphSlice slice = referenceManager.graphGenerator.CreateGraph(GraphGenerator.GraphType.SPATIAL)
+                .GetComponent<GraphSlice>();
+            // GraphSlice slice = Instantiate(referenceManager.graphGenerator.spatialSlicePrefab, spatialGraph.transform)
+            //     .GetComponent<GraphSlice>();
+            slice.transform.position = transform.position;
+            slice.spatialGraph = spatialGraph;
+            slice.referenceManager = referenceManager;
+            slice.SliceNr = ++sliceNr;
+            slice.gameObject.name = "Slice" + sliceNr;
             float currentCoord, diff, prevCoord;
             var point = sortedPoints[0];
-            slice.Add(point.Label, point);
+            slice.points.Add(point.Label, point);
             float firstCoord = prevCoord = point.Position[axis];
             float lastCoord = sortedPoints[sortedPoints.Count - 1].Position[axis];
             float dividers = 20f;
@@ -205,7 +290,15 @@ namespace CellexalVR.Spatial
                 if (diff > epsilonToUse || Math.Abs(currentCoord - prevCoord) > 0.1f)
                 {
                     slices.Add(slice);
-                    slice = new Dictionary<string, Graph.GraphPoint>();
+                    slice = referenceManager.graphGenerator.CreateGraph(GraphGenerator.GraphType.SPATIAL)
+                        .GetComponent<GraphSlice>();
+                    // slice = Instantiate(referenceManager.graphGenerator.spatialSlicePrefab, spatialGraph.transform)
+                    //     .GetComponent<GraphSlice>();
+                    slice.transform.position = transform.position;
+                    slice.spatialGraph = spatialGraph;
+                    slice.referenceManager = referenceManager;
+                    slice.SliceNr = ++sliceNr;
+                    slice.gameObject.name = "Slice" + sliceNr;
                     firstCoord = currentCoord;
                 }
 
@@ -214,7 +307,7 @@ namespace CellexalVR.Spatial
                     slices.Add(slice);
                 }
 
-                slice.Add(point.Label, point);
+                slice.points.Add(point.Label, point);
                 prevCoord = currentCoord;
             }
 
@@ -222,389 +315,148 @@ namespace CellexalVR.Spatial
             return slices;
         }
 
-        private List<Dictionary<string, Graph.GraphPoint>> ManuallyDividePointsIntoSections(
+        private List<GraphSlice> ManuallyDividePointsIntoSections(
             Dictionary<string, Graph.GraphPoint> points)
         {
-            var pl = new Plane(slicer.transform.forward,
-                slicer.transform.position);
-            Dictionary<string, Graph.GraphPoint> sideA = new Dictionary<string, Graph.GraphPoint>();
-            Dictionary<string, Graph.GraphPoint> sideB = new Dictionary<string, Graph.GraphPoint>();
-            // List<Tuple<string, Vector3>> sideA = new List<Tuple<string, Vector3>>();
-            // List<Tuple<string, Vector3>> sideB = new List<Tuple<string, Vector3>>();
+            Slicer sl = GetComponentInChildren<Slicer>();
+            Vector3 v1 = sl.t1.position; // - sl.t2.position;
+            Vector3 v2 = sl.t2.position; // - sl.t1.position;
+            Vector3 v3 = v2 - v1;
+            Vector3 n = Vector3.Cross(v3, Vector3.right).normalized;
+            Vector3 midPoint = new Vector3((v2.x + v1.x) / 2f, (v2.y + v1.y) / 2f, (v2.z + v1.z) / 2f);
+            var pl = new Plane(n, midPoint);
+            // var pl = new Plane(slicer.transform.forward,
+            //     slicer.transform.position);
+
+            // var slice1 = Instantiate(referenceManager.graphGenerator.spatialSlicePrefab, spatialGraph.transform)
+            //     .GetComponent<GraphSlice>();
+            // var slice2 = Instantiate(referenceManager.graphGenerator.spatialSlicePrefab, spatialGraph.transform)
+            //     .GetComponent<GraphSlice>();
+
+
+            GraphSlice slice1 = referenceManager.graphGenerator.CreateGraph(GraphGenerator.GraphType.SPATIAL)
+                .GetComponent<GraphSlice>();
+            GraphSlice slice2 = referenceManager.graphGenerator.CreateGraph(GraphGenerator.GraphType.SPATIAL)
+                .GetComponent<GraphSlice>();
+
+            slice1.spatialGraph = spatialGraph;
+            slice2.spatialGraph = spatialGraph;
+            slice1.referenceManager = referenceManager;
+            slice2.referenceManager = referenceManager;
+
+            slice1.transform.parent = spatialGraph.transform;
+            slice2.transform.parent = spatialGraph.transform;
+
+            GraphSlice graphSlice = GetComponent<GraphSlice>();
+            slice1.SliceNr = graphSlice.SliceNr;
+            slice1.gameObject.name = gameObject.name + "_" + graphSlice.SliceNr;
+            slice2.SliceNr = graphSlice.SliceNr + 1;
+            slice2.gameObject.name = gameObject.name + "_" + (graphSlice.SliceNr + 1);
+
+            slice1.transform.position = transform.position;
+            slice2.transform.position = transform.position;
+
+
             float xMin, yMin, zMin, totalXDiff, totalYDiff, totalZDiff;
-            if (sortedPointsX != null)
+            if (sortedPointsX == null)
             {
-                xMin = sortedPointsX[0].Position.x;
-                totalXDiff = Math.Abs(sortedPointsX[sortedPointsX.Count - 1].Position.x - xMin);
+                sortedPointsX = SortPoints(points.Values.ToList(), 0);
             }
 
-            else
+            xMin = sortedPointsX[0].Position.x;
+            float xMax = sortedPointsX[sortedPointsX.Count - 1].Position.x;
+            totalXDiff = Math.Abs(xMax - xMin);
+
+            if (sortedPointsY == null)
             {
-                xMin = points.Min(v => (v.Value.Position.x));
-                totalXDiff = Math.Abs(points.Max(x => (x.Value.Position.x)) - xMin);
+                sortedPointsY = SortPoints(points.Values.ToList(), 1);
             }
 
-            if (sortedPointsY != null)
+            yMin = sortedPointsY[0].Position.y;
+            float yMax = sortedPointsY[sortedPointsY.Count - 1].Position.y;
+            totalYDiff = Math.Abs(yMax - yMin);
+
+            if (sortedPointsZ == null)
             {
-                yMin = sortedPointsY[0].Position.y;
-                totalYDiff = Math.Abs(sortedPointsY[sortedPointsY.Count - 1].Position.y - yMin);
+                sortedPointsZ = SortPoints(points.Values.ToList(), 2);
             }
 
-            else
-            {
-                yMin = points.Min(v => (v.Value.Position.y));
-                totalYDiff = Math.Abs(points.Max(y => (y.Value.Position.y)) - yMin);
-            }
-
-            if (sortedPointsZ != null)
-            {
-                zMin = sortedPointsZ[0].Position.z;
-                totalZDiff = Math.Abs(sortedPointsZ[sortedPointsZ.Count - 1].Position.z - zMin);
-            }
-
-            else
-            {
-                zMin = points.Min(v => (v.Value.Position.z));
-                totalZDiff = Math.Abs(points.Max(z => (z.Value.Position.z)) - zMin);
-            }
+            zMin = sortedPointsZ[0].Position.z;
+            float zMax = sortedPointsZ[sortedPointsZ.Count - 1].Position.z;
+            totalZDiff = Math.Abs(zMax - zMin);
 
             minCoords = new Vector3(xMin, yMin, zMin);
             diffVect = new Vector3(totalXDiff, totalYDiff, totalZDiff);
+            int p = 0;
+
+            // var maxCoords = new Vector3(xMax, yMax, zMax);
+            // var mid = new Vector3(sortedPointsX[(int) (sortedPointsX.Count / 2)].WorldPosition.x,
+            //     sortedPointsX[(int) (sortedPointsY.Count / 2)].WorldPosition.y,
+            //     sortedPointsX[(int) (sortedPointsZ.Count / 2)].WorldPosition.z);
+            // print(
+            //     $"minCoords: {minCoords}, mid gp wPos:" +
+            //     $" {sortedPointsZ[(int) (sortedPointsZ.Count / 2)].WorldPosition}," +
+            //     $" mid gp pos: {sortedPointsZ[(int) (sortedPointsZ.Count / 2)].Position} plane pos: {midPoint}," +
+            //     $" mid: {mid}, max: {maxCoords}," +
+            //     $" trans point : {transform.TransformPoint(sortedPointsZ[(int) (sortedPointsZ.Count / 2)].Position)}, " +
+            //     $" trans plane : {transform.TransformPoint(midPoint)}");
             foreach (Graph.GraphPoint point in points.Values)
             {
-                if (pl.GetSide(point.WorldPosition))
+                if (pl.GetSide(transform.TransformPoint(point.Position)))
                 {
-                    sideB.Add(point.Label, point);
+                    slice2.points.Add(point.Label, point);
                 }
                 else
                 {
-                    sideA.Add(point.Label, point);
+                    slice1.points.Add(point.Label, point);
                 }
             }
 
-            var slices = new List<Dictionary<string, Graph.GraphPoint>>();
-            slices.Add(sideA);
-            slices.Add(sideB);
-            print($"sideA: {sideA.Count}, sideB: {sideB.Count}");
+            List<GraphSlice> slices = new List<GraphSlice> {slice1, slice2};
+            if (slice1.points.Count == 0)
+            {
+                slices.Remove(slice1);
+                Destroy(slice1.gameObject);
+            }
+
+            if (slice2.points.Count == 0)
+            {
+                slices.Remove(slice2);
+                Destroy(slice2.gameObject);
+            }
+
+            print($"sideA: {slice1.points.Count}, sideB: {slice2.points.Count}");
             return slices;
         }
 
-        public IEnumerator BuildSpatialGraph(List<Dictionary<string, Graph.GraphPoint>> slices, int axis)
+
+        public IEnumerator BuildSpat(GraphSlice[] slices)
         {
-            buildingGraph = true;
             int sliceNr = 0;
-            Vector3 maxCoords = new Vector3();
-            Vector3 minCoords = new Vector3();
-            maxCoords.x = spatialGraph.pointsDict.Max(v => (v.Value.Position.x));
-            maxCoords.y = spatialGraph.pointsDict.Max(v => (v.Value.Position.y));
-            maxCoords.z = spatialGraph.pointsDict.Max(v => (v.Value.Position.z));
-            minCoords.x = spatialGraph.pointsDict.Min(v => (v.Value.Position.x));
-            minCoords.y = spatialGraph.pointsDict.Min(v => (v.Value.Position.y));
-            minCoords.z = spatialGraph.pointsDict.Min(v => (v.Value.Position.z));
-
-            // Graph combGraph = referenceManager.graphGenerator.CreateGraph(GraphGenerator.GraphType.SPATIAL);
-            // yield return null;
-            //
-            // referenceManager.graphManager.Graphs.Add(combGraph);
-            // referenceManager.graphManager.originalGraphs.Add(combGraph);
-            // Transform transform1 = combGraph.transform;
-            // transform1.parent = transform;
-            // transform1.localPosition = new Vector3(0, 0, 0);
-            // combGraph.LODGroups = referenceManager.graphGenerator.nrOfLODGroups;
-            // combGraph.textures = new Texture2D[referenceManager.graphGenerator.nrOfLODGroups];
-            // GraphSlice gs = combGraph.gameObject.AddComponent<Spatial.GraphSlice>();
-            // gs.referenceManager = referenceManager;
-            // gs.sliceNr = ++sliceNr;
-            // combGraph.gameObject.name = "Slice" + sliceNr;
-            // combGraph.GraphName = "Slice" + sliceNr;
-            // combGraph.maxCoordValues = maxCoords;
-            // combGraph.minCoordValues = minCoords;
-            foreach (Dictionary<string, Graph.GraphPoint> points in slices)
+            // var sliceParent = Instantiate(referenceManager.graphGenerator.spatialGraphPrefab, spatialGraph.transform);
+            // sliceParent.gameObject.name = gameObject.name;
+            // Destroy(sliceParent.GetComponent<Graph>());
+            foreach (GraphSlice slice in slices)
             {
-                if (points.Count == 0)
-                {
-                    continue;
-                }
-
-                var graphSlice = Instantiate(referenceManager.graphGenerator.spatialSlicePrefab, transform).GetComponent<GraphSlice>();
-                graphSlice.referenceManager = referenceManager;
-                graphSlice.points = points;
-                spatialGraph.slices.Add(graphSlice);
-
-                // Graph combGraph = referenceManager.graphGenerator.CreateGraph(GraphGenerator.GraphType.SPATIAL);
-                // yield return null;
-                // referenceManager.graphManager.Graphs.Add(combGraph);
-                // referenceManager.graphManager.originalGraphs.Add(combGraph);
-                // Transform transform1 = combGraph.transform;
-                // transform1.parent = transform;
-                // transform1.localPosition = new Vector3(0, 0, 0);
-                // combGraph.LODGroups = referenceManager.graphGenerator.nrOfLODGroups;
-                // combGraph.textures = new Texture2D[referenceManager.graphGenerator.nrOfLODGroups];
-                // GraphSlice gs = combGraph.gameObject.AddComponent<Spatial.GraphSlice>();
-                // gs.referenceManager = referenceManager;
-                // gs.sliceNr = ++sliceNr;
-                // combGraph.gameObject.name = "Slice" + sliceNr;
-                // combGraph.GraphName = "Slice" + sliceNr;
-                // yield return null;
-
-                // Dictionary<string, Graph.GraphPoint> pointsInSlice =
-                //     new Dictionary<string, Graph.GraphPoint>(points.Count);
-                // foreach (Graph.GraphPoint point in points.Values)
-                // {
-                // Cell cell = referenceManager.cellManager.AddCell(point.Label);
-                // Graph.GraphPoint gp = referenceManager.graphGenerator.AddGraphPoint(cell, point.Position.x,
-                //     point.Position.y,
-                //     point.Position.z, combGraph);
-                // }
-
-                // combGraph.maxCoordValues = maxCoords;
-                // combGraph.minCoordValues = minCoords;
-                StartCoroutine(
-                    referenceManager.graphGenerator.SliceClusteringLOD(
-                        referenceManager.graphGenerator.nrOfLODGroups, points, graphSlice));
-                // referenceManager.graphGenerator.SliceClustering();
-
-                while (referenceManager.graphGenerator.isCreating)
+                StartCoroutine(slice.BuildSlice(sliceNr == 0));
+                while (slice.buildingSlice)
                 {
                     yield return null;
                 }
 
-                // foreach (GraphSlice slice in slices)
-                // {
-                //     
-                // }
-                if (referenceManager.graphGenerator.nrOfLODGroups > 1)
-                {
-                    if (graphSlice.GetComponent<LODGroup>() == null)
-                    {
-                        graphSlice.gameObject.AddComponent<LODGroup>();
-                    }
-                    referenceManager.graphGenerator.UpdateLODGroups(slice: graphSlice);
-                }
+                sliceNr++;
             }
 
-            // spatialGraph.AddSlices();
-
-            if (spatialGraph.slices.Count > 1)
-            {
-                for (int i = 0; i < spatialGraph.slices.Count; i++)
-                {
-                    float pos = -0.5f + i * (1f / (spatialGraph.slices.Count - 1));
-                    GraphSlice slice = spatialGraph.slices[i].GetComponent<GraphSlice>();
-                    slice.sliceCoords[axis] = pos;
-                    // print($"name: {slice.gameObject.name}, pos: {pos}");
-                }
-            }
-
-            buildingGraph = false;
-
-            // var point = spatialGraph.points[spatialGraph.points.Count / 2];
-            // gp = referenceManager.graphManager.FindGraphPoint("Slice20", point.Item1);
-            // print($"point: {gp.WorldPosition}, slicer: {slicer.transform.position}");
+            // if (spatialGraph.slices.Count > 1)
+            // {
+            //     for (int i = 0; i < spatialGraph.slices.Count; i++)
+            //     {
+            //         float pos = -0.5f + i * (1f / (spatialGraph.slices.Count - 1));
+            //         GraphSlice slice = spatialGraph.slices[i].GetComponent<GraphSlice>();
+            //         slice.sliceCoords[2] = pos;
+            //         // print($"name: {slice.gameObject.name}, pos: {pos}");
+            //     }
+            // }
         }
-
-        // public IEnumerator BuildSpatialGraph(bool useSlicer = false, int axis = 2, int dividers = 0)
-        // {
-        //     buildingGraph = true;
-        //     int sliceNr = 0;
-        //     spatialGraph.points.Sort((x, y) => x.Item2[axis].CompareTo(y.Item2[axis]));
-        //     Vector3 maxCoords = new Vector3();
-        //     Vector3 minCoords = new Vector3();
-        //     maxCoords.x = spatialGraph.points.Max(v => (v.Item2.x));
-        //     maxCoords.y = spatialGraph.points.Max(v => (v.Item2.y));
-        //     maxCoords.z = spatialGraph.points.Max(v => (v.Item2.z));
-        //     minCoords.x = spatialGraph.points.Min(v => (v.Item2.x));
-        //     minCoords.y = spatialGraph.points.Min(v => (v.Item2.y));
-        //     minCoords.z = spatialGraph.points.Min(v => (v.Item2.z));
-        //     Graph combGraph = referenceManager.graphGenerator.CreateGraph(GraphGenerator.GraphType.SPATIAL);
-        //     yield return null;
-        //     referenceManager.graphManager.Graphs.Add(combGraph);
-        //     referenceManager.graphManager.originalGraphs.Add(combGraph);
-        //     Transform transform1 = combGraph.transform;
-        //     transform1.parent = transform;
-        //     transform1.localPosition = new Vector3(0, 0, 0);
-        //     combGraph.LODGroups = referenceManager.graphGenerator.nrOfLODGroups;
-        //     combGraph.textures = new Texture2D[referenceManager.graphGenerator.nrOfLODGroups];
-        //     GraphSlice gs = combGraph.gameObject.AddComponent<Spatial.GraphSlice>();
-        //     gs.referenceManager = referenceManager;
-        //     gs.sliceNr = ++sliceNr;
-        //     combGraph.gameObject.name = "Slice" + sliceNr;
-        //     combGraph.GraphName = "Slice" + sliceNr;
-        //     yield return null;
-        //
-        //     Tuple<string, Vector3> gpTuple = spatialGraph.points[0];
-        //     Cell cell = referenceManager.cellManager.AddCell(gpTuple.Item1);
-        //
-        //     Graph.GraphPoint gp = referenceManager.graphGenerator.AddGraphPoint(cell, gpTuple.Item2.x,
-        //         gpTuple.Item2.y,
-        //         gpTuple.Item2.z);
-        //
-        //     float currentCoord = gpTuple.Item2[axis];
-        //     float firstCoord = currentCoord;
-        //     float prevCoord = currentCoord;
-        //     float lastCoord = spatialGraph.points[spatialGraph.points.Count - 1].Item2[axis];
-        //     // difference to decide when to start on new slice.
-        //     float epsilonToUse, diff;
-        //     bool normalZSlicing = false;
-        //     if (dividers == 0 && axis == 2)
-        //     {
-        //         epsilonToUse = 0.01f;
-        //         normalZSlicing = true;
-        //     }
-        //     else
-        //     {
-        //         epsilonToUse = Math.Abs(firstCoord - lastCoord) / (float) dividers;
-        //     }
-        //
-        //     float totalZDiff = Math.Abs(firstCoord - lastCoord);
-        //     float firstZ = gpTuple.Item2[axis];
-        //     float relativeVal = (slicer.transform.localPosition.z + 0.5f);
-        //     Mesh quadMesh = slicer.GetComponentInChildren<MeshFilter>().mesh;
-        //     // plane = new Plane(quadMesh.bounds.center, quadMesh.bounds.max, quadMesh.bounds.min);
-        //     plane = new Plane(slicer.transform.InverseTransformDirection(slicer.transform.forward),
-        //         slicer.transform.localPosition);
-        //     print(
-        //         $"forward: {slicer.transform.TransformDirection(slicer.transform.forward)}, {slicer.transform.forward}");
-        //     for (int n = 1; n < spatialGraph.points.Count; n++)
-        //     {
-        //         gpTuple = spatialGraph.points[n];
-        //         currentCoord = gpTuple.Item2[axis];
-        //         // when we reach new slice (new x/y/z coordinate) build the graph and then start adding to a new one.
-        //         bool newSliceComp;
-        //         if (!useSlicer)
-        //         {
-        //             diff = normalZSlicing
-        //                 ? Math.Abs(currentCoord - prevCoord)
-        //                 : Math.Abs(currentCoord - firstCoord);
-        //             newSliceComp = diff > epsilonToUse;
-        //         }
-        //         else
-        //         {
-        //             // convert coordinate to value in range (0, 1) 
-        //             var convertedCoord = new Vector3(0, 0, (currentCoord - firstZ) / totalZDiff - 0.5f);
-        //             newSliceComp = plane.GetSide(convertedCoord);
-        //             // newSliceComp = (currentCoord - firstZ) >= (relativeVal * totalZDiff);
-        //         }
-        //
-        //
-        //         if (newSliceComp)
-        //         {
-        //             // float d = Math.Abs((currentCoord - firstZ) - (relativeVal * totalZDiff));
-        //             // print($"d: {d}, slicer: {relativeVal * totalZDiff}");
-        //             firstCoord = currentCoord;
-        //             // gs.zCoord = gp.WorldPosition.z;
-        //             combGraph.maxCoordValues = maxCoords;
-        //             combGraph.minCoordValues = minCoords;
-        //             StartCoroutine(
-        //                 referenceManager.graphGenerator.SliceClusteringLOD(
-        //                     referenceManager.graphGenerator.nrOfLODGroups));
-        //
-        //             while (referenceManager.graphGenerator.isCreating)
-        //             {
-        //                 yield return null;
-        //             }
-        //
-        //             if (referenceManager.graphGenerator.nrOfLODGroups > 1)
-        //             {
-        //                 combGraph.gameObject.AddComponent<LODGroup>();
-        //                 referenceManager.graphGenerator.UpdateLODGroups(combGraph);
-        //             }
-        //
-        //             combGraph = referenceManager.graphGenerator.CreateGraph(GraphGenerator.GraphType.SPATIAL);
-        //             combGraph.LODGroups = referenceManager.graphGenerator.nrOfLODGroups;
-        //             combGraph.textures = new Texture2D[referenceManager.graphGenerator.nrOfLODGroups];
-        //             yield return null;
-        //             referenceManager.graphManager.Graphs.Add(combGraph);
-        //             referenceManager.graphManager.originalGraphs.Add(combGraph);
-        //             combGraph.transform.parent = transform;
-        //             yield return null;
-        //             gs = combGraph.gameObject.AddComponent<GraphSlice>();
-        //             gs.referenceManager = referenceManager;
-        //             gs.sliceNr = ++sliceNr;
-        //             combGraph.transform.localPosition = new Vector3(0, 0, 0);
-        //             combGraph.GraphName = "Slice" + sliceNr;
-        //             combGraph.gameObject.name = "Slice" + sliceNr;
-        //             // slicer.transform.localPosition = new Vector3(0, 0, 0.5f);
-        //             relativeVal = 1.1f;
-        //             plane.Flip();
-        //             // slicer.transform.localPosition = new Vector3(0, 0, 0.6f);
-        //             // quadMesh = slicer.GetComponentInChildren<MeshFilter>().mesh;
-        //             // plane = new Plane(quadMesh.normals[0], new Vector3(0, 0, 0.6f));
-        //         }
-        //
-        //         // last gp: finish the final slice
-        //         else if (n == spatialGraph.points.Count - 1)
-        //         {
-        //             cell = referenceManager.cellManager.AddCell(gpTuple.Item1);
-        //             gp = referenceManager.graphGenerator.AddGraphPoint(cell, gpTuple.Item2.x, gpTuple.Item2.y,
-        //                 gpTuple.Item2.z);
-        //             // try 
-        //             // {
-        //             //     // gs.zCoord = gp.WorldPosition.z;
-        //             // }
-        //             // catch (Exception e)
-        //             // {
-        //             //     GC.Collect();
-        //             // }
-        //
-        //             combGraph.maxCoordValues = maxCoords;
-        //             combGraph.minCoordValues = minCoords;
-        //             StartCoroutine(
-        //                 referenceManager.graphGenerator.SliceClusteringLOD(
-        //                     referenceManager.graphGenerator.nrOfLODGroups));
-        //
-        //             while (referenceManager.graphGenerator.isCreating)
-        //             {
-        //                 yield return null;
-        //             }
-        //
-        //             if (referenceManager.graphGenerator.nrOfLODGroups > 1)
-        //             {
-        //                 combGraph.gameObject.AddComponent<LODGroup>();
-        //                 referenceManager.graphGenerator.UpdateLODGroups(combGraph);
-        //             }
-        //
-        //             combGraph.transform.localPosition = new Vector3(0, 0, 0);
-        //             continue;
-        //         }
-        //
-        //         cell = referenceManager.cellManager.AddCell(gpTuple.Item1);
-        //         gp = referenceManager.graphGenerator.AddGraphPoint(cell, gpTuple.Item2.x, gpTuple.Item2.y,
-        //             gpTuple.Item2.z);
-        //         prevCoord = currentCoord;
-        //     }
-        //
-        //     // if (spatialGraph.slices.Count > 0)
-        //     // {
-        //     //     removingOldSlices = true;
-        //     //     StartCoroutine(RemoveOldSlices());
-        //     // }
-        //     //
-        //     // while (removingOldSlices)
-        //     // {
-        //     //     yield return null;
-        //     // }
-        //
-        //     spatialGraph.AddSlices();
-        //
-        //     if (spatialGraph.slices.Count > 1)
-        //     {
-        //         for (int i = 0; i < spatialGraph.slices.Count; i++)
-        //         {
-        //             float pos = -0.5f + i * (1f / (spatialGraph.slices.Count - 1));
-        //             GraphSlice slice = spatialGraph.slices[i].GetComponent<GraphSlice>();
-        //             slice.sliceCoords[axis] = pos;
-        //             // print($"name: {slice.gameObject.name}, pos: {pos}");
-        //         }
-        //     }
-        //
-        //     buildingGraph = false;
-        //     print($"building graph done");
-        //
-        //
-        //     // var point = spatialGraph.points[spatialGraph.points.Count / 2];
-        //     // gp = referenceManager.graphManager.FindGraphPoint("Slice20", point.Item1);
-        //     // print($"point: {gp.WorldPosition}, slicer: {slicer.transform.position}");
-        // }
     }
 }

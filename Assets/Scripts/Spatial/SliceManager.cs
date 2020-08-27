@@ -12,10 +12,7 @@ using VRTK;
 
 namespace CellexalVR.Spatial
 {
-    /// <summary>
-    /// Represents a spatial graph that in turn consists of many slices. The spatial graph is the parent of the graph objects.
-    /// </summary>
-    public class SpatialGraph : MonoBehaviour
+    public class SliceManager : MonoBehaviour
     {
         private SteamVR_TrackedObject rightController;
         private SteamVR_Controller.Device rdevice;
@@ -25,31 +22,19 @@ namespace CellexalVR.Spatial
         private bool dispersing;
         private Vector3 positionBeforeDispersing;
         private Quaternion rotationBeforeDispersing;
+        private VRTK_InteractableObject interactableObject;
 
         public bool slicesActive;
 
-        // public List<Graph> slices = new List<Graph>();
-        // public Dictionary<string, GraphPoint> points = new Dictionary<string, GraphPoint>();
-        // public List<Tuple<string, Vector3>> points = new List<Tuple<string, Vector3>>();
-        public GameObject chunkManagerPrefab;
-        public GameObject contourParent;
-        public Material opaqueMat;
         public ReferenceManager referenceManager;
-        public GameObject replacementPrefab;
-        public GameObject wirePrefab;
-        public GameObject brainModel;
-        public GameObject cubePrefab;
-        public Dictionary<string, Graph.GraphPoint> pointsDict = new Dictionary<string, Graph.GraphPoint>();
         public List<GraphSlice> slices = new List<GraphSlice>();
 
         private void Start()
         {
-            referenceManager = GameObject.Find("InputReader").GetComponent<ReferenceManager>();
             rightController = referenceManager.rightController;
             startPosition = transform.position;
-            // GameObject brain = GameObject.Instantiate(brainModel);
-            // brain.GetComponent<ReferenceMouseBrain>().spatialGraph = this;
             _rigidBody = GetComponent<Rigidbody>();
+            interactableObject = GetComponent<VRTK_InteractableObject>();
 
             // var angle = -(Math.PI);
             // var radius = 1f;
@@ -64,11 +49,11 @@ namespace CellexalVR.Spatial
 
         private void Update()
         {
-            if (GetComponent<VRTK_InteractableObject>().IsGrabbed())
-            {
-                referenceManager.multiuserMessageSender.SendMessageMoveGraph(gameObject.name, transform.position,
-                    transform.rotation, transform.localScale);
-            }
+            // if (GetComponent<VRTK_InteractableObject>().IsGrabbed())
+            // {
+            //     referenceManager.multiuserMessageSender.SendMessageMoveGraph(gameObject.name, transform.position,
+            //         transform.rotation, transform.localScale);
+            // }
 
             // transform.LookAt(referenceManager.headset.transform);
             rdevice = SteamVR_Controller.Input((int) rightController.index);
@@ -100,148 +85,23 @@ namespace CellexalVR.Spatial
                 // ActivateSlices();
             }
 
-            // if (Input.GetKeyDown(KeyCode.K))
-            // {
-            //     StartCoroutine(slices[0].GetComponent<GraphSlicer>().SliceGraph(true, 0, true));
-            // }
-            //
-            // if (Input.GetKeyDown(KeyCode.L))
-            // {
-            //     StartCoroutine(slices[0].GetComponent<GraphSlicer>().SliceGraph(true, 1, true));
-            // }
-            //
-            // if (Input.GetKeyDown(KeyCode.M))
-            // {
-            //     StartCoroutine(slices[0].GetComponent<GraphSlicer>().SliceGraph());
-            // }
+
             // if (Input.GetKeyDown(KeyCode.P))
             // {
             //     print("Start slicing Graph");
             //     StartCoroutine(slices[0].GetComponent<GraphSlicer>().SliceGraph(false, activateSlices: true));
             // }
-            //
-            // if (Input.GetKeyDown(KeyCode.G))
-            // {
-            //     ActivateSlices(!slicesActive);
-            // }
+
+            if (Input.GetKeyDown(KeyCode.G))
+            {
+                ActivateSlices(true);
+            }
+
+            if (Input.GetKeyDown(KeyCode.H))
+            {
+                ActivateSlices(false);
+            }
         }
-
-        public void AddSlices()
-        {
-            // foreach (Graph graph in GetComponentsInChildren<Graph>())
-            foreach (GraphSlice slice in slices)
-            {
-                // foreach (BoxCollider bc in graph.GetComponents<BoxCollider>())
-                // {
-                //     Vector3 size = bc.size;
-                //     size.z += 0.01f;
-                //     bc.size = size;
-                //     bc.enabled = false;
-                // }
-
-                // foreach (KeyValuePair<string, Graph.GraphPoint> gpPair in graph.points)
-                // {
-                //     points.Add(new Tuple<string, Vector3>(gpPair.Key, gpPair.Value.Position));
-                //     // points[gpPair.Key] = gpPair.Value;
-                // }
-
-                slices.Add(slice);
-            }
-
-            // yield return null;
-        }
-
-        /// <summary>
-        /// Create a mesh using the marching cubes algorithm. Read the coordinates and add a density value of one to each point.
-        /// </summary>
-        /// <returns></returns>
-        public IEnumerator CreateMesh()
-        {
-            string path = Directory.GetCurrentDirectory() + @"\Data\" + CellexalUser.DataSourceFolder + @"\" +
-                          "slice.mds";
-            ChunkManager chunkManager = GameObject.Instantiate(chunkManagerPrefab).GetComponent<ChunkManager>();
-            yield return null;
-            int i = 0;
-            using (StreamReader sr = new StreamReader(path))
-            {
-                string header = sr.ReadLine();
-                while (!sr.EndOfStream)
-                {
-                    string[] coords = sr.ReadLine()
-                        .Split(new string[] {" ", "\t"}, StringSplitOptions.RemoveEmptyEntries);
-                    i++;
-                    int x = (int) float.Parse(coords[1]);
-                    int y = (int) float.Parse(coords[2]);
-                    int z = (int) float.Parse(coords[3]);
-                    chunkManager.addDensity(x, y, z, 1);
-
-                    //chunkManager.addDensity(x, y, z + (1 % z), 1);
-                    //chunkManager.addDensity(x, y, z + z * (1 % z), 1);
-                    //chunkManager.addDensity(x, y, z + z * (1 % z), 1);
-                }
-            }
-            //print(i);
-
-            chunkManager.toggleSurfaceLevelandUpdateCubes(0);
-
-
-            foreach (MeshFilter mf in chunkManager.GetComponentsInChildren<MeshFilter>())
-            {
-                mf.mesh.RecalculateBounds();
-                mf.mesh.RecalculateNormals();
-            }
-
-            contour = Instantiate(contourParent);
-            chunkManager.transform.parent = contour.transform;
-            contour.transform.localScale = Vector3.one * 0.15f;
-            BoxCollider bc = contour.AddComponent<BoxCollider>();
-            bc.center = Vector3.one * 4;
-            bc.size = Vector3.one * 6;
-        }
-
-        /// <summary>
-        /// Create a mesh inside the full spatial graph mesh. This is used when colouring by gene expression to create a kernel to visualise.
-        /// </summary>
-        /// <param name="geneName"></param>
-        /// <returns></returns>
-        public IEnumerator CreateMeshFromAShape(string geneName)
-        {
-            //string path = Directory.GetCurrentDirectory() + @"\Data\" + CellexalUser.DataSourceFolder + @"\" + "gene1triang" + ".hull";
-            string vertPath = Directory.GetCurrentDirectory() + @"\Data\" + CellexalUser.DataSourceFolder + @"\" +
-                              geneName + ".mesh";
-            ChunkManager chunkManager = GameObject.Instantiate(chunkManagerPrefab).GetComponent<ChunkManager>();
-            chunkManager.gameObject.name = geneName;
-            yield return null;
-            using (StreamReader sr = new StreamReader(vertPath))
-            {
-                sr.ReadLine();
-                while (!sr.EndOfStream)
-                {
-                    string[] line = sr.ReadLine().Split(null);
-                    chunkManager.addDensity((int) float.Parse(line[1]), (int) float.Parse(line[2]),
-                        (int) float.Parse(line[3]), 1);
-                }
-            }
-
-            List<int> triangles = new List<int>();
-            CellexalLog.Log("Started reading " + vertPath);
-            chunkManager.toggleSurfaceLevelandUpdateCubes(0);
-            foreach (MeshFilter mf in chunkManager.GetComponentsInChildren<MeshFilter>())
-            {
-                Renderer r = mf.gameObject.GetComponent<Renderer>();
-                r.material = opaqueMat;
-                r.material.color = Color.red;
-                mf.mesh.RecalculateBounds();
-                mf.mesh.RecalculateNormals();
-            }
-
-            chunkManager.transform.parent = contour.transform;
-            yield return null;
-            chunkManager.transform.localScale = Vector3.one;
-            chunkManager.transform.localPosition = Vector3.zero;
-            chunkManager.transform.localRotation = Quaternion.identity;
-        }
-
 
         /// <summary>
         /// Places the slices in a grid pattern to be able to look at them all individually.
@@ -350,45 +210,64 @@ namespace CellexalVR.Spatial
         /// </summary>
         public void ActivateSlices(bool activate, bool move = true)
         {
+            if (slicesActive == activate) return;
+            slicesActive = activate;
             GetComponents<BoxCollider>().All(x => x.enabled = !activate);
-            GetComponent<VRTK_InteractableObject>().isGrabbable = activate;
+            // GetComponent<VRTK_InteractableObject>().isGrabbable = activate;
+            if (!interactableObject)
+            {
+                interactableObject = GetComponent<VRTK_InteractableObject>();
+            }
+
+            interactableObject.isGrabbable = activate;
+
+            SliceManager manager = null;
+            foreach (GraphSlice gs in slices)
+            {
+                gs.ActivateSlice(activate, move);
+
+                manager = gs.GetComponent<SliceManager>();
+                if (manager)
+                {
+                    manager.enabled = activate;
+                    enabled = !activate;
+                }
+
+                // gs.ActivateSlice(false, move);
+                // BoxCollider collider = GetComponent<BoxCollider>();
+                // if (collider == null)
+                // {
+                //     gameObject.AddComponent<BoxCollider>();
+                // }
+            }
+
             if (activate)
             {
                 Destroy(_rigidBody);
+                Destroy(GetComponent<Collider>());
             }
 
-            foreach (GraphSlice gs in GetComponentsInChildren<GraphSlice>())
+            else
             {
-                if (activate)
+                Rigidbody rigidbody = gameObject.GetComponent<Rigidbody>();
+                if (rigidbody == null)
                 {
-                    Destroy(_rigidBody);
-                    Destroy(GetComponent<Collider>());
-                    gs.ActivateSlice(true, move);
+                    rigidbody = gameObject.AddComponent<Rigidbody>();
                 }
-                else
-                {
-                    Rigidbody rigidbody = gameObject.GetComponent<Rigidbody>();
-                    if (rigidbody == null)
-                    {
-                        rigidbody = gameObject.AddComponent<Rigidbody>();
-                    }
 
-                    _rigidBody = rigidbody;
-                    _rigidBody.useGravity = false;
-                    _rigidBody.isKinematic = false;
-                    _rigidBody.drag = 10;
-                    _rigidBody.angularDrag = 15;
-                    gs.ActivateSlice(false, move);
-                    ResetSlices();
-                    // BoxCollider collider = GetComponent<BoxCollider>();
-                    // if (collider == null)
-                    // {
-                    //     gameObject.AddComponent<BoxCollider>();
-                    // }
+                _rigidBody = rigidbody;
+                _rigidBody.useGravity = false;
+                _rigidBody.isKinematic = false;
+                _rigidBody.drag = 10;
+                _rigidBody.angularDrag = 15;
+                ResetSlices();
+                if (transform.parent != null) 
+                {
+                    transform.parent.GetComponent<SliceManager>().enabled = true;
+                    enabled = false;
                 }
+
             }
-
-            slicesActive = activate;
         }
 
         public void ToggleGraphPointsTransparency(bool toggle)
@@ -418,7 +297,7 @@ namespace CellexalVR.Spatial
 
         public GraphSlice GetSlice(string sliceName)
         {
-            foreach (GraphSlice slice in GetComponentsInChildren<GraphSlice>())
+            foreach (GraphSlice slice in slices)
             {
                 if (slice.gameObject.name.Equals(sliceName))
                     return slice;

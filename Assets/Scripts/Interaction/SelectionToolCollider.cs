@@ -175,7 +175,6 @@ namespace CellexalVR.Interaction
                     Vector3 boundsExtents = activeCollider.bounds.extents;
                     foreach (var graph in graphManager.Graphs)
                     {
-                        //print(graph.GraphName + graph.GraphActive);
                         var closestPoints = graph.MinkowskiDetection(activeCollider.transform.position, boundsCenter,
                             boundsExtents, currentColorIndex);
                         foreach (var point in closestPoints)
