@@ -364,6 +364,8 @@ namespace CellexalVR.AnalysisObjects
                 referenceManager.graphGenerator.meshToUse =
                     referenceManager.graphGenerator.graphpointStandardQLargeSzMesh;
             }
+            
+            lodGroup.transform.localRotation = Quaternion.identity;
         }
 
         public IEnumerator SliceClusteringLOD(int lodGroups, Dictionary<string, Graph.GraphPoint> points = null,

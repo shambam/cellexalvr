@@ -221,30 +221,33 @@ namespace CellexalVR.Spatial
 
             interactableObject.isGrabbable = activate;
 
-            SliceManager manager = null;
             foreach (GraphSlice gs in slices)
             {
                 gs.ActivateSlice(activate, move);
 
-                manager = gs.GetComponent<SliceManager>();
+                SliceManager manager = gs.GetComponent<SliceManager>();
                 if (manager)
                 {
                     manager.enabled = activate;
                     enabled = !activate;
                 }
 
-                // gs.ActivateSlice(false, move);
-                // BoxCollider collider = GetComponent<BoxCollider>();
-                // if (collider == null)
-                // {
-                //     gameObject.AddComponent<BoxCollider>();
-                // }
+                else
+                {
+                    enabled = true;
+                }
+
             }
 
             if (activate)
             {
                 Destroy(_rigidBody);
                 Destroy(GetComponent<Collider>());
+                if (transform.parent != null) 
+                {
+                    transform.parent.GetComponent<SliceManager>().enabled = false;
+                    enabled = true;
+                }
             }
 
             else

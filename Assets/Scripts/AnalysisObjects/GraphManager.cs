@@ -233,7 +233,6 @@ namespace CellexalVR.AnalysisObjects
         {
             foreach (Graph graph in Graphs)
             {
-                print(graph.gameObject.name);
                 graph.ColorByGeneExpression(expressions);
             }
 
