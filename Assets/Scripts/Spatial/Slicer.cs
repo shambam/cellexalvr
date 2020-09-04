@@ -18,6 +18,7 @@ namespace CellexalVR.Spatial
         public GameObject blade;
         public GameObject plane;
         public GraphSlicer graphSlicer;
+        public GameObject slicingMenuParent;
         [HideInInspector] public bool sliceAnimationActive;
 
         public int Axis { get; set; }

@@ -35,7 +35,6 @@ namespace CellexalVR.Spatial
         public Dictionary<int, List<GameObject>> lodGroupClusters = new Dictionary<int, List<GameObject>>();
         public Graph.OctreeNode octreeRoot;
         public SpatialGraph spatialGraph;
-        public int mainAxis;
 
         protected Graph graph;
         
@@ -256,23 +255,33 @@ namespace CellexalVR.Spatial
 
 
             // place slicer correct
-            // float xMax = points.Max(v => v.Value.Position.x);
-            // float yMax = points.Max(v => v.Value.Position.y);
-            // float zMax = points.Max(v => v.Value.Position.z);
-            // float xMin = points.Min(v => v.Value.Position.x);
-            // float yMin = points.Min(v => v.Value.Position.y);
-            // float zMin = points.Min(v => v.Value.Position.z);
-            //
-            // var max = new Vector3(xMax, yMax, zMax);
-            // var min = new Vector3(xMin, yMin, zMin);
-            // var diff = max - min;
-            // var gDiff = graph.maxCoordValues - graph.minCoordValues;
-            // var ratio = new Vector3(diff.x / gDiff.x, diff.y / gDiff.y,
-            //     diff.z / gDiff.z);
-            //
-            //
-            // slicer.transform.localScale = ratio;
-            // slicer.transform.localPosition = sliceCoords / 2;
+            float xMax = points.Max(v => v.Value.Position.x);
+            float yMax = points.Max(v => v.Value.Position.y);
+            float zMax = points.Max(v => v.Value.Position.z);
+            float xMin = points.Min(v => v.Value.Position.x);
+            float yMin = points.Min(v => v.Value.Position.y);
+            float zMin = points.Min(v => v.Value.Position.z);
+            
+            var max = new Vector3(xMax, yMax, zMax);
+            var min = new Vector3(xMin, yMin, zMin);
+            var diff = max - min;
+            var gDiff = graph.maxCoordValues - graph.minCoordValues;
+            var ratio = new Vector3(diff.x / gDiff.x, diff.y / gDiff.y,
+                diff.z / gDiff.z);
+
+
+            var mid = (min + max) / 2;
+            
+
+
+            Slicer slicer = GetComponentInChildren<Slicer>();
+            slicer.transform.localScale = ratio;
+            slicer.transform.localPosition = mid;
+
+            var menuScale = slicer.slicingMenuParent.transform.localScale;
+            menuScale.y /= ratio.y;
+            menuScale.z /= ratio.x;
+            slicer.slicingMenuParent.transform.localScale = menuScale;
         }
 
 
