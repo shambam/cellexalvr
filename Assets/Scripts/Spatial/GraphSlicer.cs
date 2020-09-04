@@ -7,6 +7,7 @@ using CellexalVR.AnalysisLogic;
 using CellexalVR.AnalysisObjects;
 using CellexalVR.General;
 using UnityEngine;
+using Valve.VR.InteractionSystem;
 
 namespace CellexalVR.Spatial
 {
@@ -47,17 +48,17 @@ namespace CellexalVR.Spatial
             if (slicer == null || !slicer.gameObject.activeSelf) return;
             if (Input.GetKeyDown(KeyCode.K))
             {
-                StartCoroutine(SliceGraph(true, 0));
+                StartCoroutine(SliceGraph(true, 0, activateSlices: true));
             }
 
             if (Input.GetKeyDown(KeyCode.L))
             {
-                StartCoroutine(SliceGraph(true, 1));
+                StartCoroutine(SliceGraph(true, 1, activateSlices: true));
             }
 
             if (Input.GetKeyDown(KeyCode.M))
             {
-                StartCoroutine(SliceGraph());
+                StartCoroutine(SliceGraph(activateSlices: true));
             }
 
             if (Input.GetKeyDown(KeyCode.P))
@@ -90,7 +91,13 @@ namespace CellexalVR.Spatial
         {
             GC.Collect();
             Resources.UnloadUnusedAssets();
-            Dictionary<string, Color32> oldTextureColors = SaveOldTexture();
+            Dictionary<string, Color32> oldTextureColors1 = SaveOldTexture();
+            Dictionary<string, Color32> oldTextureColors2 = SaveOldTexture(1);
+            
+            Dictionary<string, Color32>[] oldTextures = new Dictionary<string, Color32>[2];
+            oldTextures[0] = oldTextureColors1;
+            oldTextures[1] = oldTextureColors2;
+            
             List<GraphSlice> sls = new List<GraphSlice>();
 
             if (automatic)
@@ -106,14 +113,6 @@ namespace CellexalVR.Spatial
 
             if (sls.All(x => x.points.Count > 0))
             {
-                StartCoroutine(BuildSpat(sls.ToArray()));
-
-                while (sls.Any(x => x.buildingSlice))
-                {
-                    yield return null;
-                }
-
-                RemoveOldSlice();
                 sliceManager = gameObject.GetComponent<SliceManager>();
                 if (!sliceManager)
                 {
@@ -121,6 +120,14 @@ namespace CellexalVR.Spatial
                 }
 
                 sliceManager.referenceManager = referenceManager;
+                sls.ForEach(s => s.sliceCoords[axis] = -0.5f + s.SliceNr * (1f / (sls.Count - 1)));
+                StartCoroutine(BuildSpat(sls.ToArray()));
+                while (sls.Any(x => x.buildingSlice) || slicer.sliceAnimationActive)
+                {
+                    yield return null;
+                }
+                
+                RemoveOldSlice();
                 for (int i = 0; i < sls.Count; i++)
                 {
                     GraphSlice gs = sls[i].GetComponent<GraphSlice>();
@@ -128,15 +135,13 @@ namespace CellexalVR.Spatial
                     childSlices.Add(graph);
                     gs.transform.parent = sliceManager.transform;
                     sliceManager.slices.Add(gs);
-                    float pos = -0.5f + i * (1f / (sls.Count - 1));
-                    gs.sliceCoords[axis] = pos;
 
                     foreach (KeyValuePair<string, Graph.GraphPoint> point in gs.points)
                     {
                         for (int k = 0; k < graph.lodGroups; k++)
                         {
                             Vector2Int textureCoord = point.Value.textureCoord[k];
-                            Color32 oldColor = oldTextureColors[point.Key];
+                            Color32 oldColor = oldTextures[k][point.Key];
                             graph.textures[k].SetPixels32(textureCoord.x, textureCoord.y, 1, 1,
                                 new Color32[] {oldColor});
                         }
@@ -149,6 +154,7 @@ namespace CellexalVR.Spatial
                     }
 
                     graph.textures[0].Apply();
+                    graph.textures[1].Apply();
 
                     foreach (List<GameObject> gpCluster in graph.lodGroupClusters.Values)
                     {
@@ -156,10 +162,6 @@ namespace CellexalVR.Spatial
                     }
                 }
 
-                while (slicer.sliceAnimationActive)
-                {
-                    yield return null;
-                }
 
                 if (activateSlices)
                 {
@@ -203,7 +205,6 @@ namespace CellexalVR.Spatial
 
             childSlices.Clear();
             slicer.gameObject.SetActive(false);
-            Destroy(graph);
         }
 
 
@@ -221,6 +222,7 @@ namespace CellexalVR.Spatial
 
         private List<GraphSlice> AutoDividePointsIntoSlices(Dictionary<string, Graph.GraphPoint> points, int axis = 0)
         {
+            List<Vector3> cutPositions = new List<Vector3>();
             List<GraphSlice> slices = new List<GraphSlice>();
             List<Graph.GraphPoint> sortedPoints = new List<Graph.GraphPoint>(spatialGraph.pointsDict.Count);
             if (axis == 0)
@@ -267,12 +269,18 @@ namespace CellexalVR.Spatial
             slice.SliceNr = graphSlice.SliceNr;
             slice.gameObject.name = gameObject.name + "_" + graphSlice.SliceNr;
             float currentCoord, diff, prevCoord;
-            var point = sortedPoints[0];
+            Graph.GraphPoint point = sortedPoints[0];
             slice.points.Add(point.Label, point);
             float firstCoord = prevCoord = point.Position[axis];
             float lastCoord = sortedPoints[sortedPoints.Count - 1].Position[axis];
             float dividers = 20f;
             float epsilonToUse = Math.Abs(firstCoord - lastCoord) / (float) dividers;
+
+            if (axis == spatialGraph.mainAxis)
+            {
+                epsilonToUse = 0.01f;
+            }
+            
             for (int i = 1; i < sortedPoints.Count; i++)
             {
                 point = sortedPoints[i];
@@ -280,8 +288,9 @@ namespace CellexalVR.Spatial
                 // when we reach new slice (new x/y/z coordinate) build the graph and then start adding to a new one.
                 diff = Math.Abs(currentCoord - firstCoord);
 
-                if (diff > epsilonToUse || Math.Abs(currentCoord - prevCoord) > 0.1f)
+                if (diff > epsilonToUse)// || Math.Abs(currentCoord - prevCoord) > 0.1f)
                 {
+                    cutPositions.Add(point.Position);
                     slices.Add(slice);
                     slice = referenceManager.graphGenerator.CreateGraph(GraphGenerator.GraphType.SPATIAL)
                         .GetComponent<GraphSlice>();
@@ -302,6 +311,7 @@ namespace CellexalVR.Spatial
                 prevCoord = currentCoord;
             }
 
+            StartCoroutine(slicer.sliceAnimation(cutPositions.ToArray(), axis));
 
             return slices;
         }
@@ -405,7 +415,11 @@ namespace CellexalVR.Spatial
             int sliceNr = 0;
             foreach (GraphSlice slice in slices)
             {
-                StartCoroutine(slice.BuildSlice(sliceNr == 0));
+                Graph g = slice.GetComponent<Graph>();
+                g.diffCoordValues = graph.diffCoordValues;
+                g.maxCoordValues = graph.maxCoordValues;
+                g.minCoordValues = graph.minCoordValues;
+                StartCoroutine(slice.BuildSlice(slice.gameObject.name.Equals("Slice0")));
                 while (slice.buildingSlice)
                 {
                     yield return null;

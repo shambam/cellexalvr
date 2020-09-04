@@ -177,15 +177,6 @@ namespace CellexalVR.AnalysisObjects
                     texture.Apply();
                 }
 
-                var spatialGraph = GetComponent<SpatialGraph>();
-                if (spatialGraph)
-                {
-                    foreach (GraphSlice gs in spatialGraph.slices)
-                    {
-                        gs.SetTexture(textureDictionary);
-                    }
-                }
-
                 textureChanged = false;
             }
 

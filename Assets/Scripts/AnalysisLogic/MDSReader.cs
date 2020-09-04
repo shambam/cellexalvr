@@ -307,6 +307,9 @@ namespace CellexalVR.AnalysisLogic
 
             using (StreamReader mdsStreamReader = new StreamReader(file))
             {
+                List<float> xValues = new List<float>();
+                List<float> yValues = new List<float>();
+                List<float> zValues = new List<float>();
                 int i = 0;
                 string header = mdsStreamReader.ReadLine();
                 while (!mdsStreamReader.EndOfStream)
@@ -326,12 +329,16 @@ namespace CellexalVR.AnalysisLogic
                         float x = float.Parse(words[1], System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
                         float y = float.Parse(words[2], System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
                         float z = float.Parse(words[3], System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
-                        // gps.Add(new Tuple<string, Vector3>(cellName, new Vector3(x, y, z)));
-                        // sg.points.Add(new Tuple<string, Vector3>(cellName, new Vector3(x, y, z)));
                         Cell cell = referenceManager.cellManager.AddCell(cellName);
                         Graph.GraphPoint gp = referenceManager.graphGenerator.AddGraphPoint(cell, x, y, z);
                         sg.pointsDict.Add(cellName, gp);
                         graphSlice.points.Add(cellName, gp);
+
+                        xValues.Add(gp.Position.x);
+
+                        yValues.Add(gp.Position.y);
+
+                        zValues.Add(gp.Position.z);
 
                         itemsThisFrame++;
                     }
@@ -353,29 +360,22 @@ namespace CellexalVR.AnalysisLogic
                         maximumItemsPerFrame -= CellexalConfig.Config.GraphLoadingCellsPerFrameIncrement;
                     }
                 }
+
+                int xCount = xValues.Distinct().Count();
+                int yCount = yValues.Distinct().Count();
+                int zCount = zValues.Distinct().Count();
+
+                int minCount = Math.Min(Math.Min(xCount, yCount), zCount);
+                int mainAxis = -1;
+                if (minCount == xCount) mainAxis = 0;
+                else if (minCount == yCount) mainAxis = 1;
+                else mainAxis = 2;
+                print(mainAxis);
+
+                sg.mainAxis = mainAxis;
             }
 
-            // int n = CellexalConfig.Config.GraphPointQuality == "Standard" ? 2 : 1;
-            // StartCoroutine(referenceManager.graphGenerator.SliceClusteringLOD(n));
-            //
-            // while (referenceManager.graphGenerator.isCreating)
-            // {
-            //     yield return null;
-            // }
-            //
-            // if (n > 1)
-            // {
-            //     graph.gameObject.AddComponent<LODGroup>();
-            //     referenceManager.graphGenerator.UpdateLODGroups(graph);
-            // }
 
-            // StartCoroutine(graphSlicer.SliceGraph());
-
-            // List<Dictionary<string, Graph.GraphPoint>> allPoints = new List<Dictionary<string, Graph.GraphPoint>>
-            // {
-            //     graphSlice.points
-            // };
-            // spatialGraph.slices.Add(graphSlice);
             StartCoroutine(graphSlicer.BuildSpat(new[] {graphSlice}));
 
             while (graphSlice.buildingSlice)
@@ -383,12 +383,10 @@ namespace CellexalVR.AnalysisLogic
                 yield return null;
             }
 
-            foreach (List<GameObject> gpCluster in graphSlice.lodGroupClusters.Values)
+            foreach (List<GameObject> gpCluster in graph.lodGroupClusters.Values)
             {
                 gpCluster.ForEach(x => x.SetActive(true));
             }
-
-            // StartCoroutine(graphSlicer.BuildSpatialGraph(allPoints, 0));
         }
     }
 }

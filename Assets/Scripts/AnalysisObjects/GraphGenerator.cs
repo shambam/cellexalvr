@@ -364,7 +364,7 @@ namespace CellexalVR.AnalysisObjects
                 referenceManager.graphGenerator.meshToUse =
                     referenceManager.graphGenerator.graphpointStandardQLargeSzMesh;
             }
-            
+
             lodGroup.transform.localRotation = Quaternion.identity;
         }
 
@@ -384,6 +384,7 @@ namespace CellexalVR.AnalysisObjects
                 isCreating = true;
                 if (i == 0 && scale)
                 {
+                    print("scale coords");
                     ScaleAllCoordinates();
                 }
 
@@ -392,7 +393,7 @@ namespace CellexalVR.AnalysisObjects
                     AddLODGroup(newGraph, i, slice);
                 }
 
-                if (i > 0)
+                if (i > 0 && scale)
                 {
                     referenceManager.graphGenerator.UpdateCoords();
                 }
@@ -822,20 +823,7 @@ namespace CellexalVR.AnalysisObjects
             Dictionary<string, Graph.GraphPoint> points,
             BooleanExpression.Expr expr = null, int lodGroup = 0, GraphSlice slice = null)
         {
-            // if (slice != null)
-            // {
-            //     slice.lodGroupClusters[lodGroup] = new List<GameObject>(nbrOfClusters);
-            // }
-
             newGraph.lodGroupClusters[lodGroup] = new List<GameObject>(nbrOfClusters);
-            // else
-            // {
-            // }
-
-            // GameObject lodGroup = new GameObject();
-            // lodGroup.transform.parent = newGraph.transform;
-            // lodGroup.transform.localPosition = Vector3.zero;
-            // lodGroup.gameObject.name = $"LODgroup{k}";
             var stopwatch = new System.Diagnostics.Stopwatch();
             stopwatch.Start();
 
@@ -916,17 +904,12 @@ namespace CellexalVR.AnalysisObjects
                 GameObject newPart;
                 // newPart = Instantiate(graphpointsPrefab, newGraph.transform);
                 // print($"group {lodGroups[lodGroup]}");
-                // if (slice != null)
-                // {
-                //     newPart = Instantiate(graphpointsPrefab, slice.LODGroupParents[lodGroup].transform);
-                //     newPart.SetActive(false);
-                // }
 
-                // else
-                // {
                 newPart = Instantiate(graphpointsPrefab, newGraph.lodGroupParents[lodGroup].transform);
-                // }
-
+                if (newGraph.GetComponent<GraphSlice>() != null)
+                {
+                    newPart.SetActive(false);
+                }
 
                 var newMesh = new Mesh();
                 newMesh.indexFormat = IndexFormat.UInt32;
@@ -960,17 +943,8 @@ namespace CellexalVR.AnalysisObjects
                 newMesh.RecalculateNormals();
 
                 newPart.GetComponent<MeshFilter>().mesh = newMesh;
-                // newGraph.graphPointClusters.Add(newPart);
-                // if (slice != null)
-                // {
-                //     slice.lodGroupClusters[lodGroup].Add(newPart);
-                // }
 
                 newGraph.lodGroupClusters[lodGroup].Add(newPart);
-                // else
-                // {
-                // }
-
                 newPart.GetComponent<Renderer>().sharedMaterial = graphPointMaterial;
                 //newPart.GetComponent<Renderer>().sharedMaterials = new Material[] { graphPointMaterial, graphPointTransparentMaterial };
 

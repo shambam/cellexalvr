@@ -41,6 +41,7 @@ namespace CellexalVR.Spatial
         public GameObject cubePrefab;
         public Dictionary<string, Graph.GraphPoint> pointsDict = new Dictionary<string, Graph.GraphPoint>();
         public List<GraphSlice> slices = new List<GraphSlice>();
+        public int mainAxis;
 
         private void Start()
         {

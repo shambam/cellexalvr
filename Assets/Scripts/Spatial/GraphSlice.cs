@@ -21,7 +21,6 @@ namespace CellexalVR.Spatial
         public GameObject replacement;
         public GameObject wire;
         public bool buildingSlice;
-        public GameObject slicer;
         public Texture2D[] textures;
         public Dictionary<int, int> textureWidths = new Dictionary<int, int>();
         public Dictionary<int, int> textureHeights = new Dictionary<int, int>();
@@ -36,6 +35,7 @@ namespace CellexalVR.Spatial
         public Dictionary<int, List<GameObject>> lodGroupClusters = new Dictionary<int, List<GameObject>>();
         public Graph.OctreeNode octreeRoot;
         public SpatialGraph spatialGraph;
+        public int mainAxis;
 
         protected Graph graph;
         
@@ -213,14 +213,14 @@ namespace CellexalVR.Spatial
         public IEnumerator BuildSlice(bool scale = true)
         {
             buildingSlice = true;
-            Vector3 maxCoords = new Vector3();
-            Vector3 minCoords = new Vector3();
-            maxCoords.x = spatialGraph.pointsDict.Max(v => (v.Value.Position.x));
-            maxCoords.y = spatialGraph.pointsDict.Max(v => (v.Value.Position.y));
-            maxCoords.z = spatialGraph.pointsDict.Max(v => (v.Value.Position.z));
-            minCoords.x = spatialGraph.pointsDict.Min(v => (v.Value.Position.x));
-            minCoords.y = spatialGraph.pointsDict.Min(v => (v.Value.Position.y));
-            minCoords.z = spatialGraph.pointsDict.Min(v => (v.Value.Position.z));
+            // Vector3 maxCoords = new Vector3();
+            // Vector3 minCoords = new Vector3();
+            // maxCoords.x = spatialGraph.pointsDict.Max(v => (v.Value.Position.x));
+            // maxCoords.y = spatialGraph.pointsDict.Max(v => (v.Value.Position.y));
+            // maxCoords.z = spatialGraph.pointsDict.Max(v => (v.Value.Position.z));
+            // minCoords.x = spatialGraph.pointsDict.Min(v => (v.Value.Position.x));
+            // minCoords.y = spatialGraph.pointsDict.Min(v => (v.Value.Position.y));
+            // minCoords.z = spatialGraph.pointsDict.Min(v => (v.Value.Position.z));
 
             // Graph graph = referenceManager.graphGenerator.CreateGraph(GraphGenerator.GraphType.SPATIAL);
             // graph.referenceManager = referenceManager;
@@ -270,12 +270,9 @@ namespace CellexalVR.Spatial
             // var ratio = new Vector3(diff.x / gDiff.x, diff.y / gDiff.y,
             //     diff.z / gDiff.z);
             //
-            // print(
-            //     $"g diff coord: {graph.maxCoordValues - graph.minCoordValues}, " +
-            //     $" this diff : {diff}," +
-            //     $" ratio : {ratio}");
             //
             // slicer.transform.localScale = ratio;
+            // slicer.transform.localPosition = sliceCoords / 2;
         }
 
 
