@@ -212,21 +212,8 @@ namespace CellexalVR.Spatial
         public IEnumerator BuildSlice(bool scale = true)
         {
             buildingSlice = true;
-            // Vector3 maxCoords = new Vector3();
-            // Vector3 minCoords = new Vector3();
-            // maxCoords.x = spatialGraph.pointsDict.Max(v => (v.Value.Position.x));
-            // maxCoords.y = spatialGraph.pointsDict.Max(v => (v.Value.Position.y));
-            // maxCoords.z = spatialGraph.pointsDict.Max(v => (v.Value.Position.z));
-            // minCoords.x = spatialGraph.pointsDict.Min(v => (v.Value.Position.x));
-            // minCoords.y = spatialGraph.pointsDict.Min(v => (v.Value.Position.y));
-            // minCoords.z = spatialGraph.pointsDict.Min(v => (v.Value.Position.z));
-
-            // Graph graph = referenceManager.graphGenerator.CreateGraph(GraphGenerator.GraphType.SPATIAL);
-            // graph.referenceManager = referenceManager;
             graph = GetComponent<Graph>();
             referenceManager.graphGenerator.newGraph = graph;
-            // graph.maxCoordValues = maxCoords;
-            // graph.minCoordValues = minCoords;
             StartCoroutine(
                 referenceManager.graphGenerator.SliceClusteringLOD(
                     referenceManager.graphGenerator.nrOfLODGroups, points, scale: scale));
@@ -267,30 +254,28 @@ namespace CellexalVR.Spatial
             var diff = max - min;
             var gDiff = graph.maxCoordValues - graph.minCoordValues;
             var ratio = new Vector3(diff.x / gDiff.x, diff.y / gDiff.y,
-                diff.z / gDiff.z);
+                diff.z / gDiff.z) + Vector3.one * 0.1f;
 
 
             var mid = (min + max) / 2;
-            
 
-
-            Slicer slicer = GetComponentInChildren<Slicer>();
+            Slicer slicer = GetComponentInChildren<Slicer>(true);
             slicer.transform.localScale = ratio;
             slicer.transform.localPosition = mid;
 
             var menuScale = slicer.slicingMenuParent.transform.localScale;
             menuScale.y /= ratio.y;
-            menuScale.z /= ratio.x;
+            menuScale.z /= ratio.z;
             slicer.slicingMenuParent.transform.localScale = menuScale;
         }
 
 
-        public void SetTexture(Dictionary<string, Color32> textureColors)
+        public void SetTexture(Dictionary<string, Color32> textureColors, int k)
         {
-            Texture2D texture = textures[0];
+            Texture2D texture = graph.textures[k];
             foreach (KeyValuePair<string, Graph.GraphPoint> point in points)
             {
-                Vector2Int textureCoord = point.Value.textureCoord[0];
+                Vector2Int textureCoord = point.Value.textureCoord[k];
                 Color32 col = textureColors[point.Key];
                 texture.SetPixel(textureCoord.x, textureCoord.y, col);
             }

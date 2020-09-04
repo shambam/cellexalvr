@@ -12,6 +12,7 @@ namespace CellexalVR.Menu.Buttons.Slicing
 
         private void Awake()
         {
+            SetButtonActivated(false);
             slicer = GetComponentInParent<Slicer>();
         }
         

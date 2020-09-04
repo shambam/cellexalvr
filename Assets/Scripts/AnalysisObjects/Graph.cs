@@ -1494,7 +1494,10 @@ namespace CellexalVR.AnalysisObjects
                 // {
                 // }
 
-                lodGroupClusters[g][0].GetComponent<Renderer>().sharedMaterial.mainTexture = textures[g];
+                if (lodGroupParents.Count > 0)
+                {
+                    lodGroupClusters[g][0].GetComponent<Renderer>().sharedMaterial.mainTexture = textures[g];
+                }
 
                 // graphPointClusters[graphPointClusters.Count - 1].GetComponent<Renderer>().sharedMaterial.mainTexture = texture2;
             }

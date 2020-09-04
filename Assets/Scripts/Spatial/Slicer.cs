@@ -127,28 +127,6 @@ namespace CellexalVR.Spatial
                 yield return null;
             }
 
-            // while (t < animationTime)
-            // {
-            //     progress = Mathf.SmoothStep(0, animationTime, t);
-            //     pos.y = Mathf.Lerp(yStart, yEnd, progress);
-            //     t += (Time.deltaTime / animationTime);
-            //     blade.transform.localPosition = pos;
-            //     yield return null;
-            // }
-
-            // yStart = yEnd;
-            // yEnd = 0.5f;
-            // t = 0;
-            //
-            // while (t < animationTime)
-            // {
-            //     progress = Mathf.SmoothStep(0, animationTime, t);
-            //     pos.y = Mathf.Lerp(yStart, yEnd, progress);
-            //     t += (Time.deltaTime / animationTime);
-            //     blade.transform.localPosition = pos;
-            //     yield return null;
-            // }
-
             plane.SetActive(false);
             sliceAnimationActive = false;
         }
@@ -196,6 +174,7 @@ namespace CellexalVR.Spatial
 
             plane.SetActive(false);
             plane.transform.localRotation = Quaternion.identity;
+            plane.transform.localPosition = Vector3.zero;
             blade.transform.localPosition = startPos;
             sliceAnimationActive = false;
         }
@@ -207,10 +186,16 @@ namespace CellexalVR.Spatial
         }
 
 
-        // private void OnTriggerEnter(Collider other)
-        // {
-        //     print($"slicer collider : {other.gameObject.name}" );
-        // }
+        private void OnTriggerEnter(Collider other)
+        {
+            // controllerInside = true;
+            print($"slicer collider : {other.gameObject.name}" );
+        }
+
+        private void OnTriggerExit(Collider other)
+        {
+            // controllerInside = false;
+        }
 
         private void Update()
         {

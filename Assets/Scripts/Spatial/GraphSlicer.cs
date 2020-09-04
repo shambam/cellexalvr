@@ -31,6 +31,7 @@ namespace CellexalVR.Spatial
         private bool slicerInside;
         private List<Graph> childSlices = new List<Graph>();
         private SliceManager sliceManager;
+        private Dictionary<string, Color32>[] oldTextures = new Dictionary<string, Color32>[2];
 
 
         private void Start()
@@ -91,13 +92,23 @@ namespace CellexalVR.Spatial
         {
             GC.Collect();
             Resources.UnloadUnusedAssets();
-            Dictionary<string, Color32> oldTextureColors1 = SaveOldTexture();
-            Dictionary<string, Color32> oldTextureColors2 = SaveOldTexture(1);
-            
-            Dictionary<string, Color32>[] oldTextures = new Dictionary<string, Color32>[2];
-            oldTextures[0] = oldTextureColors1;
-            oldTextures[1] = oldTextureColors2;
-            
+            // Dictionary<string, Color32> oldTextureColors1 = SaveOldTexture();
+            // Dictionary<string, Color32> oldTextureColors2 = SaveOldTexture(1);
+
+            for (int i = 0; i < graph.lodGroups; i++)
+            {
+                if (childSlices.Count > 0)
+                {
+                    oldTextures[i] = SaveOldTexture(childSlices, i);
+                }
+                else
+                {
+                    oldTextures[i] = SaveOldTexture(graph, i);
+                }
+            }
+            // oldTextures[0] = SaveOldTexture(); //oldTextureColors1);
+            // oldTextures[1] = SaveOldTexture(1); //oldTextureColors2;
+
             List<GraphSlice> sls = new List<GraphSlice>();
 
             if (automatic)
@@ -126,37 +137,49 @@ namespace CellexalVR.Spatial
                 {
                     yield return null;
                 }
-                
+
                 RemoveOldSlice();
                 for (int i = 0; i < sls.Count; i++)
                 {
                     GraphSlice gs = sls[i].GetComponent<GraphSlice>();
-                    Graph graph = gs.GetComponent<Graph>();
-                    childSlices.Add(graph);
+                    Graph g = gs.GetComponent<Graph>();
+                    childSlices.Add(g);
                     gs.transform.parent = sliceManager.transform;
                     sliceManager.slices.Add(gs);
 
-                    foreach (KeyValuePair<string, Graph.GraphPoint> point in gs.points)
+                    int m = 0;
+
+                    for (int k = 0; k < graph.lodGroups; k++)
                     {
-                        for (int k = 0; k < graph.lodGroups; k++)
-                        {
-                            Vector2Int textureCoord = point.Value.textureCoord[k];
-                            Color32 oldColor = oldTextures[k][point.Key];
-                            graph.textures[k].SetPixels32(textureCoord.x, textureCoord.y, 1, 1,
-                                new Color32[] {oldColor});
-                        }
+                        gs.SetTexture(oldTextures[k], k);
+                        // foreach (KeyValuePair<string, Graph.GraphPoint> point in g.points)
+                        // {
+                        //     Vector2Int textureCoord = point.Value.textureCoord[k];
+                        //     Color32 oldColor = oldTextures[k][point.Key];
+                        //     g.textures[k].SetPixels32(textureCoord.x, textureCoord.y, 1, 1,
+                        //         new Color32[] {oldColor});
+                        //     if (m < 10)
+                        //     {
+                        //         print($"point: {point.Key} , col : {oldColor}, coord : {textureCoord}");
+                        //     }
+                        //
+                        //     m++;
+                        // }
+
+
+                        // graph.textures[k].Apply();
+                        // g.textures[k].Apply();
+                        // graph.textures[k].Apply();
+                        // graph.textures[1].Apply();
                     }
 
                     for (int j = 0; j < gs.LODGroupParents.Count; j++)
                     {
-                        graph.lodGroupClusters[j][0].GetComponent<Renderer>().sharedMaterial.mainTexture =
-                            graph.textures[0];
+                        g.lodGroupClusters[j][0].GetComponent<Renderer>().sharedMaterial.mainTexture =
+                            g.textures[0];
                     }
 
-                    graph.textures[0].Apply();
-                    graph.textures[1].Apply();
-
-                    foreach (List<GameObject> gpCluster in graph.lodGroupClusters.Values)
+                    foreach (List<GameObject> gpCluster in g.lodGroupClusters.Values)
                     {
                         gpCluster.ForEach(x => x.SetActive(true));
                     }
@@ -170,11 +193,28 @@ namespace CellexalVR.Spatial
             }
         }
 
-        private Dictionary<string, Color32> SaveOldTexture(int i = 0)
+
+        private Dictionary<string, Color32> SaveOldTexture(List<Graph> slices, int i = 0)
         {
-            Texture2D oldTexture = graph.textures[i];
             Dictionary<string, Color32> oldTextureColors = new Dictionary<string, Color32>();
-            foreach (KeyValuePair<string, Graph.GraphPoint> point in graph.points)
+            foreach (Graph g in slices)
+            {
+                Texture2D oldTexture = g.textures[i];
+                foreach (KeyValuePair<string, Graph.GraphPoint> point in g.points)
+                {
+                    Vector2Int textureCoord = point.Value.textureCoord[i];
+                    oldTextureColors[point.Key] = oldTexture.GetPixel(textureCoord.x, textureCoord.y);
+                }
+            }
+
+            return oldTextureColors;
+        }
+
+        private Dictionary<string, Color32> SaveOldTexture(Graph g, int i = 0)
+        {
+            Texture2D oldTexture = g.textures[i];
+            Dictionary<string, Color32> oldTextureColors = new Dictionary<string, Color32>();
+            foreach (KeyValuePair<string, Graph.GraphPoint> point in g.points)
             {
                 Vector2Int textureCoord = point.Value.textureCoord[i];
                 oldTextureColors[point.Key] =
@@ -188,11 +228,13 @@ namespace CellexalVR.Spatial
         private void RemoveOldSlice()
         {
             spatialGraph.slices.Remove(GetComponent<GraphSlice>());
-            referenceManager.graphManager.Graphs.Remove(graph);
+            // referenceManager.graphManager.Graphs.Remove(graph);
             foreach (GameObject obj in graph.lodGroupParents)
             {
                 Destroy(obj);
             }
+
+            graph.lodGroupParents.Clear();
 
             foreach (Graph g in childSlices)
             {
@@ -200,7 +242,6 @@ namespace CellexalVR.Spatial
                 sliceManager.slices.Remove(g.GetComponent<GraphSlice>());
                 referenceManager.graphManager.Graphs.Remove(g);
                 Destroy(g.gameObject);
-                Destroy(g);
             }
 
             childSlices.Clear();
@@ -280,7 +321,7 @@ namespace CellexalVR.Spatial
             {
                 epsilonToUse = 0.01f;
             }
-            
+
             for (int i = 1; i < sortedPoints.Count; i++)
             {
                 point = sortedPoints[i];
@@ -288,7 +329,7 @@ namespace CellexalVR.Spatial
                 // when we reach new slice (new x/y/z coordinate) build the graph and then start adding to a new one.
                 diff = Math.Abs(currentCoord - firstCoord);
 
-                if (diff > epsilonToUse)// || Math.Abs(currentCoord - prevCoord) > 0.1f)
+                if (diff > epsilonToUse) // || Math.Abs(currentCoord - prevCoord) > 0.1f)
                 {
                     cutPositions.Add(point.Position);
                     slices.Add(slice);

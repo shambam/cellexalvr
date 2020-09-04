@@ -9,6 +9,7 @@
 
         private void Awake()
         {
+            SetButtonActivated(false);
             slicingMenu = GetComponentInParent<SlicingMenu>();
         }
         

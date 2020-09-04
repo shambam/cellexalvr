@@ -30,7 +30,6 @@ namespace CellexalVR.AnalysisObjects
         public ReferenceManager referenceManager;
         public GameObject graphpointsPrefab;
         public GameObject graphPrefab;
-        public GameObject spatialGraphPrefab;
         public GameObject spatialSlicePrefab;
         public GameObject AxesPrefabColoured;
         public GameObject AxesPrefabUncoloured;
@@ -45,7 +44,6 @@ namespace CellexalVR.AnalysisObjects
         public Mesh meshToUse;
         public string DirectoryName { get; set; }
         public bool isCreating;
-        public bool addingToExisting;
         public int nrOfLODGroups = 1;
 
         public enum GraphType
@@ -60,7 +58,6 @@ namespace CellexalVR.AnalysisObjects
         public Color[] geneExpressionColors;
         public Texture2D graphPointColors;
         public int graphCount;
-        public List<GameObject> lodGroups;
         public Graph newGraph;
 
         private GraphType graphType;
@@ -103,49 +100,11 @@ namespace CellexalVR.AnalysisObjects
         /// <returns>The new graph.</returns>
         public Graph CreateGraph(GraphType type)
         {
-            graphType = type;
-            if (type == GraphType.BETWEEN)
-            {
-                //meshToUse = graphpointStandardQLargeSzMesh;
-                meshToUse = graphpointLowQLargeSzMesh;
-            }
-            else if (CellexalConfig.Config.GraphPointQuality == "Standard"
-                     && CellexalConfig.Config.GraphPointSize == "Standard")
-            {
-                meshToUse = graphpointStandardQStandardSzMesh;
-            }
-            else if (CellexalConfig.Config.GraphPointQuality == "Low"
-                     && CellexalConfig.Config.GraphPointSize == "Standard")
-            {
-                meshToUse = graphpointLowQStandardSzMesh;
-            }
-            else if (CellexalConfig.Config.GraphPointQuality == "Standard"
-                     && CellexalConfig.Config.GraphPointSize == "Small")
-            {
-                meshToUse = graphpointLowQSmallSzMesh;
-            }
-            else if (CellexalConfig.Config.GraphPointQuality == "Low"
-                     && CellexalConfig.Config.GraphPointSize == "Small")
-            {
-                meshToUse = graphpointLowQSmallSzMesh;
-            }
-            else if (CellexalConfig.Config.GraphPointQuality == "Standard"
-                     && CellexalConfig.Config.GraphPointSize == "Large")
-            {
-                meshToUse = graphpointStandardQLargeSzMesh;
-            }
-            else
-            {
-                meshToUse = graphpointLowQLargeSzMesh;
-            }
-
-
+            SetMeshToUse(type);
             if (type == GraphType.SPATIAL)
             {
                 // meshToUse = graphpointStandardQLargeSzMesh;
-                // newGraph = Instantiate(spatialSlicePrefab).GetComponent<Graph>();
                 newGraph = Instantiate(spatialSlicePrefab).GetComponent<Graph>();
-                // spatialGraph = GetComponent<SpatialGraph>();
             }
             else
             {
@@ -161,6 +120,48 @@ namespace CellexalVR.AnalysisObjects
             return newGraph;
         }
 
+        /// <summary>
+        /// Helper function to set the current mesh used to create the graphs based on the selection in the config.
+        /// </summary>
+        private void SetMeshToUse(GraphType type)
+        {
+             graphType = type;
+             if (type == GraphType.BETWEEN)
+             {
+                 //meshToUse = graphpointStandardQLargeSzMesh;
+                 meshToUse = graphpointLowQLargeSzMesh;
+             }
+             else if (CellexalConfig.Config.GraphPointQuality == "Standard"
+                      && CellexalConfig.Config.GraphPointSize == "Standard")
+             {
+                 meshToUse = graphpointStandardQStandardSzMesh;
+             }
+             else if (CellexalConfig.Config.GraphPointQuality == "Low"
+                      && CellexalConfig.Config.GraphPointSize == "Standard")
+             {
+                 meshToUse = graphpointLowQStandardSzMesh;
+             }
+             else if (CellexalConfig.Config.GraphPointQuality == "Standard"
+                      && CellexalConfig.Config.GraphPointSize == "Small")
+             {
+                 meshToUse = graphpointLowQSmallSzMesh;
+             }
+             else if (CellexalConfig.Config.GraphPointQuality == "Low"
+                      && CellexalConfig.Config.GraphPointSize == "Small")
+             {
+                 meshToUse = graphpointLowQSmallSzMesh;
+             }
+             else if (CellexalConfig.Config.GraphPointQuality == "Standard"
+                      && CellexalConfig.Config.GraphPointSize == "Large")
+             {
+                 meshToUse = graphpointStandardQLargeSzMesh;
+             }
+             else
+             {
+                 meshToUse = graphpointLowQLargeSzMesh;
+             }
+        }
+        
         /// <summary>
         /// Creates the texture that the CombinedGraph shader uses to fetch colors for the graphpoints.
         /// </summary>
@@ -336,34 +337,29 @@ namespace CellexalVR.AnalysisObjects
         private void AddLODGroup(Graph combGraph, int i, GraphSlice slice = null)
         {
             GameObject lodGroup = new GameObject();
-            Transform parent;
-            if (slice != null)
-            {
-                parent = slice.transform;
-                slice.LODGroupParents.Add(lodGroup);
-            }
-
-            // else
+            // if (slice != null)
             // {
-            parent = combGraph.transform;
-            combGraph.lodGroupParents.Add(lodGroup);
+            //     parent = slice.transform;
+            //     slice.LODGroupParents.Add(lodGroup);
             // }
+
+            Transform parent = combGraph.transform;
+            combGraph.lodGroupParents.Add(lodGroup);
 
             lodGroup.transform.parent = parent;
             lodGroup.transform.localPosition = Vector3.zero;
             lodGroup.gameObject.name = $"LODGroup{i}";
             if (i > 0)
             {
-                referenceManager.graphGenerator.meshToUse =
-                    referenceManager.graphGenerator.graphpointLowQLargeSzMesh;
+                meshToUse = referenceManager.graphGenerator.graphpointLowQLargeSzMesh;
                 // referenceManager.graphGenerator.UpdateCoords();
             }
 
             else
             {
-                referenceManager.graphGenerator.meshToUse =
-                    referenceManager.graphGenerator.graphpointStandardQLargeSzMesh;
+                SetMeshToUse(graphType);
             }
+                
 
             lodGroup.transform.localRotation = Quaternion.identity;
         }
@@ -388,7 +384,7 @@ namespace CellexalVR.AnalysisObjects
                     ScaleAllCoordinates();
                 }
 
-                if (lodGroups > 1)
+                if (lodGroups > 0)
                 {
                     AddLODGroup(newGraph, i, slice);
                 }
