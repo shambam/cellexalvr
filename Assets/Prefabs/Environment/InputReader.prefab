@@ -48,15 +48,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   referenceManager: {fileID: 797481884179529250}
-  networkPrefab: {fileID: 114190743744166870, guid: 802de9a0247fe3f4aa4ce2c5509c2eef,
-    type: 3}
-  SpatialGraphPrefab: {fileID: 4866979709267056668, guid: 775827d6390ac5848a4f11b8f83d64f5,
-    type: 3}
-  graphName: {fileID: 114647396841719870, guid: 2ba89b1022cb7e14f9efe83d76c6788b,
-    type: 3}
-  lineprefab: {fileID: 1820579546230104, guid: f2a3da0f21dec6b4cb72d32489e20385, type: 3}
+  spatialGraphPrefab: {fileID: 0}
+  facsGraphCounter: 0
+  attributeFileRead: 0
+  attributeReader: {fileID: 0}
   debug: 0
-  doLoad: 0
 --- !u!114 &114405805043964006
 MonoBehaviour:
   m_ObjectHideFlags: 0

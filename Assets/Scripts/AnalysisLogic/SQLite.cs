@@ -16,6 +16,7 @@ using SQLiter;
 using CellexalVR.AnalysisLogic;
 using System.Data;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace SQLiter
 {
@@ -783,11 +784,37 @@ namespace SQLiter
         private IEnumerator QueryGeneCoroutine(string geneName, Action<SQLite> action)
         {
             _result.Clear();
-            string query = "select cname, value " +
-                           "FROM datavalues " +
-                           "INNER JOIN cells ON (datavalues.cell_id = cells.id) " +
-                           "WHERE (ene_id = (select id from genes where upper(gname) = upper(\"" + geneName + "\"))";
 
+            string query = "";
+            Regex rx = new Regex(@",", RegexOptions.Compiled);
+            MatchCollection matches = rx.Matches(geneName);
+            if (matches.Count > 0) // multiple genes
+            {
+                Regex ry = new Regex(@"\b(?<word>\w+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+                StringBuilder builder = new StringBuilder();
+                matches = ry.Matches(geneName);
+                foreach (Match match in matches)
+                {
+                    GroupCollection groups = match.Groups;
+                    builder.Append("\"").Append(groups["word"].Value.ToUpper()).Append("\",");
+                }
+                geneName = builder.ToString();
+                geneName = geneName.Remove(geneName.Length - 1);
+
+                query = "select cname, sum(value) " +
+                "from datavalues " +
+                "INNER JOIN cells ON(datavalues.cell_id = cells.id) " +
+                "where gene_id IN (" +
+                    "select id from genes " +
+                    "where upper(gname) " +
+                    "IN(" + geneName + ") ) GROUP BY cname";
+            }
+            else
+            {
+                query = "SELECT cname, value from datavalues left join cells on datavalues.cell_id = cells.id " +
+                   "where gene_id = (select id from genes where upper(gname) = upper( \"" + geneName + "\"))";
+            }
+       
             Thread t = new Thread(() => QueryThread(query));
             t.Start();
             while (t.IsAlive)
@@ -824,8 +851,42 @@ namespace SQLiter
         {
             //int statusId = status.AddStatus("Querying database for gene " + geneName);
             _result.Clear();
-            string query = "SELECT cname, value from datavalues left join cells on datavalues.cell_id = cells.id " +
-                "where gene_id = (select id from genes where gname = \"" + geneName + "\")";
+
+            string query = "";
+            Regex rx = new Regex(@",", RegexOptions.Compiled);
+            MatchCollection matches = rx.Matches(geneName);
+            if ( matches.Count > 0) // multiple genes
+            {
+                Regex ry = new Regex(@"\b(?<word>\w+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+                StringBuilder builder = new StringBuilder();
+                matches = ry.Matches(geneName);
+                foreach (Match match in matches)
+                {
+                    GroupCollection groups = match.Groups;
+                    builder.Append("\"").Append(groups["word"].Value.ToUpper()).Append("\",");
+                }
+                geneName = builder.ToString();
+                geneName = geneName.Remove(geneName.Length - 1);
+
+                query = "select cname, sum(value) " +
+                "from datavalues " +
+                "INNER JOIN cells ON(datavalues.cell_id = cells.id) " +
+                "where gene_id IN (" +
+                    "select id from genes " +
+                    "where upper(gname) " +
+                    "IN(" + geneName + ") ) GROUP BY cname";
+            }
+
+
+
+            else
+            {
+                query = "SELECT cname, value from datavalues left join cells on datavalues.cell_id = cells.id " +
+                   "where gene_id = (select id from genes where gname = \"" + geneName + "\")";
+            }
+
+            print("SQL queriy: " + query + ";");
+
             Thread t = new Thread(() => QueryThread(query));
             t.Start();
             while (t.IsAlive)
