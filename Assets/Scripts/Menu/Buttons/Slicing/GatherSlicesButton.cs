@@ -1,5 +1,4 @@
 ﻿using CellexalVR.Spatial;
-using UnityEngine;
 
 namespace CellexalVR.Menu.Buttons.Slicing
 {
@@ -7,22 +6,22 @@ namespace CellexalVR.Menu.Buttons.Slicing
     {
         protected override string Description => "Gather Slices to Parent";
 
-        private SliceManager sliceManager;
+        public SliceManager sliceManager;
 
-
-        private void Awake()
+        private void Start()
         {
-            SetButtonActivated(false);
-            sliceManager = GetComponentInParent<SliceManager>();
-            if (sliceManager)
+            if (!sliceManager.slicesActive)
             {
-                SetButtonActivated(true);
+                SetButtonActivated(false);
             }
         }
-        
+
         public override void Click()
         {
             sliceManager.ActivateSlices(false);
+
+            // TODO: Add multi-user functionality.
         }
+
     }
 }

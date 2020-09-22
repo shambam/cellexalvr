@@ -93,7 +93,7 @@ namespace CellexalVR.Menu.Buttons
 
         private void CheckForClick()
         {
-            if (!buttonActivated) return;
+            if (!buttonActivated || rightController == null) return;
             device = SteamVR_Controller.Input((int) rightController.index);
             if (controllerInside && device.GetPressDown(SteamVR_Controller.ButtonMask.Trigger))
             {
@@ -111,9 +111,9 @@ namespace CellexalVR.Menu.Buttons
         /// Button sometimes stays active even though ontriggerexit should have been called.
         /// To deactivate button again check every 10th frame if laser pointer collider is colliding.
         /// </summary>
-        private void CheckForHit()
+        protected virtual void CheckForHit()
         {
-            if (!buttonActivated) return;
+            if (!buttonActivated || rightController == null) return;
             if (frameCount % 10 == 0)
             {
                 laserInside = false;

@@ -7,16 +7,15 @@
 
         private SlicingMenu slicingMenu;
 
-        private void Awake()
+        private void Start()
         {
-            SetButtonActivated(false);
+            SetButtonActivated(true);
             slicingMenu = GetComponentInParent<SlicingMenu>();
         }
         
         public override void Click()
         {
             slicingMenu.ActivateMode(modeMenuToActivate);
-            
             // TODO: Add multi user synch
             
         }

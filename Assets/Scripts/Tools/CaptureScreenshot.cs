@@ -93,7 +93,6 @@ namespace CellexalVR.Tools
         /// <summary>
         /// Calls R logging function to save screenshot for session report.
         /// </summary
-
         IEnumerator LogScreenshot(string screenshotImageFilePath)
         {
             string args = screenshotImageFilePath;

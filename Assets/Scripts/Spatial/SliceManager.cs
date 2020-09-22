@@ -8,12 +8,19 @@ using CellexalVR.General;
 using System;
 using System.Linq;
 using CellexalVR.AnalysisObjects;
+using CellexalVR.Menu.Buttons.Slicing;
 using VRTK;
 
 namespace CellexalVR.Spatial
 {
     public class SliceManager : MonoBehaviour
     {
+        public bool slicesActive;
+        public bool controllerInsideSlice;
+        public ReferenceManager referenceManager;
+        public List<GraphSlice> slices = new List<GraphSlice>();
+        public VRTK_InteractableObject interactableObject;
+
         private SteamVR_TrackedObject rightController;
         private SteamVR_Controller.Device rdevice;
         private GameObject contour;
@@ -22,15 +29,10 @@ namespace CellexalVR.Spatial
         private bool dispersing;
         private Vector3 positionBeforeDispersing;
         private Quaternion rotationBeforeDispersing;
-        private VRTK_InteractableObject interactableObject;
-
-        public bool slicesActive;
-
-        public ReferenceManager referenceManager;
-        public List<GraphSlice> slices = new List<GraphSlice>();
 
         private void Start()
         {
+            referenceManager = GameObject.Find("InputReader").GetComponent<ReferenceManager>();
             rightController = referenceManager.rightController;
             startPosition = transform.position;
             _rigidBody = GetComponent<Rigidbody>();
@@ -212,19 +214,22 @@ namespace CellexalVR.Spatial
         {
             if (slicesActive == activate) return;
             slicesActive = activate;
+            GetComponentInChildren<SliceBoxActivator>().ToggleCollider(!activate);
             GetComponents<BoxCollider>().All(x => x.enabled = !activate);
-            // GetComponent<VRTK_InteractableObject>().isGrabbable = activate;
             if (!interactableObject)
             {
                 interactableObject = GetComponent<VRTK_InteractableObject>();
             }
 
-            interactableObject.isGrabbable = activate;
+            interactableObject.isGrabbable = !activate;
 
             foreach (GraphSlice gs in slices)
             {
+                GatherSlicesButton gatherSlicesButton = gs.GetComponentInChildren<GatherSlicesButton>(true);
+                gatherSlicesButton.SetButtonActivated(true);
+                gatherSlicesButton.sliceManager = this;
+                // gs.GetComponentInChildren<GatherSlicesButton>(true).TurnOn();//SetButtonActivated(activate);
                 gs.ActivateSlice(activate, move);
-
                 SliceManager manager = gs.GetComponent<SliceManager>();
                 if (manager)
                 {
@@ -236,18 +241,18 @@ namespace CellexalVR.Spatial
                 {
                     enabled = true;
                 }
-
             }
 
             if (activate)
             {
                 Destroy(_rigidBody);
-                Destroy(GetComponent<Collider>());
-                if (transform.parent != null) 
-                {
-                    transform.parent.GetComponent<SliceManager>().enabled = false;
-                    enabled = true;
-                }
+                // Destroy(GetComponent<Collider>());
+                Transform parentSliceTransform = transform.parent;
+                if (!parentSliceTransform) return;
+                SliceManager parentSlice = parentSliceTransform.GetComponent<SliceManager>();
+                if (!parentSlice) return;
+                parentSlice.enabled = false;
+                enabled = true;
             }
 
             else
@@ -255,6 +260,7 @@ namespace CellexalVR.Spatial
                 Rigidbody rigidbody = gameObject.GetComponent<Rigidbody>();
                 if (rigidbody == null)
                 {
+                    print("adding rigidbody");
                     rigidbody = gameObject.AddComponent<Rigidbody>();
                 }
 
@@ -264,12 +270,12 @@ namespace CellexalVR.Spatial
                 _rigidBody.drag = 10;
                 _rigidBody.angularDrag = 15;
                 ResetSlices();
-                if (transform.parent != null) 
-                {
-                    transform.parent.GetComponent<SliceManager>().enabled = true;
-                    enabled = false;
-                }
-
+                Transform parentSliceTransform = transform.parent;
+                if (!parentSliceTransform) return;
+                SliceManager parentSlice = parentSliceTransform.GetComponent<SliceManager>();
+                if (!parentSlice) return;
+                parentSlice.enabled = false;
+                enabled = false;
             }
         }
 

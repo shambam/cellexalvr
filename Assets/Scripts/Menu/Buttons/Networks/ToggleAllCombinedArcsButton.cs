@@ -20,7 +20,7 @@ namespace CellexalVR.Menu.Buttons.Networks
         protected override void ActionsAfterSliding()
         {
             if (networks == null) return;
-            var allArcsButton = referenceManager.arcsSubMenu.GetComponentInChildren<ToggleAllArcsButton>();
+            ToggleAllArcsButton allArcsButton = referenceManager.arcsSubMenu.GetComponentInChildren<ToggleAllArcsButton>();
             if (allArcsButton.CurrentState) allArcsButton.CurrentState = !currentState;
 
             foreach (NetworkCenter network in networks)

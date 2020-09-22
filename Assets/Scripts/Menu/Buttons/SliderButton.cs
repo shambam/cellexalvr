@@ -29,7 +29,7 @@ namespace CellexalVR.Menu.Buttons
             
         }
 
-        private void Start()
+        protected virtual void Start()
         {
             UpdateColors();
         }

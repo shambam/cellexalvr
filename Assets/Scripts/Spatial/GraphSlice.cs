@@ -24,12 +24,14 @@ namespace CellexalVR.Spatial
         public Texture2D[] textures;
         public Dictionary<int, int> textureWidths = new Dictionary<int, int>();
         public Dictionary<int, int> textureHeights = new Dictionary<int, int>();
+
         public int SliceNr
         {
             get { return sliceNr; }
             set { sliceNr = value; }
         }
-        public Vector3 sliceCoords = new Vector3();
+
+        public Vector3 sliceCoords;
         public Dictionary<string, Graph.GraphPoint> points = new Dictionary<string, Graph.GraphPoint>();
         public List<GameObject> LODGroupParents = new List<GameObject>();
         public Dictionary<int, List<GameObject>> lodGroupClusters = new Dictionary<int, List<GameObject>>();
@@ -37,7 +39,7 @@ namespace CellexalVR.Spatial
         public SpatialGraph spatialGraph;
 
         protected Graph graph;
-        
+
         private Vector3 originalPos;
         private Vector3 originalSc;
         private Quaternion originalRot;
@@ -158,6 +160,7 @@ namespace CellexalVR.Spatial
                 rigidbody.angularDrag = 15;
                 GetComponent<VRTK_InteractableObject>().isGrabbable = true;
                 sliceMode = true;
+
                 if (move)
                 {
                     Vector3 targetPos = sliceCoords;
@@ -171,6 +174,10 @@ namespace CellexalVR.Spatial
                 GetComponent<VRTK_InteractableObject>().isGrabbable = false;
                 Destroy(GetComponent<Rigidbody>());
                 sliceMode = false;
+                Slicer slicer = GetComponentInChildren<Slicer>(true);
+                slicer.gameObject.SetActive(false);
+                GetComponentInChildren<SliceBoxActivator>(true).ToggleCollider(false);
+                
             }
         }
 
@@ -217,12 +224,12 @@ namespace CellexalVR.Spatial
             StartCoroutine(
                 referenceManager.graphGenerator.SliceClusteringLOD(
                     referenceManager.graphGenerator.nrOfLODGroups, points, scale: scale));
-            
+
             while (referenceManager.graphGenerator.isCreating)
             {
                 yield return null;
             }
-            
+
             graph.points = points;
 
             if (referenceManager.graphGenerator.nrOfLODGroups > 1)
@@ -231,7 +238,7 @@ namespace CellexalVR.Spatial
                 {
                     gameObject.AddComponent<LODGroup>();
                 }
-            
+
                 referenceManager.graphGenerator.UpdateLODGroups(graph, slice: this);
             }
 
@@ -248,7 +255,7 @@ namespace CellexalVR.Spatial
             float xMin = points.Min(v => v.Value.Position.x);
             float yMin = points.Min(v => v.Value.Position.y);
             float zMin = points.Min(v => v.Value.Position.z);
-            
+
             var max = new Vector3(xMax, yMax, zMax);
             var min = new Vector3(xMin, yMin, zMin);
             var diff = max - min;
@@ -262,6 +269,10 @@ namespace CellexalVR.Spatial
             Slicer slicer = GetComponentInChildren<Slicer>(true);
             slicer.transform.localScale = ratio;
             slicer.transform.localPosition = mid;
+
+            SliceBoxActivator sba = GetComponentInChildren<SliceBoxActivator>();
+            sba.transform.localScale = ratio;
+            sba.transform.localPosition = mid;
 
             var menuScale = slicer.slicingMenuParent.transform.localScale;
             menuScale.y /= ratio.y;
@@ -281,7 +292,6 @@ namespace CellexalVR.Spatial
             }
 
             texture.Apply();
-
         }
 
         // spatialGraph.AddSlices();

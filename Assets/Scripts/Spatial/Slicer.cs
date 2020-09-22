@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using CellexalVR.AnalysisObjects;
+using CellexalVR.General;
 using CellexalVR.Menu.Buttons;
 using CellexalVR.Menu.Buttons.Slicing;
 using UnityEngine;
@@ -84,7 +85,7 @@ namespace CellexalVR.Spatial
                     if (sb.axis == axis) return;
                     sb.CurrentState = false;
                 }
-                
+
                 sliceGraphButton.SetButtonActivated(true);
             }
         }
@@ -134,20 +135,7 @@ namespace CellexalVR.Spatial
         public IEnumerator sliceAnimation(Vector3[] cutPositions, int axis)
         {
             sliceAnimationActive = true;
-
-            switch (axis)
-            {
-                case 0:
-                    plane.transform.localRotation = Quaternion.Euler(0, 90, 0);
-                    break;
-                case 1:
-                    plane.transform.localRotation = Quaternion.Euler(90, 0, 0);
-                    break;
-                default:
-                    plane.transform.localRotation = Quaternion.identity;
-                    break;
-            }
-
+            ActivatePlane(axis);
             float animationTime = 4.0f / cutPositions.Length;
             Vector3 bladePos = blade.transform.localPosition;
             Vector3 planePos = Vector3.zero; // plane.transform.localPosition;
@@ -155,7 +143,6 @@ namespace CellexalVR.Spatial
             Vector3 endPos = new Vector3(bladePos.x, -0.5f, bladePos.z);
             float speed = cutPositions.Length / 4f;
             float step = speed * Time.deltaTime;
-            plane.SetActive(true);
             for (int i = 0; i < cutPositions.Length; i++)
             {
                 float t = 0f;
@@ -179,6 +166,24 @@ namespace CellexalVR.Spatial
             sliceAnimationActive = false;
         }
 
+        public void ActivatePlane(int axis)
+        {
+            switch (axis)
+            {
+                case 0:
+                    plane.transform.localRotation = Quaternion.Euler(0, 90, 0);
+                    break;
+                case 1:
+                    plane.transform.localRotation = Quaternion.Euler(90, 0, 0);
+                    break;
+                default:
+                    plane.transform.localRotation = Quaternion.identity;
+                    break;
+            }
+
+            plane.SetActive(true);
+        }
+
 
         public Plane GetPlane()
         {
@@ -189,7 +194,7 @@ namespace CellexalVR.Spatial
         private void OnTriggerEnter(Collider other)
         {
             // controllerInside = true;
-            print($"slicer collider : {other.gameObject.name}" );
+            print($"slicer collider : {other.gameObject.name}");
         }
 
         private void OnTriggerExit(Collider other)

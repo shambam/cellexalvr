@@ -17,7 +17,6 @@ namespace CellexalVR.Spatial
         public Slicer slicer;
         public SpatialGraph spatialGraph;
 
-
         private Graph graph;
         private GraphGenerator graphGenerator;
         private bool removingOldSlices;
@@ -60,6 +59,11 @@ namespace CellexalVR.Spatial
             if (Input.GetKeyDown(KeyCode.M))
             {
                 StartCoroutine(SliceGraph(activateSlices: true));
+            }
+
+            if (Input.GetKeyDown(KeyCode.N))
+            {
+                GetComponent<Graph>().ResetPosition();
             }
 
             if (Input.GetKeyDown(KeyCode.P))
@@ -130,9 +134,15 @@ namespace CellexalVR.Spatial
                     sliceManager = gameObject.AddComponent<SliceManager>();
                 }
 
+                GetComponentInChildren<SliceBoxActivator>().sliceManager = sliceManager;
+
                 sliceManager.referenceManager = referenceManager;
-                sls.ForEach(s => s.sliceCoords[axis] = -0.5f + s.SliceNr * (1f / (sls.Count - 1)));
-                StartCoroutine(BuildSpat(sls.ToArray()));
+                foreach (GraphSlice s in sls)
+                {
+                    s.sliceCoords[axis] = -0.5f + s.SliceNr * (1f / (sls.Count - 1));
+
+                }
+                StartCoroutine(BuildSpatialSlices(sls.ToArray()));
                 while (sls.Any(x => x.buildingSlice) || slicer.sliceAnimationActive)
                 {
                     yield return null;
@@ -145,6 +155,8 @@ namespace CellexalVR.Spatial
                     Graph g = gs.GetComponent<Graph>();
                     childSlices.Add(g);
                     gs.transform.parent = sliceManager.transform;
+                    gs.transform.localScale = Vector3.one;
+                    gs.transform.localRotation = Quaternion.identity;
                     sliceManager.slices.Add(gs);
 
                     int m = 0;
@@ -451,7 +463,7 @@ namespace CellexalVR.Spatial
         }
 
 
-        public IEnumerator BuildSpat(GraphSlice[] slices)
+        public IEnumerator BuildSpatialSlices(GraphSlice[] slices)
         {
             int sliceNr = 0;
             foreach (GraphSlice slice in slices)

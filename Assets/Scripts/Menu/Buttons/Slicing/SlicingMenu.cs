@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Linq;
+using CellexalVR.General;
 using CellexalVR.Spatial;
+using Spatial;
 using UnityEngine;
 
 namespace CellexalVR.Menu.Buttons.Slicing
@@ -9,6 +12,8 @@ namespace CellexalVR.Menu.Buttons.Slicing
         public GameObject automaticModeMenu;
         public GameObject manualModeMenu;
         public GameObject freeHandModeMenu;
+        public ToggleAutoSliceAxisButton[] axisButtons = new ToggleAutoSliceAxisButton[3];
+
 
         public enum SliceMode
         {
@@ -53,6 +58,26 @@ namespace CellexalVR.Menu.Buttons.Slicing
                     throw new ArgumentOutOfRangeException(nameof(modeToActivate), modeToActivate, null);
             }
         }
+
+        public void SetSliceAxis(int axis)
+        {
+            if (currentMode != SliceMode.Automatic) return;
+            graphSlicer.slicer.Axis = axis;
+
+            if (axisButtons.All(x => !x.CurrentState))
+            {
+                graphSlicer.slicer.Axis = -1;
+                GetComponentInChildren<SliceGraphButton>(true).SetButtonActivated(false);
+                graphSlicer.slicer.plane.SetActive(false);
+            }
+            
+            else
+            {
+                GetComponentInChildren<SliceGraphButton>(true).SetButtonActivated(true);
+                graphSlicer.slicer.ActivatePlane(axis);
+            }
+        }
+
 
         public void SliceGraph()
         {

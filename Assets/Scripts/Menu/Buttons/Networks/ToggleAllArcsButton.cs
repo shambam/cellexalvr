@@ -1,6 +1,7 @@
 ﻿using CellexalVR.AnalysisObjects;
 using CellexalVR.General;
 using UnityEngine;
+
 namespace CellexalVR.Menu.Buttons.Networks
 {
     /// <summary>
@@ -20,10 +21,12 @@ namespace CellexalVR.Menu.Buttons.Networks
             if (networks == null) return;
             // foreach (NetworkCenter network in networks)
             // {
-                // network.SetCombinedArcsVisible(false);
-                // network.SetArcsVisible(currentState);
-                // referenceManager.multiuserMessageSender.SendMessageSetArcsVisible(currentState, network.name);
+            // network.SetCombinedArcsVisible(false);
+            // network.SetArcsVisible(currentState);
+            // referenceManager.multiuserMessageSender.SendMessageSetArcsVisible(currentState, network.name);
             // }
+            ToggleAllCombinedArcsButton allCombArcsButton = referenceManager.arcsSubMenu.GetComponentInChildren<ToggleAllCombinedArcsButton>();
+            if (allCombArcsButton.CurrentState) allCombArcsButton.CurrentState = !currentState;
             referenceManager.arcsSubMenu.ToggleAllArcs(currentState);
             referenceManager.multiuserMessageSender.SendMessageToggleAllArcs(currentState);
         }
@@ -38,6 +41,5 @@ namespace CellexalVR.Menu.Buttons.Networks
             this.networks = new NetworkCenter[networks.Length];
             networks.CopyTo(this.networks, 0);
         }
-
     }
 }

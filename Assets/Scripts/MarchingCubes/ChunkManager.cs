@@ -10,8 +10,8 @@ namespace CellexalVR.MarchingCubes
     public class ChunkManager : MonoBehaviour
     {
         public Transform sphereHolder;
-        public static int chunkResolution = 8;
-        public static int size = 8;
+        public static int chunkResolution = 9;
+        public static int size = 9;
         public static int n = (ChunkManager.chunkResolution - 1) * size + 1;
         public static bool addVertexSpheres = false;
         public static bool addDensitySpheres = false;

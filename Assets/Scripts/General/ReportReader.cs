@@ -5,8 +5,8 @@ using System.Windows.Forms;
 using CellexalVR.DesktopUI;
 using CellexalVR.Extensions;
 using UnityEngine;
-using HtmlAgilityPack;
-using HtmlDocument = HtmlAgilityPack.HtmlDocument;
+// using HtmlAgilityPack;
+// using HtmlDocument = HtmlAgilityPack.HtmlDocument;
 
 namespace CellexalVR.General
 {
@@ -59,57 +59,57 @@ namespace CellexalVR.General
         /// <param name="reportFolder"></param>
         private void CreateCommandFileFromHtmlReport(string reportPath, string dataFolderPart, string reportFolder)
         {
-            HtmlDocument doc = new HtmlDocument();
-            doc.Load(@reportPath);
-            HtmlNodeCollection pnodes = doc.DocumentNode.SelectNodes("//p");
-            HtmlNodeCollection h2nodes = doc.DocumentNode.SelectNodes("//h2");
-            IEnumerable<HtmlNode> nodes = pnodes.Union(h2nodes);
-
-            List<string> relevantLines = new List<string>();
-            foreach (HtmlNode node in nodes)
-            {
-                string line = node.InnerHtml;
-                if (line.Contains("Analysis of data:"))
-                {
-                    string commandLine = "rps" + line.Split(':')[1] + " "
-                                         + (CellexalUser.UserSpecificFolder + "/" + dataFolderPart).FixFilePath();
-                    relevantLines.Add(commandLine);
-                }
-                else if (line.Contains("Network from Saved Selection"))
-                {
-                    string[] lineWords = line.Split(null);
-                    int selectionIndex = int.Parse(lineWords[lineWords.Length - 1]) - 1;
-                    string commandLine = "rsf " + (CellexalUser.UserSpecificFolder +
-                                                   "/" + dataFolderPart +
-                                                   "/" + reportFolder +
-                                                   "/selection" + selectionIndex).FixFilePath() + ".txt " +
-                                         "true";
-                    if (relevantLines.Contains(commandLine)) continue;
-                    relevantLines.Add(commandLine);
-                    relevantLines.Add("confirmselection");
-                    relevantLines.Add("gn");
-                }
-                else if (line.Contains("Heatmap From Saved Selection"))
-                {
-                    string[] lineWords = line.Split(null);
-                    int selectionIndex = int.Parse(lineWords[lineWords.Length - 1]) - 1;
-                    string commandLine = "rsf " + (CellexalUser.UserSpecificFolder +
-                                                   "/" + dataFolderPart +
-                                                   "/" + reportFolder +
-                                                   "/selection" + selectionIndex).FixFilePath() + ".txt " +
-                                         "true";
-                    ;
-                    if (relevantLines.Contains(commandLine)) continue;
-                    relevantLines.Add(commandLine);
-                    relevantLines.Add("confirmselection");
-                    relevantLines.Add("gh");
-                }
-            }
-
-            string savePath =
-                (CellexalUser.UserSpecificFolder + "/" + dataFolderPart + "/" + reportFolder + "/command_file.txt")
-                .FixFilePath();
-            CompileCommandFile(relevantLines, savePath);
+            // HtmlDocument doc = new HtmlDocument();
+            // doc.Load(@reportPath);
+            // HtmlNodeCollection pnodes = doc.DocumentNode.SelectNodes("//p");
+            // HtmlNodeCollection h2nodes = doc.DocumentNode.SelectNodes("//h2");
+            // IEnumerable<HtmlNode> nodes = pnodes.Union(h2nodes);
+            //
+            // List<string> relevantLines = new List<string>();
+            // foreach (HtmlNode node in nodes)
+            // {
+            //     string line = node.InnerHtml;
+            //     if (line.Contains("Analysis of data:"))
+            //     {
+            //         string commandLine = "rps" + line.Split(':')[1] + " "
+            //                              + (CellexalUser.UserSpecificFolder + "/" + dataFolderPart).FixFilePath();
+            //         relevantLines.Add(commandLine);
+            //     }
+            //     else if (line.Contains("Network from Saved Selection"))
+            //     {
+            //         string[] lineWords = line.Split(null);
+            //         int selectionIndex = int.Parse(lineWords[lineWords.Length - 1]) - 1;
+            //         string commandLine = "rsf " + (CellexalUser.UserSpecificFolder +
+            //                                        "/" + dataFolderPart +
+            //                                        "/" + reportFolder +
+            //                                        "/selection" + selectionIndex).FixFilePath() + ".txt " +
+            //                              "true";
+            //         if (relevantLines.Contains(commandLine)) continue;
+            //         relevantLines.Add(commandLine);
+            //         relevantLines.Add("confirmselection");
+            //         relevantLines.Add("gn");
+            //     }
+            //     else if (line.Contains("Heatmap From Saved Selection"))
+            //     {
+            //         string[] lineWords = line.Split(null);
+            //         int selectionIndex = int.Parse(lineWords[lineWords.Length - 1]) - 1;
+            //         string commandLine = "rsf " + (CellexalUser.UserSpecificFolder +
+            //                                        "/" + dataFolderPart +
+            //                                        "/" + reportFolder +
+            //                                        "/selection" + selectionIndex).FixFilePath() + ".txt " +
+            //                              "true";
+            //         ;
+            //         if (relevantLines.Contains(commandLine)) continue;
+            //         relevantLines.Add(commandLine);
+            //         relevantLines.Add("confirmselection");
+            //         relevantLines.Add("gh");
+            //     }
+            // }
+            //
+            // string savePath =
+            //     (CellexalUser.UserSpecificFolder + "/" + dataFolderPart + "/" + reportFolder + "/command_file.txt")
+            //     .FixFilePath();
+            // CompileCommandFile(relevantLines, savePath);
         }
 
         private static void CompileCommandFile(List<string> linesToCompile, string path)

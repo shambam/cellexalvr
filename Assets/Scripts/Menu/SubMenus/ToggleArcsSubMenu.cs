@@ -175,7 +175,6 @@ namespace CellexalVR.Menu.SubMenus
 
                 ToggleArcsButton lastButton = toggleArcButtonList[toggleArcButtonList.Count / 2 - 1];
                 lastButton.network.SetCombinedArcsVisible(false);
-                GetComponentInChildren<ToggleAllCombinedArcsButton>().CurrentState = false;
                 // referenceManager.multiuserMessageSender.SendMessageSetArcsVisible(toggle, lastButton.network.name);
             }
 

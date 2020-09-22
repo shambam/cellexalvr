@@ -28,10 +28,6 @@ namespace CellexalVR.Spatial
 
         public bool slicesActive;
 
-        // public List<Graph> slices = new List<Graph>();
-        // public Dictionary<string, GraphPoint> points = new Dictionary<string, GraphPoint>();
-        // public List<Tuple<string, Vector3>> points = new List<Tuple<string, Vector3>>();
-        public GameObject chunkManagerPrefab;
         public GameObject contourParent;
         public Material opaqueMat;
         public ReferenceManager referenceManager;
@@ -159,8 +155,8 @@ namespace CellexalVR.Spatial
         public IEnumerator CreateMesh()
         {
             string path = Directory.GetCurrentDirectory() + @"\Data\" + CellexalUser.DataSourceFolder + @"\" +
-                          "slice.mds";
-            ChunkManager chunkManager = GameObject.Instantiate(chunkManagerPrefab).GetComponent<ChunkManager>();
+                          "slice_coords.mds";
+            ChunkManager chunkManager = GameObject.Instantiate(referenceManager.graphGenerator.chunkManagerPrefab).GetComponent<ChunkManager>();
             yield return null;
             int i = 0;
             using (StreamReader sr = new StreamReader(path))
@@ -175,12 +171,17 @@ namespace CellexalVR.Spatial
                     int y = (int) float.Parse(coords[2]);
                     int z = (int) float.Parse(coords[3]);
                     chunkManager.addDensity(x, y, z, 1);
-
+            
                     //chunkManager.addDensity(x, y, z + (1 % z), 1);
                     //chunkManager.addDensity(x, y, z + z * (1 % z), 1);
                     //chunkManager.addDensity(x, y, z + z * (1 % z), 1);
                 }
             }
+            // foreach (GraphPoint gp in GetComponent<Graph>().points.Values)
+            // {
+            //     chunkManager.addDensity((int)gp.WorldPosition.x, (int)gp.WorldPosition.y, (int)gp.WorldPosition.z, 1);
+            // }
+            
             //print(i);
 
             chunkManager.toggleSurfaceLevelandUpdateCubes(0);
@@ -192,7 +193,7 @@ namespace CellexalVR.Spatial
                 mf.mesh.RecalculateNormals();
             }
 
-            contour = Instantiate(contourParent);
+            contour = Instantiate(referenceManager.graphGenerator.contourParent);
             chunkManager.transform.parent = contour.transform;
             contour.transform.localScale = Vector3.one * 0.15f;
             BoxCollider bc = contour.AddComponent<BoxCollider>();
@@ -210,7 +211,7 @@ namespace CellexalVR.Spatial
             //string path = Directory.GetCurrentDirectory() + @"\Data\" + CellexalUser.DataSourceFolder + @"\" + "gene1triang" + ".hull";
             string vertPath = Directory.GetCurrentDirectory() + @"\Data\" + CellexalUser.DataSourceFolder + @"\" +
                               geneName + ".mesh";
-            ChunkManager chunkManager = GameObject.Instantiate(chunkManagerPrefab).GetComponent<ChunkManager>();
+            ChunkManager chunkManager = GameObject.Instantiate(referenceManager.graphGenerator.chunkManagerPrefab).GetComponent<ChunkManager>();
             chunkManager.gameObject.name = geneName;
             yield return null;
             using (StreamReader sr = new StreamReader(vertPath))
