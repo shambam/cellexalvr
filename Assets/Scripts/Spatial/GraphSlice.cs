@@ -24,6 +24,7 @@ namespace CellexalVR.Spatial
         public Texture2D[] textures;
         public Dictionary<int, int> textureWidths = new Dictionary<int, int>();
         public Dictionary<int, int> textureHeights = new Dictionary<int, int>();
+        public GraphSlice parentSlice;
 
         public int SliceNr
         {
@@ -51,6 +52,7 @@ namespace CellexalVR.Spatial
         private bool grabbing;
         private int flipped = 1;
         private int sliceNr;
+        private Slicer slicer;
 
 
         private void Start()
@@ -61,6 +63,7 @@ namespace CellexalVR.Spatial
             originalPos = Vector3.zero; //transform.localPosition;
             originalRot = transform.localRotation;
             originalSc = transform.localScale;
+            slicer = GetComponentInChildren<Slicer>(true);
             //GetComponent<Rigidbody>().drag = Mathf.Infinity;
             //GetComponent<Rigidbody>().angularDrag = Mathf.Infinity;
         }
@@ -163,35 +166,40 @@ namespace CellexalVR.Spatial
 
                 if (move)
                 {
-                    Vector3 targetPos = sliceCoords;
                     // transform.TransformPoint(targetPos);
                     float time = 1f;
-                    StartCoroutine(MoveSlice(targetPos.x, targetPos.y, targetPos.z, time));
+                    StartCoroutine(MoveSlice(sliceCoords, time));
                 }
             }
+
             else
             {
                 GetComponent<VRTK_InteractableObject>().isGrabbable = false;
                 Destroy(GetComponent<Rigidbody>());
                 sliceMode = false;
-                Slicer slicer = GetComponentInChildren<Slicer>(true);
                 slicer.gameObject.SetActive(false);
                 GetComponentInChildren<SliceBoxActivator>(true).ToggleCollider(false);
-                
             }
         }
 
-        public IEnumerator MoveSlice(float x, float y, float z, float animationTime, bool rotate = false)
+        public IEnumerator MoveSlice(Vector3 targetPos, float animationTime, bool lookAtCamera = false,
+            bool rotate = false,
+            Quaternion targetRot = default)
         {
             Vector3 startPos = transform.localPosition;
-            Vector3 targetPosition = new Vector3(x, y, z);
+            Quaternion startRot = transform.localRotation;
             float t = 0f;
             while (t < animationTime)
             {
                 float progress = Mathf.SmoothStep(0, animationTime, t);
-                transform.localPosition = Vector3.Lerp(startPos, targetPosition, progress);
-                t += (Time.deltaTime / animationTime);
+                transform.localPosition = Vector3.Lerp(startPos, targetPos, progress);
                 if (rotate)
+                {
+                    transform.localRotation = Quaternion.Lerp(startRot, targetRot, progress);
+                }
+
+                t += (Time.deltaTime / animationTime);
+                if (lookAtCamera)
                 {
                     transform.LookAt(referenceManager.headset.transform);
                 }
@@ -263,10 +271,8 @@ namespace CellexalVR.Spatial
             var ratio = new Vector3(diff.x / gDiff.x, diff.y / gDiff.y,
                 diff.z / gDiff.z) + Vector3.one * 0.1f;
 
-
             var mid = (min + max) / 2;
 
-            Slicer slicer = GetComponentInChildren<Slicer>(true);
             slicer.transform.localScale = ratio;
             slicer.transform.localPosition = mid;
 
@@ -294,21 +300,56 @@ namespace CellexalVR.Spatial
             texture.Apply();
         }
 
-        // spatialGraph.AddSlices();
-        // if (spatialGraph.slices.Count > 1)
-        // {
-        //     for (int i = 0; i < spatialGraph.slices.Count; i++)
-        //     {
-        //         float pos = -0.5f + i * (1f / (spatialGraph.slices.Count - 1));
-        //         GraphSlice slice = spatialGraph.slices[i].GetComponent<GraphSlice>();
-        //         slice.sliceCoords[axis] = pos;
-        //         // print($"name: {slice.gameObject.name}, pos: {pos}");
-        //     }
-        // }
+        public void MoveToReference()
+        {
+            GetComponent<VRTK_InteractableObject>().isGrabbable = false;
+            Destroy(GetComponent<Rigidbody>());
+            gameObject.transform.parent = referenceManager.brainModel.transform;
+            Vector3 targetPosition = referenceManager.brainModel.startPosition;
+            StartCoroutine(MoveSlice(targetPosition, 1, false, true, Quaternion.Euler(0, 90, -180)));
+            transform.localScale = Vector3.one * 0.82f;
+            slicer.gameObject.SetActive(false);
+            GetComponent<SliceManager>().slicesActive = true;
+        }
+
+        public void MoveToParentSlice()
+        {
+            // GetComponent<VRTK_InteractableObject>().isGrabbable = true;
+            // if (GetComponent<Rigidbody>() == null)
+            // {
+            //     var rigidbody = gameObject.AddComponent<Rigidbody>();
+            //     rigidbody.useGravity = false;
+            //     rigidbody.drag = 10;
+            //     rigidbody.angularDrag = 15;
+            // }
+
+            if (parentSlice != null)
+            {
+                SliceManager parentSliceManager = parentSlice.GetComponent<SliceManager>();
+                foreach (GraphSlice slice in parentSliceManager.slices)
+                {
+                    slice.transform.parent = parentSlice.transform;
+                }
+
+                parentSliceManager.ActivateSlices(false);
+            }
+
+            else
+            {
+                transform.parent = null;
+                GetComponent<SliceManager>().ActivateSlices(false);
+            }
 
 
-        // var point = spatialGraph.points[spatialGraph.points.Count / 2];
-        // gp = referenceManager.graphManager.FindGraphPoint("Slice20", point.Item1);
-        // print($"point: {gp.WorldPosition}, slicer: {slicer.transform.position}");
+            transform.localScale = Vector3.one;
+
+
+            // StartCoroutine(MoveToGraphCoroutine());
+            // transform.localPosition = Vector3.zero;
+            // transform.localRotation = Quaternion.identity;
+            // transform.localScale = Vector3.one;
+            //
+            // slicer.gameObject.SetActive(false);
+        }
     }
 }

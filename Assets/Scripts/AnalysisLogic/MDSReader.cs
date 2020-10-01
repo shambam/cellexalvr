@@ -288,11 +288,15 @@ namespace CellexalVR.AnalysisLogic
             }
 
             Graph graph = referenceManager.graphGenerator.CreateGraph(GraphGenerator.GraphType.SPATIAL);
+            // string[] regexResult = Regex.Split(file, @"[\\/]");
+            // string graphFileName = regexResult[regexResult.Length - 1];
+            // graph.GraphName = graphFileName.Substring(0, graphFileName.Length - 4);
+            graph.GraphName = "Slice0";
             SpatialGraph spatialGraph = graph.gameObject.AddComponent<SpatialGraph>();
             graph.gameObject.layer = LayerMask.NameToLayer("GraphLayer");
             spatialGraph.referenceManager = referenceManager;
             GraphSlice graphSlice = graph.GetComponent<GraphSlice>();
-            graphSlice.gameObject.name = "Slice0";
+            // graphSlice.gameObject.name = "Slice0";
             GraphSlicer graphSlicer = graphSlice.GetComponent<GraphSlicer>();
             graphSlicer.spatialGraph = spatialGraph;
             graphSlice.spatialGraph = spatialGraph;

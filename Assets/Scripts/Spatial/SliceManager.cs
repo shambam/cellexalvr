@@ -158,7 +158,7 @@ namespace CellexalVR.Spatial
             {
                 gs = slices[i].GetComponent<GraphSlice>();
                 Vector3 pos = slicePositions[i];
-                StartCoroutine(gs.MoveSlice(pos.x, pos.y, pos.z, animationTime, true));
+                StartCoroutine(gs.MoveSlice(pos, animationTime, true));
                 // yield return new WaitForSeconds(0.001f);
             }
 

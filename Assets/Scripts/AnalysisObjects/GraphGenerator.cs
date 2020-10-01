@@ -134,6 +134,12 @@ namespace CellexalVR.AnalysisObjects
                 //meshToUse = graphpointStandardQLargeSzMesh;
                 meshToUse = graphpointLowQLargeSzMesh;
             }
+            
+            // else if (type == GraphType.SPATIAL)
+            // {
+            //     meshToUse = graphpointStandardQLargeSzMesh;
+            // }
+            
             else if (CellexalConfig.Config.GraphPointQuality == "Standard"
                      && CellexalConfig.Config.GraphPointSize == "Standard")
             {

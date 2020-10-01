@@ -1,4 +1,6 @@
-﻿
+﻿using CellexalVR.Spatial;
+using Spatial;
+
 namespace CellexalVR.Menu.Buttons.Slicing
 {
     public class SliceGraphButton : CellexalButton
@@ -18,6 +20,11 @@ namespace CellexalVR.Menu.Buttons.Slicing
         {
             slicingMenu.SliceGraph();
 
+            slicingMenu.GetComponentInChildren<ToggleManualSelectionSliceButton>(true).CurrentState = false;
+            slicingMenu.GetComponentInChildren<ToggleManualSlicePlaneButton>(true).CurrentState = false;
+
+
+            // referenceManager.controllerModelSwitcher.TurnOffActiveTool(true);
             // TODO: Add multi-user functionality.
         }
 

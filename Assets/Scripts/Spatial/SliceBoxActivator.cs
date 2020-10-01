@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using CellexalVR.General;
+using CellexalVR.Interaction;
 using CellexalVR.Spatial;
 using UnityEngine;
 
@@ -61,7 +62,8 @@ public class SliceBoxActivator : MonoBehaviour
     private void Update()
     {
         device = SteamVR_Controller.Input((int) rightController.index);
-        if (controllerInside && device.GetPressDown(SteamVR_Controller.ButtonMask.Trigger))
+        if (controllerInside && device.GetPressDown(SteamVR_Controller.ButtonMask.Trigger)
+                             && referenceManager.controllerModelSwitcher.ActualModel != ControllerModelSwitcher.Model.SelectionTool)
         {
             // controllerInside = false;
             meshRenderer.enabled = false;

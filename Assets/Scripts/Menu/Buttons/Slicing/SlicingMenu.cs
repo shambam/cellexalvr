@@ -45,14 +45,10 @@ namespace CellexalVR.Menu.Buttons.Slicing
                     automaticModeMenu.SetActive(true);
                     manualModeMenu.SetActive(false);
                     break;
+                case SliceMode.Freehand:
                 case SliceMode.Manual:
                     manualModeMenu.SetActive(true);
                     automaticModeMenu.SetActive(false);
-                    break;
-                case SliceMode.Freehand:
-                    freeHandModeMenu.SetActive(true);
-                    automaticModeMenu.SetActive(false);
-                    manualModeMenu.SetActive(false);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(modeToActivate), modeToActivate, null);
@@ -84,14 +80,15 @@ namespace CellexalVR.Menu.Buttons.Slicing
             switch (currentMode)
             {
                 case SliceMode.Automatic:
-                    StartCoroutine(graphSlicer.SliceGraph(automatic: true, axis: graphSlicer.slicer.Axis, true));
+                    StartCoroutine(graphSlicer.SliceGraph(currentMode, axis: graphSlicer.slicer.Axis, true));
                     break;
                 case SliceMode.Manual:
-                    StartCoroutine(graphSlicer.SliceGraph(false, 2, true));
-                    break;
-                case SliceMode.None:
+                    StartCoroutine(graphSlicer.SliceGraph(currentMode, 2, true));
                     break;
                 case SliceMode.Freehand:
+                    StartCoroutine(graphSlicer.SliceGraph(currentMode, 2, true));
+                    break;
+                case SliceMode.None:
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

@@ -4,9 +4,9 @@ namespace CellexalVR.Menu.Buttons.Slicing
 {
     public class GatherSlicesButton : CellexalButton
     {
-        protected override string Description => "Gather Slices to Parent";
-
+        public bool toggle;
         public SliceManager sliceManager;
+        protected override string Description => toggle ? "Disperse" : "Gather" + " split slices together";
 
         private void Start()
         {
@@ -18,8 +18,7 @@ namespace CellexalVR.Menu.Buttons.Slicing
 
         public override void Click()
         {
-            sliceManager.ActivateSlices(false);
-
+            sliceManager.ActivateSlices(toggle);
             // TODO: Add multi-user functionality.
         }
 

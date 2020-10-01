@@ -6,6 +6,8 @@ using System.Runtime.Remoting;
 using CellexalVR.AnalysisLogic;
 using CellexalVR.AnalysisObjects;
 using CellexalVR.General;
+using CellexalVR.Menu.Buttons.Slicing;
+using Spatial;
 using UnityEngine;
 using Valve.VR.InteractionSystem;
 
@@ -48,17 +50,17 @@ namespace CellexalVR.Spatial
             if (slicer == null || !slicer.gameObject.activeSelf) return;
             if (Input.GetKeyDown(KeyCode.K))
             {
-                StartCoroutine(SliceGraph(true, 0, activateSlices: true));
+                StartCoroutine(SliceGraph(SlicingMenu.SliceMode.Automatic, 0, activateSlices: true));
             }
 
             if (Input.GetKeyDown(KeyCode.L))
             {
-                StartCoroutine(SliceGraph(true, 1, activateSlices: true));
+                StartCoroutine(SliceGraph(SlicingMenu.SliceMode.Automatic, 1, activateSlices: true));
             }
 
             if (Input.GetKeyDown(KeyCode.M))
             {
-                StartCoroutine(SliceGraph(activateSlices: true));
+                StartCoroutine(SliceGraph(SlicingMenu.SliceMode.Automatic, activateSlices: true));
             }
 
             if (Input.GetKeyDown(KeyCode.N))
@@ -70,7 +72,7 @@ namespace CellexalVR.Spatial
             {
                 if (slicerInside)
                 {
-                    StartCoroutine(SliceGraph(false, activateSlices: true));
+                    StartCoroutine(SliceGraph(SlicingMenu.SliceMode.Manual, activateSlices: true));
                 }
             }
         }
@@ -92,7 +94,7 @@ namespace CellexalVR.Spatial
         }
 
 
-        public IEnumerator SliceGraph(bool automatic = true, int axis = 2, bool activateSlices = false)
+        public IEnumerator SliceGraph(SlicingMenu.SliceMode sliceMode, int axis = 2, bool activateSlices = false)
         {
             GC.Collect();
             Resources.UnloadUnusedAssets();
@@ -115,16 +117,22 @@ namespace CellexalVR.Spatial
 
             List<GraphSlice> sls = new List<GraphSlice>();
 
-            if (automatic)
+            switch (sliceMode)
             {
-                sls = AutoDividePointsIntoSlices(slice.points, axis);
+                case SlicingMenu.SliceMode.Automatic:
+                    sls = AutoDividePointsIntoSlices(slice.points, axis);
+                    break;
+                case SlicingMenu.SliceMode.Manual:
+                    sls = ManuallyDividePointsIntoSections(slice.points);
+                    break;
+                case SlicingMenu.SliceMode.Freehand:
+                    sls = DividePointsBySelection(slice.points);
+                    break;
+                case SlicingMenu.SliceMode.None:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(sliceMode), sliceMode, null);
             }
-
-            else
-            {
-                sls = ManuallyDividePointsIntoSections(slice.points);
-            }
-
 
             if (sls.All(x => x.points.Count > 0))
             {
@@ -140,14 +148,16 @@ namespace CellexalVR.Spatial
                 foreach (GraphSlice s in sls)
                 {
                     s.sliceCoords[axis] = -0.5f + s.SliceNr * (1f / (sls.Count - 1));
-
+                    s.parentSlice = GetComponent<GraphSlice>();
                 }
+
                 StartCoroutine(BuildSpatialSlices(sls.ToArray()));
                 while (sls.Any(x => x.buildingSlice) || slicer.sliceAnimationActive)
                 {
                     yield return null;
                 }
 
+                
                 RemoveOldSlice();
                 for (int i = 0; i < sls.Count; i++)
                 {
@@ -369,6 +379,73 @@ namespace CellexalVR.Spatial
             return slices;
         }
 
+        private List<GraphSlice> DividePointsBySelection(Dictionary<string, Graph.GraphPoint> points)
+        {
+            referenceManager.selectionManager.ConfirmSelection();
+            List<GraphSlice> slices = new List<GraphSlice>();
+            List<Graph.GraphPoint> currrentSelection = referenceManager.selectionManager.GetLastSelection();
+
+            if (currrentSelection.Count == 0 || currrentSelection.Count == points.Count)
+            {
+                slices.Add(new GraphSlice());
+                slices.Add(new GraphSlice());
+                return (slices);
+            }
+
+            GraphSlice slice1 = referenceManager.graphGenerator.CreateGraph(GraphGenerator.GraphType.SPATIAL)
+                .GetComponent<GraphSlice>();
+
+            slice1.spatialGraph = spatialGraph;
+            slice1.referenceManager = referenceManager;
+
+            slice1.transform.parent = spatialGraph.transform;
+
+            GraphSlice graphSlice = GetComponent<GraphSlice>();
+            slice1.SliceNr = graphSlice.SliceNr;
+            slice1.gameObject.name = gameObject.name + "_" + graphSlice.SliceNr;
+
+            slice1.transform.position = transform.position;
+            slice1.transform.localRotation = Quaternion.identity;
+
+
+            int currentGroup;
+            int prevGroup = -1;
+            GraphSlice currentSlice = slice1;
+            List<Graph.GraphPoint> gps = points.Values.ToList();
+            gps.Sort((x, y) => x.Group.CompareTo(y.Group));
+            foreach (Graph.GraphPoint gp in gps)
+            {
+                currentGroup = gp.Group;
+                if (currentGroup != prevGroup)
+                {
+                    GraphSlice slice = referenceManager.graphGenerator.CreateGraph(GraphGenerator.GraphType.SPATIAL)
+                        .GetComponent<GraphSlice>();
+                    slice.spatialGraph = spatialGraph;
+                    slice.referenceManager = referenceManager;
+                    slice.transform.parent = spatialGraph.transform;
+                    slice.SliceNr = graphSlice.SliceNr + 1;
+                    slice.GetComponent<Graph>().GraphName = gameObject.name + "_" + (graphSlice.SliceNr + 1);
+                    slice.transform.position = transform.position;
+                    slice.transform.localRotation = Quaternion.identity;
+                    currentSlice = slice;
+                    slices.Add(slice);
+                }
+
+                currentSlice.points.Add(gp.Label, gp);
+                prevGroup = gp.Group;
+            }
+
+            // if (slice1.points.Count == 0 || slice2.points.Count == 0)
+            // {
+            //     Destroy(slice1.gameObject);
+            //     Destroy(slice2.gameObject);
+            // }
+
+            slices.Add(slice1);
+
+            return slices;
+        }
+
         private List<GraphSlice> ManuallyDividePointsIntoSections(
             Dictionary<string, Graph.GraphPoint> points)
         {
@@ -390,9 +467,9 @@ namespace CellexalVR.Spatial
 
             GraphSlice graphSlice = GetComponent<GraphSlice>();
             slice1.SliceNr = graphSlice.SliceNr;
-            slice1.gameObject.name = gameObject.name + "_" + graphSlice.SliceNr;
+            slice1.GetComponent<Graph>().GraphName = gameObject.name + "_" + graphSlice.SliceNr;
             slice2.SliceNr = graphSlice.SliceNr + 1;
-            slice2.gameObject.name = gameObject.name + "_" + (graphSlice.SliceNr + 1);
+            slice2.GetComponent<Graph>().GraphName = gameObject.name + "_" + (graphSlice.SliceNr + 1);
 
             slice1.transform.position = slice2.transform.position = transform.position;
             slice1.transform.localRotation = slice2.transform.localRotation = Quaternion.identity;

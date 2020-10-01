@@ -61,7 +61,7 @@ namespace CellexalVR.Spatial
 
         public void SliceGraph()
         {
-            StartCoroutine(graphSlicer.SliceGraph(Automatic, axis, true));
+            StartCoroutine(graphSlicer.SliceGraph(SlicingMenu.SliceMode.Automatic, axis, true));
         }
 
         public void ToggleManualSlicer(bool toggle)

@@ -2,6 +2,7 @@
 using CellexalVR.Menu.Buttons;
 using CellexalVR.Menu.Buttons.Slicing;
 using CellexalVR.SceneObjects;
+using Spatial;
 using UnityEngine;
 
 namespace CellexalVR.Spatial
