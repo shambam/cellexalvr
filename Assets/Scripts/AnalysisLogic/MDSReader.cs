@@ -63,13 +63,14 @@ namespace CellexalVR.AnalysisLogic
                     yield return null;
                 }
 
+                referenceManager.pointSpawner.positions.Clear();
                 // TODO: Make a more robust way of deciding if it should be loaded as a spatial graph.
-                if (file.Contains("slice"))
-                {
-                    StartCoroutine(ReadSpatialMDSFiles(file));
-                    referenceManager.graphGenerator.isCreating = true;
-                    continue;
-                }
+                // if (file.Contains("slice"))
+                // {
+                //     StartCoroutine(ReadSpatialMDSFiles(file));
+                //     referenceManager.graphGenerator.isCreating = true;
+                //     continue;
+                // }
 
                 Graph combGraph = referenceManager.graphGenerator.CreateGraph(type);
                 // more_cells newGraph.GetComponent<GraphInteract>().isGrabbable = false;
@@ -146,6 +147,7 @@ namespace CellexalVR.AnalysisLogic
                         float z = float.Parse(words[3], System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
                         Cell cell = referenceManager.cellManager.AddCell(cellName);
                         referenceManager.graphGenerator.AddGraphPoint(cell, x, y, z);
+                        referenceManager.pointSpawner.AddGraphPoint(x, y, z);
                         axes[0] = "x";
                         axes[1] = "y";
                         axes[2] = "z";
@@ -179,6 +181,7 @@ namespace CellexalVR.AnalysisLogic
                                 System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
                             Cell cell = referenceManager.cellManager.AddCell(cellname);
                             referenceManager.graphGenerator.AddGraphPoint(cell, x, y, z);
+                            referenceManager.pointSpawner.AddGraphPoint(x, y, z);
                             itemsThisFrame++;
                         }
 
@@ -221,22 +224,26 @@ namespace CellexalVR.AnalysisLogic
                 // If high quality mesh is used. Use LOD groups to swap to low q when further away.
                 // Improves performance a lot when analysing larger graphs.
                 int n = CellexalConfig.Config.GraphPointQuality == "Standard" ? 2 : 1;
-                StartCoroutine(referenceManager.graphGenerator.SliceClusteringLOD(nrOfLODGroups));
+                referenceManager.pointSpawner.CreateEntities(combGraph);
+                var collider = combGraph.gameObject.AddComponent<BoxCollider>();
+                collider.isTrigger = true;
+                
+                // StartCoroutine(referenceManager.graphGenerator.SliceClusteringLOD(nrOfLODGroups));
 
                 while (referenceManager.graphGenerator.isCreating)
                 {
                     yield return null;
                 }
 
-                if (nrOfLODGroups > 1)
-                {
-                    combGraph.gameObject.AddComponent<LODGroup>();
-                    referenceManager.graphGenerator.UpdateLODGroups(combGraph);
-                }
+                // if (nrOfLODGroups > 1)
+                // {
+                //     combGraph.gameObject.AddComponent<LODGroup>();
+                //     referenceManager.graphGenerator.UpdateLODGroups(combGraph);
+                // }
 
                 // Add axes in bottom corner of graph and scale points differently
-                combGraph.SetInfoText();
-                referenceManager.graphGenerator.AddAxes(combGraph, axes);
+                // combGraph.SetInfoText();
+                // referenceManager.graphGenerator.AddAxes(combGraph, axes);
 
                 //status.UpdateStatus(statusId, "Reading index.facs file");
                 //statusDisplayHUD.UpdateStatus(statusIdHUD, "Reading index.facs file");
@@ -246,17 +253,17 @@ namespace CellexalVR.AnalysisLogic
                 //statusDisplayFar.RemoveStatus(statusIdFar);
             }
 
-            if (type.Equals(GraphGenerator.GraphType.MDS))
-            {
-                referenceManager.inputReader.attributeReader =
-                    referenceManager.inputReader.gameObject.AddComponent<AttributeReader>();
-                referenceManager.inputReader.attributeReader.referenceManager = referenceManager;
-                StartCoroutine(referenceManager.inputReader.attributeReader.ReadAttributeFilesCoroutine(path));
-                while (!referenceManager.inputReader.attributeFileRead)
-                    yield return null;
-                referenceManager.inputReader.ReadFacsFiles(path, totalNbrOfCells);
-                referenceManager.inputReader.ReadFilterFiles(CellexalUser.UserSpecificFolder);
-            }
+            // if (type.Equals(GraphGenerator.GraphType.MDS))
+            // {
+            //     referenceManager.inputReader.attributeReader =
+            //         referenceManager.inputReader.gameObject.AddComponent<AttributeReader>();
+            //     referenceManager.inputReader.attributeReader.referenceManager = referenceManager;
+            //     StartCoroutine(referenceManager.inputReader.attributeReader.ReadAttributeFilesCoroutine(path));
+            //     while (!referenceManager.inputReader.attributeFileRead)
+            //         yield return null;
+            //     referenceManager.inputReader.ReadFacsFiles(path, totalNbrOfCells);
+            //     referenceManager.inputReader.ReadFilterFiles(CellexalUser.UserSpecificFolder);
+            // }
 
             CellexalEvents.GraphsLoaded.Invoke();
         }

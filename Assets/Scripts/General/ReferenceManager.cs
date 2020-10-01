@@ -128,6 +128,7 @@ namespace CellexalVR.General
         public Floor floor;
         public PDFViewer.PDFMesh pdfMesh;
         public AllenReferenceBrain brainModel;
+        public PointSpawner pointSpawner;
 
         //h5reader annotator
         public H5ReaderAnnotatorScriptManager h5ReaderAnnotatorScriptManager;
@@ -268,6 +269,7 @@ namespace CellexalVR.General
             floor = GameObject.Find("Floor").GetComponent<Floor>();
             pdfMesh = GameObject.Find("PDFViewer").GetComponentInChildren<PDFMesh>();
             brainModel = GameObject.Find("BrainParent").GetComponent<AllenReferenceBrain>();
+            pointSpawner = GameObject.Find("PointSpawner").GetComponent<PointSpawner>();
 
             geneKeyboard = GameObject.Find("Keyboard Setup").GetComponent<KeyboardHandler>();
             keyboardSwitch = GameObject.Find("Keyboard Setup").GetComponent<KeyboardSwitch>();

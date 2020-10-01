@@ -137,7 +137,7 @@ namespace CellexalVR.AnalysisObjects
         private int nbrOfExpressionColors;
 
 
-        private static LayerMask selectionToolLayerMask;
+        public static LayerMask selectionToolLayerMask;
 
         public OctreeNode octreeRoot;
         private GraphGenerator graphGenerator;

@@ -5,6 +5,8 @@ using CellexalVR.Multiuser;
 using System;
 using System.Diagnostics;
 using System.Linq;
+using DefaultNamespace;
+using Unity.Entities;
 using UnityEngine;
 using UnityEngine.UI;
 using VRTK;
@@ -173,27 +175,31 @@ namespace CellexalVR.Interaction
                     var activeCollider = selectionToolColliders[CurrentMeshIndex];
                     Vector3 boundsCenter = activeCollider.bounds.center;
                     Vector3 boundsExtents = activeCollider.bounds.extents;
-                    foreach (var graph in graphManager.Graphs)
-                    {
-                        var closestPoints = graph.MinkowskiDetection(activeCollider.transform.position, boundsCenter,
-                            boundsExtents, currentColorIndex);
-                        foreach (var point in closestPoints)
-                        {
-                            if (CurrentMeshIndex > 3)
-                            {
-                                selectionManager.RemoveGraphpointFromSelection(point);
-                            }
-
-                            else
-                            {
-                                selectionManager.AddGraphpointToSelection(point, currentColorIndex, true);
-                            }
-                        }
-                    }
+                    World.Active.GetExistingSystem<QuadrantSystem>().selectionActive = true;
+                    World.Active.GetExistingSystem<PointSelectionSystem>().selectionActive = true;
+                    // foreach (var graph in graphManager.Graphs)
+                    // {
+                    //     var closestPoints = graph.MinkowskiDetection(activeCollider.transform.position, boundsCenter,
+                    //         boundsExtents, currentColorIndex);
+                    //     foreach (var point in closestPoints)
+                    //     {
+                    //         if (CurrentMeshIndex > 3)
+                    //         {
+                    //             selectionManager.RemoveGraphpointFromSelection(point);
+                    //         }
+                    //
+                    //         else
+                    //         {
+                    //             selectionManager.AddGraphpointToSelection(point, currentColorIndex, true);
+                    //         }
+                    //     }
+                    // }
                 }
 
                 else if (device.GetPressUp(SteamVR_Controller.ButtonMask.Trigger))
                 {
+                    World.Active.GetExistingSystem<QuadrantSystem>().selectionActive = false;
+                    World.Active.GetExistingSystem<PointSelectionSystem>().selectionActive = false;
                     selActive = false;
                     particles.gameObject.SetActive(false);
                     selectionToolMaterial.SetFloat("_SelectionActive", 0);
