@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using AnalysisLogic;
 using CellexalVR.AnalysisObjects;
 using CellexalVR.General;
 using CellexalVR.Spatial;
@@ -57,6 +58,7 @@ namespace CellexalVR.AnalysisLogic
             int totalNbrOfCells = 0;
             foreach (string file in mdsFiles)
             {
+                print($"reading file: {file}");
                 while (referenceManager.graphGenerator.isCreating)
                 {
                     yield return null;
@@ -71,6 +73,8 @@ namespace CellexalVR.AnalysisLogic
                 // }
 
                 Graph combGraph = referenceManager.graphGenerator.CreateGraph(type);
+                PointCloud pc = combGraph.GetComponent<PointCloud>();
+                pc.Initialize(referenceManager.graphManager.Graphs.Count);
                 // more_cells newGraph.GetComponent<GraphInteract>().isGrabbable = false;
                 // file will be the full file name e.g C:\...\graph1.mds
                 // good programming habits have left us with a nice mix of forward and backward slashes

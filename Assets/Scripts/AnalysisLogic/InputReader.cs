@@ -13,9 +13,13 @@ using CellexalVR.DesktopUI;
 using CellexalVR.Extensions;
 using System.Drawing;
 using System.Diagnostics;
+using AnalysisLogic;
 using CellexalVR.AnalysisLogic.H5reader;
 using CellexalVR.PDFViewer;
+using DefaultNamespace;
+using Unity.Mathematics;
 using UnityEngine.XR;
+using Color = UnityEngine.Color;
 
 namespace CellexalVR.AnalysisLogic
 {
@@ -30,8 +34,9 @@ namespace CellexalVR.AnalysisLogic
         public int facsGraphCounter;
         public bool attributeFileRead;
         public AttributeReader attributeReader;
+        public PointCloudGenerator pointCloudGenerator;
 
-        private readonly char[] separators = { ' ', '\t' };
+        private readonly char[] separators = {' ', '\t', ','};
         private CellManager cellManager;
         private SQLite database;
         private SelectionManager selectionManager;
@@ -95,18 +100,63 @@ namespace CellexalVR.AnalysisLogic
         }
 
 
-        [ConsoleCommand("inputReader", folder: "Data", aliases: new string[] { "readfolder", "rf" })]
+        [ConsoleCommand("inputReader", folder: "Data", aliases: new string[] {"readfolder", "rf"})]
         public void ReadFolderConsole(string path)
         {
             referenceManager.multiuserMessageSender.SendMessageReadFolder(path);
             ReadFolder(path);
         }
-        
+
+        [ConsoleCommand("inputReader", folder: "Data", aliases: new string[] {"readbigfolder", "rbf"})]
+        public void ReadBigFolderConsole(string path)
+        {
+            referenceManager.multiuserMessageSender.SendMessageReadFolder(path);
+            ReadBigFolder(path);
+            // ReadFolder(path);
+        }
+
         [ConsoleCommand("inputReader", folder: "Data", aliases: new string[] {"readprevioussession", "rps"})]
         public void ReadPreviousSessionConsole(string path, string fromPreviousSession = "")
         {
             // referenceManager.multiuserMessageSender.SendMessageReadFolder(path);
             ReadFolder(path, null, fromPreviousSession);
+        }
+
+
+        private void ReadBigFolder(string path)
+        {
+            if (!referenceManager.loaderController.loaderMovedDown)
+            {
+                referenceManager.loaderController.loaderMovedDown = true;
+                referenceManager.loaderController.MoveLoader(new Vector3(0f, -2f, 0f), 2f);
+            }
+            Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+            PointCloud pc = pointCloudGenerator.CreateNewPointCloud();
+            string workingDirectory = Directory.GetCurrentDirectory();
+            string fullPath = workingDirectory + "\\Data\\" + path;
+            string[] files = Directory.GetFiles(fullPath, "*.mds");
+            string mdsFile = files[0];
+            // foreach (string mdsFile in files)
+            // {
+                using (StreamReader streamReader = new StreamReader(mdsFile))
+                {
+                    streamReader.ReadLine();
+                
+                    while (!streamReader.EndOfStream)
+                    {
+                        string[] words = streamReader.ReadLine().Split(separators);
+                        float x = (float.Parse(words[1])); // / 30.0f) + 1.5f;
+                        float y = (float.Parse(words[2])); // / 30.0f) + 1;
+                        float z = float.Parse(words[3]); // / 30.0f;
+                        Cell cell = cellManager.AddCell(words[0]);
+                        pointCloudGenerator.AddGraphPoint(cell.Label, x, y, z);
+                    }
+                }
+                pointCloudGenerator.SpawnPoints(pc, false);
+                // pointCloudGenerator.ReadMetaData(pc, fullPath);
+                // pointCloudGenerator.ColorPoints(pc);
+            // }
+            GC.Collect();
         }
 
         /// <summary>
@@ -142,7 +192,6 @@ namespace CellexalVR.AnalysisLogic
         /// Reads one folder of data and creates the graphs described by the data.
         /// </summary>
         /// <param name="path"> The path to the folder. </param>
-        //[ConsoleCommand("inputReader", folder: "Data", aliases: new string[] { "readfolder", "rf" })]
         public void ReadFolder(string path, Dictionary<string, string> h5config = null, string fromPreviousSession = "")
         {
             currentPath = path;
@@ -181,7 +230,6 @@ namespace CellexalVR.AnalysisLogic
                 }
             }
 
-            //summertwerk
             bool h5 = Directory.EnumerateFiles("Data\\" + path, "*.h5ad").Any();
             bool loom = Directory.EnumerateFiles("Data\\" + path, "*.loom").Any();
             if (h5 || loom)
@@ -190,7 +238,7 @@ namespace CellexalVR.AnalysisLogic
                 return;
             }
 
-            database.InitDatabase(fullPath + "\\database.sqlite");
+            // database.InitDatabase(fullPath + "\\database.sqlite");
             string[] mdsFiles = Directory.GetFiles(fullPath,
                 CrossSceneInformation.Tutorial ? "DDRTree.mds" : "*.mds");
 
@@ -206,7 +254,7 @@ namespace CellexalVR.AnalysisLogic
             mdsReader = gameObject.AddComponent<MDSReader>();
             mdsReader.referenceManager = referenceManager;
             StartCoroutine(mdsReader.ReadMDSFiles(fullPath, mdsFiles));
-            StartCoroutine(referenceManager.inputReader.StartServer("main", fromPreviousSession));
+            // StartCoroutine(referenceManager.inputReader.StartServer("main", fromPreviousSession));
 
             graphGenerator.isCreating = true;
             referenceManager.configManager.ReadConfigFiles(fullPath);
@@ -238,7 +286,7 @@ namespace CellexalVR.AnalysisLogic
         public void ReadGraphFromMarkerFile(string path, string file)
         {
             facsGraphCounter++;
-            StartCoroutine(mdsReader.ReadMDSFiles(path, new string[] { file }, GraphGenerator.GraphType.FACS, false));
+            StartCoroutine(mdsReader.ReadMDSFiles(path, new string[] {file}, GraphGenerator.GraphType.FACS, false));
         }
 
         public void ReadFilterFiles(string path)
@@ -320,6 +368,7 @@ namespace CellexalVR.AnalysisLogic
                 foreach (string reader in h5ReadersToRemove)
                     h5readers.Remove(reader);
             }
+
             //File.Delete(CellexalUser.UserSpecificFolder + "\\geneServer.pid");
             CellexalLog.Log("Stopped Server");
         }
@@ -358,7 +407,7 @@ namespace CellexalVR.AnalysisLogic
                 return;
             }
 
-            string[] header = headerLine.Split(new string[] { "\t", " " }, StringSplitOptions.RemoveEmptyEntries);
+            string[] header = headerLine.Split(new string[] {"\t", " "}, StringSplitOptions.RemoveEmptyEntries);
             float[] min = new float[header.Length];
             float[] max = new float[header.Length];
             string[] values = new string[header.Length + 1];
@@ -469,7 +518,7 @@ namespace CellexalVR.AnalysisLogic
             {
                 line = streamReader.ReadLine();
                 if (line == "") continue;
-                words = line.Split(new char[] { '\t', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                words = line.Split(new char[] {'\t', ' '}, StringSplitOptions.RemoveEmptyEntries);
 
                 // set the grouping's name to [the grouping's number]\n[number of colors in grouping]\n[number of cells in groupings]
                 string groupingName = words[0];
@@ -518,7 +567,7 @@ namespace CellexalVR.AnalysisLogic
                 {
                     line = streamReader.ReadLine();
                     print(line);
-                    words = line.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+                    words = line.Split(new char[] {' ', '\t'}, StringSplitOptions.RemoveEmptyEntries);
                     cellNames[i][j] = words[0];
 
                     try
@@ -549,7 +598,7 @@ namespace CellexalVR.AnalysisLogic
             }
 
             // referenceManager.selectionFromPreviousMenu.SelectionFromPreviousButton(graphNames, groupingNames.ToArray(),
-                // cellNames, groups, groupingColors);
+            // cellNames, groups, groupingColors);
             CellexalLog.Log("Successfully read " + groupingNames.Count + " files");
         }
 
@@ -640,6 +689,7 @@ namespace CellexalVR.AnalysisLogic
                         referenceManager.settingsMenu.AddSelectionColor(groupColor);
                         referenceManager.settingsMenu.unsavedChanges = false;
                     }
+
                     group = referenceManager.selectionToolCollider.GetColorIndex(groupColor);
                 }
                 catch (FormatException)
@@ -708,6 +758,64 @@ namespace CellexalVR.AnalysisLogic
             float diff = Vector3.Distance(new Vector3(a.r, a.g, a.b),
                 new Vector3(b.r, b.g, b.b));
             return diff <= tolerance;
+        }
+
+        public Texture2D ReadMetaData(string dir)
+        {
+            // specific for the 4M cell dataset
+            // string[] tissues = new string[]
+            // {
+            //     "Adrenal", "Cerebellum", "Cerebrum", "Eye", "Heart", "Intestine", "Kidney", "Liver", "Lung", "Muscle", "Pancreas", "Placenta",
+            //     "Spleen", "Stomach", "Thymus"
+            // };
+            //
+            // int i = 0;
+            // Dictionary<string, Color> colorDict = new Dictionary<string, Color>();
+            // foreach (string tissue in tissues)
+            // {
+            //     colorDict[tissue] = SelectionTool.instance.colors[i++ % SelectionTool.instance.colors.Length];
+            // }
+            //
+
+            Dictionary<string, Color> colorDict = new Dictionary<string, Color>();
+            Dictionary<int, string> clusterDict = new Dictionary<int, string>();
+            int id = 0;
+            using (StreamReader sr = new StreamReader(dir))
+            {
+                string header = sr.ReadLine();
+                while (!sr.EndOfStream)
+                {
+                    string[] words = sr.ReadLine().Split(separators);
+                    //int.Parse(words[0]);
+                    string cluster = words[2];
+                    clusterDict[id++] = cluster;
+                    if (!colorDict.ContainsKey(cluster))
+                    {
+                        // print(cluster);
+                        // Color c = SelectionTool.instance.colors[i++ % SelectionTool.instance.colors.Length];
+                        Color c = UnityEngine.Random.ColorHSV(0f, 1f, 0.5f, 1f, 0.5f, 1f);
+                        c.a = 1;
+                        colorDict[cluster] = c;
+                    }
+                }
+            }
+
+            int pointCount = clusterDict.Count;
+            int width = (int) math.ceil(math.sqrt(pointCount));
+            int height = width;
+            Texture2D colorMap = new Texture2D(width, height, TextureFormat.RGBAFloat, true, true);
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    int ind = x + (width * y);
+                    if (ind >= pointCount) continue;
+                    colorMap.SetPixel(x, y, colorDict[clusterDict[ind]]);
+                }
+            }
+
+            colorMap.Apply();
+            return colorMap;
         }
     }
 }
